@@ -749,7 +749,7 @@ static void update_input(void)
    }
 
    for (i = 0; i < MAX_BUTTONS; i++)
-      if ((map[i] != -1u) && (ret & (1 << map[i])))
+      if ((map[i] != -1) && (ret & (1 << map[i])))
          input_buf |= (1 << i);
 }
 

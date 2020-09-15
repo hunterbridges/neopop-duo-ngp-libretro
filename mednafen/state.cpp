@@ -504,11 +504,13 @@ static int MDFNSS_StateAction_internal(StateMem *st, int load, int data_only,
          }
       }
 
+      /*
       if(smem_seek(st, -total, SEEK_CUR) < 0)
       {
          puts("Reverse seek error");
          return(0);
       }
+      */
 
       if(!found && !section->optional) // Not found.  We are sad!
       {

@@ -61,33 +61,33 @@ extern uint8_t (*z80_readport)(uint16_t a);
 
 void z80_enable_interrupts( void );
 
-static INLINE uint16_t z80_getpc(void) { return z80.pc.w; }
+static inline uint16_t z80_getpc(void) { return z80.pc.w; }
 
 // Ok, I lied, not a macro!
 
 //Write mem
-static INLINE void Z80_WB_MACRO(uint16_t A, uint8_t V)
+static inline void Z80_WB_MACRO(uint16_t A, uint8_t V)
 { 
  z80_tstates += 3; 
  z80_writebyte(A, V); 
 }
 
 // Write port
-static INLINE void Z80_WP_MACRO(uint16_t A, uint8_t V)
+static inline void Z80_WP_MACRO(uint16_t A, uint8_t V)
 { 
  z80_tstates += 4; 
  z80_writeport(A, V); 
 }
 
 // Read mem
-static INLINE uint8_t Z80_RB_MACRO(uint16_t A)
+static inline uint8_t Z80_RB_MACRO(uint16_t A)
 { 
  z80_tstates += 3; 
  return(z80_readbyte(A));
 }
 
 // Read port
-static INLINE uint8_t Z80_RP_MACRO(uint16_t A)
+static inline uint8_t Z80_RP_MACRO(uint16_t A)
 { 
  z80_tstates += 4; 
  return(z80_readport(A));

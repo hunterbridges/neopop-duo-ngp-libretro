@@ -1,0 +1,280 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|Win32">
+      <Configuration>Debug</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|Win32">
+      <Configuration>Release</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Debug|x64">
+      <Configuration>Debug</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|x64">
+      <Configuration>Release</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <VCProjectVersion>16.0</VCProjectVersion>
+    <Keyword>Win32Proj</Keyword>
+    <ProjectGuid>{423efff3-dfd6-4577-9af8-519c06837558}</ProjectGuid>
+    <RootNamespace>neopopduongplibretro</RootNamespace>
+    <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>v142</PlatformToolset>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>v142</PlatformToolset>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>v142</PlatformToolset>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>v142</PlatformToolset>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Label="Shared">
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <LinkIncremental>false</LinkIncremental>
+    <OutDir>$(SolutionDir)</OutDir>
+    <IncludePath>$(SolutionDir)libretro-common\compat;$(SolutionDir)mednafen\include;$(SolutionDir)mednafen;$(SolutionDir)libretro-common\include;$(IncludePath)</IncludePath>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <LinkIncremental>false</LinkIncremental>
+    <OutDir>$(SolutionDir)</OutDir>
+    <IncludePath>$(SolutionDir)libretro-common\compat;$(SolutionDir)mednafen\include;$(SolutionDir)mednafen;$(SolutionDir)libretro-common\include;$(IncludePath)</IncludePath>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <LinkIncremental>false</LinkIncremental>
+    <OutDir>$(SolutionDir)</OutDir>
+    <IncludePath>$(SolutionDir)libretro-common\compat;$(SolutionDir)mednafen\include;$(SolutionDir)mednafen;$(SolutionDir)libretro-common\include;$(IncludePath)</IncludePath>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <LinkIncremental>false</LinkIncremental>
+    <OutDir>$(SolutionDir)</OutDir>
+    <IncludePath>$(SolutionDir)libretro-common\compat;$(SolutionDir)mednafen\include;$(SolutionDir)mednafen;$(SolutionDir)libretro-common\include;$(IncludePath)</IncludePath>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <SDLCheck>true</SDLCheck>
+      <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ConformanceMode>false</ConformanceMode>
+      <AdditionalOptions>/DFRONTEND_SUPPORTS_RGB565 /D_CRT_SECURE_NO_DEPRECATE /D_CRT_NONSTDC_NO_DEPRECATE /DSIZEOF_DOUBLE=8 /DMEDNAFEN_VERSION=\"0.1.00\" /DPACKAGE=\"mednafen\" /DMEDNAFEN_VERSION_NUMERIC=100 /DPSS_STYLE=1 /DMPC_FIXED_POINT /DSTDC_HEADERS /D__STDC_LIMIT_MACROS /D__LIBRETRO__ /D_LOW_ACCURACY_ %(AdditionalOptions)</AdditionalOptions>
+    </ClCompile>
+    <Link>
+      <SubSystem>Windows</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalOptions>/NOLOGO /MANIFESTUAC:"level='asInvoker' uiAccess='false'" %(AdditionalOptions)</AdditionalOptions>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <SDLCheck>true</SDLCheck>
+      <PreprocessorDefinitions>WIN32;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ConformanceMode>false</ConformanceMode>
+      <AdditionalOptions>/DFRONTEND_SUPPORTS_RGB565 /D_CRT_SECURE_NO_DEPRECATE /D_CRT_NONSTDC_NO_DEPRECATE /DSIZEOF_DOUBLE=8 /DMEDNAFEN_VERSION=\"0.1.00\" /DPACKAGE=\"mednafen\" /DMEDNAFEN_VERSION_NUMERIC=100 /DPSS_STYLE=1 /DMPC_FIXED_POINT /DSTDC_HEADERS /D__STDC_LIMIT_MACROS /D__LIBRETRO__ /D_LOW_ACCURACY_ %(AdditionalOptions)</AdditionalOptions>
+    </ClCompile>
+    <Link>
+      <SubSystem>Windows</SubSystem>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalOptions>/NOLOGO /MANIFESTUAC:"level='asInvoker' uiAccess='false'" %(AdditionalOptions)</AdditionalOptions>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <SDLCheck>true</SDLCheck>
+      <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ConformanceMode>false</ConformanceMode>
+      <AdditionalOptions>/DFRONTEND_SUPPORTS_RGB565 /D_CRT_SECURE_NO_DEPRECATE /D_CRT_NONSTDC_NO_DEPRECATE /DSIZEOF_DOUBLE=8 /DMEDNAFEN_VERSION=\"0.1.00\" /DPACKAGE=\"mednafen\" /DMEDNAFEN_VERSION_NUMERIC=100 /DPSS_STYLE=1 /DMPC_FIXED_POINT /DSTDC_HEADERS /D__STDC_LIMIT_MACROS /D__LIBRETRO__ /D_LOW_ACCURACY_ %(AdditionalOptions)</AdditionalOptions>
+    </ClCompile>
+    <Link>
+      <SubSystem>Windows</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalOptions>/NOLOGO /MANIFESTUAC:"level='asInvoker' uiAccess='false'" %(AdditionalOptions)</AdditionalOptions>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <SDLCheck>true</SDLCheck>
+      <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ConformanceMode>false</ConformanceMode>
+      <AdditionalOptions>/DFRONTEND_SUPPORTS_RGB565 /D_CRT_SECURE_NO_DEPRECATE /D_CRT_NONSTDC_NO_DEPRECATE /DSIZEOF_DOUBLE=8 /DMEDNAFEN_VERSION=\"0.1.00\" /DPACKAGE=\"mednafen\" /DMEDNAFEN_VERSION_NUMERIC=100 /DPSS_STYLE=1 /DMPC_FIXED_POINT /DSTDC_HEADERS /D__STDC_LIMIT_MACROS /D__LIBRETRO__ /D_LOW_ACCURACY_ %(AdditionalOptions)</AdditionalOptions>
+    </ClCompile>
+    <Link>
+      <SubSystem>Windows</SubSystem>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalOptions>/NOLOGO /MANIFESTUAC:"level='asInvoker' uiAccess='false'" %(AdditionalOptions)</AdditionalOptions>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <ClCompile Include="libretro-common\compat\compat_strl.c" />
+    <ClCompile Include="libretro-common\compat\fopen_utf8.c" />
+    <ClCompile Include="libretro-common\encodings\encoding_utf.c" />
+    <ClCompile Include="libretro-common\streams\file_stream.c" />
+    <ClCompile Include="libretro-common\vfs\vfs_implementation.c" />
+    <ClCompile Include="libretro.cpp" />
+    <ClCompile Include="mednafen\file.c" />
+    <ClCompile Include="mednafen\hw_cpu\z80-fuse\opcodes_base.c">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="mednafen\hw_cpu\z80-fuse\z80.c" />
+    <ClCompile Include="mednafen\hw_cpu\z80-fuse\z80_cb.c">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="mednafen\hw_cpu\z80-fuse\z80_ddfd.c">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="mednafen\hw_cpu\z80-fuse\z80_ddfdcb.c">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="mednafen\hw_cpu\z80-fuse\z80_ed.c">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="mednafen\hw_cpu\z80-fuse\z80_ops.c" />
+    <ClCompile Include="mednafen\mempatcher.cpp" />
+    <ClCompile Include="mednafen\ngp\bios.c" />
+    <ClCompile Include="mednafen\ngp\biosHLE.cpp" />
+    <ClCompile Include="mednafen\ngp\dma.cpp" />
+    <ClCompile Include="mednafen\ngp\flash.cpp" />
+    <ClCompile Include="mednafen\ngp\gfx.cpp" />
+    <ClCompile Include="mednafen\ngp\interrupt.cpp" />
+    <ClCompile Include="mednafen\ngp\mem.cpp" />
+    <ClCompile Include="mednafen\ngp\rom.cpp" />
+    <ClCompile Include="mednafen\ngp\rtc.c" />
+    <ClCompile Include="mednafen\ngp\sound.cpp" />
+    <ClCompile Include="mednafen\ngp\system.cpp" />
+    <ClCompile Include="mednafen\ngp\T6W28_Apu.cpp" />
+    <ClCompile Include="mednafen\ngp\TLCS-900h\TLCS900h_disassemble.c" />
+    <ClCompile Include="mednafen\ngp\TLCS-900h\TLCS900h_disassemble_dst.c" />
+    <ClCompile Include="mednafen\ngp\TLCS-900h\TLCS900h_disassemble_extra.c" />
+    <ClCompile Include="mednafen\ngp\TLCS-900h\TLCS900h_disassemble_reg.c" />
+    <ClCompile Include="mednafen\ngp\TLCS-900h\TLCS900h_disassemble_src.c" />
+    <ClCompile Include="mednafen\ngp\TLCS-900h\TLCS900h_interpret.c" />
+    <ClCompile Include="mednafen\ngp\TLCS-900h\TLCS900h_interpret_dst.c" />
+    <ClCompile Include="mednafen\ngp\TLCS-900h\TLCS900h_interpret_reg.c" />
+    <ClCompile Include="mednafen\ngp\TLCS-900h\TLCS900h_interpret_single.c" />
+    <ClCompile Include="mednafen\ngp\TLCS-900h\TLCS900h_interpret_src.c" />
+    <ClCompile Include="mednafen\ngp\TLCS-900h\TLCS900h_registers.c" />
+    <ClCompile Include="mednafen\ngp\Z80_interface.cpp" />
+    <ClCompile Include="mednafen\settings.c" />
+    <ClCompile Include="mednafen\sound\Blip_Buffer.cpp" />
+    <ClCompile Include="mednafen\sound\Stereo_Buffer.cpp" />
+    <ClCompile Include="mednafen\state.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="libretro-common\include\libretro.h" />
+    <ClInclude Include="mednafen\driver.h" />
+    <ClInclude Include="mednafen\file.h" />
+    <ClInclude Include="mednafen\general.h" />
+    <ClInclude Include="mednafen\git.h" />
+    <ClInclude Include="mednafen\hw_cpu\z80-fuse\z80.h" />
+    <ClInclude Include="mednafen\hw_cpu\z80-fuse\z80_fns.h" />
+    <ClInclude Include="mednafen\hw_cpu\z80-fuse\z80_macros.h" />
+    <ClInclude Include="mednafen\hw_cpu\z80-fuse\z80_types.h" />
+    <ClInclude Include="mednafen\include\blargg_common.h" />
+    <ClInclude Include="mednafen\include\blargg_config.h" />
+    <ClInclude Include="mednafen\include\blargg_endian.h" />
+    <ClInclude Include="mednafen\include\blargg_source.h" />
+    <ClInclude Include="mednafen\include\blip\Blip_Buffer.h" />
+    <ClInclude Include="mednafen\include\blip\Stereo_Buffer.h" />
+    <ClInclude Include="mednafen\include\Fir_Resampler.h" />
+    <ClInclude Include="mednafen\masmem.h" />
+    <ClInclude Include="mednafen\mednafen-driver.h" />
+    <ClInclude Include="mednafen\mednafen-types.h" />
+    <ClInclude Include="mednafen\mednafen.h" />
+    <ClInclude Include="mednafen\mempatcher-driver.h" />
+    <ClInclude Include="mednafen\mempatcher.h" />
+    <ClInclude Include="mednafen\ngp\bios.h" />
+    <ClInclude Include="mednafen\ngp\dma.h" />
+    <ClInclude Include="mednafen\ngp\flash.h" />
+    <ClInclude Include="mednafen\ngp\gfx.h" />
+    <ClInclude Include="mednafen\ngp\interrupt.h" />
+    <ClInclude Include="mednafen\ngp\mem.h" />
+    <ClInclude Include="mednafen\ngp\neopop.h" />
+    <ClInclude Include="mednafen\ngp\rom.h" />
+    <ClInclude Include="mednafen\ngp\rtc.h" />
+    <ClInclude Include="mednafen\ngp\sound.h" />
+    <ClInclude Include="mednafen\ngp\system.h" />
+    <ClInclude Include="mednafen\ngp\T6W28_Apu.h" />
+    <ClInclude Include="mednafen\ngp\T6W28_Oscs.h" />
+    <ClInclude Include="mednafen\ngp\TLCS-900h\TLCS900h_disassemble.h" />
+    <ClInclude Include="mednafen\ngp\TLCS-900h\TLCS900h_interpret.h" />
+    <ClInclude Include="mednafen\ngp\TLCS-900h\TLCS900h_interpret_dst.h" />
+    <ClInclude Include="mednafen\ngp\TLCS-900h\TLCS900h_interpret_reg.h" />
+    <ClInclude Include="mednafen\ngp\TLCS-900h\TLCS900h_interpret_single.h" />
+    <ClInclude Include="mednafen\ngp\TLCS-900h\TLCS900h_interpret_src.h" />
+    <ClInclude Include="mednafen\ngp\TLCS-900h\TLCS900h_registers.h" />
+    <ClInclude Include="mednafen\ngp\Z80_interface.h" />
+    <ClInclude Include="mednafen\settings-common.h" />
+    <ClInclude Include="mednafen\settings-driver.h" />
+    <ClInclude Include="mednafen\settings.h" />
+    <ClInclude Include="mednafen\state.h" />
+    <ClInclude Include="mednafen\video.h" />
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>

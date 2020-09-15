@@ -1,0 +1,322 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="mednafen">
+      <UniqueIdentifier>{118e365d-d79b-49f4-9422-bb2bf80ddd81}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="libretro-common">
+      <UniqueIdentifier>{7a7b74c3-491f-4b1c-b978-34a01f12c0a9}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="mednafen\sound">
+      <UniqueIdentifier>{936ee1e9-0724-4124-b060-81fc85baba04}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="mednafen\ngp">
+      <UniqueIdentifier>{a4113f65-e51d-4fd0-aa06-364429d5f61e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="mednafen\include">
+      <UniqueIdentifier>{69b78e02-24f0-4704-83bd-8130cd3c711f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="mednafen\hw_cpu">
+      <UniqueIdentifier>{12266b3c-abf3-47d3-9b5f-c1acc7fd5da6}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="libretro-common\include">
+      <UniqueIdentifier>{3b0c54bb-2cc1-4342-9e4a-2e2857d5bef5}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="mednafen\include\blip">
+      <UniqueIdentifier>{8bd3ada5-bd47-481b-a61c-51ec725e0f27}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="mednafen\hw_cpu\z80-fuse">
+      <UniqueIdentifier>{9d5874c0-7e1c-4570-9c65-985ea952cdcb}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="mednafen\ngp\TLCS-900h">
+      <UniqueIdentifier>{1ad307c7-dbf6-4ed6-943b-242460c4d0e6}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="libretro-common\streams">
+      <UniqueIdentifier>{101770d2-4fdb-4218-9089-9f050c07f28a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="libretro-common\compat">
+      <UniqueIdentifier>{5bfaffd0-347c-4d52-8824-f9125cc2b39b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="libretro-common\encodings">
+      <UniqueIdentifier>{9fdb8b0d-ac81-46e2-9f5f-ac9b63dbf656}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="libretro-common\vfs">
+      <UniqueIdentifier>{656f5e12-ff98-450a-9bdf-e68d0e110596}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="libretro.cpp" />
+    <ClCompile Include="mednafen\file.c">
+      <Filter>mednafen</Filter>
+    </ClCompile>
+    <ClCompile Include="mednafen\mempatcher.cpp">
+      <Filter>mednafen</Filter>
+    </ClCompile>
+    <ClCompile Include="mednafen\settings.c">
+      <Filter>mednafen</Filter>
+    </ClCompile>
+    <ClCompile Include="mednafen\state.cpp">
+      <Filter>mednafen</Filter>
+    </ClCompile>
+    <ClCompile Include="mednafen\hw_cpu\z80-fuse\opcodes_base.c">
+      <Filter>mednafen\hw_cpu\z80-fuse</Filter>
+    </ClCompile>
+    <ClCompile Include="mednafen\hw_cpu\z80-fuse\z80.c">
+      <Filter>mednafen\hw_cpu\z80-fuse</Filter>
+    </ClCompile>
+    <ClCompile Include="mednafen\hw_cpu\z80-fuse\z80_cb.c">
+      <Filter>mednafen\hw_cpu\z80-fuse</Filter>
+    </ClCompile>
+    <ClCompile Include="mednafen\hw_cpu\z80-fuse\z80_ddfd.c">
+      <Filter>mednafen\hw_cpu\z80-fuse</Filter>
+    </ClCompile>
+    <ClCompile Include="mednafen\hw_cpu\z80-fuse\z80_ddfdcb.c">
+      <Filter>mednafen\hw_cpu\z80-fuse</Filter>
+    </ClCompile>
+    <ClCompile Include="mednafen\hw_cpu\z80-fuse\z80_ed.c">
+      <Filter>mednafen\hw_cpu\z80-fuse</Filter>
+    </ClCompile>
+    <ClCompile Include="mednafen\hw_cpu\z80-fuse\z80_ops.c">
+      <Filter>mednafen\hw_cpu\z80-fuse</Filter>
+    </ClCompile>
+    <ClCompile Include="mednafen\ngp\TLCS-900h\TLCS900h_disassemble.c">
+      <Filter>mednafen\ngp\TLCS-900h</Filter>
+    </ClCompile>
+    <ClCompile Include="mednafen\ngp\TLCS-900h\TLCS900h_disassemble_dst.c">
+      <Filter>mednafen\ngp\TLCS-900h</Filter>
+    </ClCompile>
+    <ClCompile Include="mednafen\ngp\TLCS-900h\TLCS900h_disassemble_extra.c">
+      <Filter>mednafen\ngp\TLCS-900h</Filter>
+    </ClCompile>
+    <ClCompile Include="mednafen\ngp\TLCS-900h\TLCS900h_disassemble_reg.c">
+      <Filter>mednafen\ngp\TLCS-900h</Filter>
+    </ClCompile>
+    <ClCompile Include="mednafen\ngp\TLCS-900h\TLCS900h_disassemble_src.c">
+      <Filter>mednafen\ngp\TLCS-900h</Filter>
+    </ClCompile>
+    <ClCompile Include="mednafen\ngp\TLCS-900h\TLCS900h_interpret.c">
+      <Filter>mednafen\ngp\TLCS-900h</Filter>
+    </ClCompile>
+    <ClCompile Include="mednafen\ngp\TLCS-900h\TLCS900h_interpret_dst.c">
+      <Filter>mednafen\ngp\TLCS-900h</Filter>
+    </ClCompile>
+    <ClCompile Include="mednafen\ngp\TLCS-900h\TLCS900h_interpret_reg.c">
+      <Filter>mednafen\ngp\TLCS-900h</Filter>
+    </ClCompile>
+    <ClCompile Include="mednafen\ngp\TLCS-900h\TLCS900h_interpret_single.c">
+      <Filter>mednafen\ngp\TLCS-900h</Filter>
+    </ClCompile>
+    <ClCompile Include="mednafen\ngp\TLCS-900h\TLCS900h_interpret_src.c">
+      <Filter>mednafen\ngp\TLCS-900h</Filter>
+    </ClCompile>
+    <ClCompile Include="mednafen\ngp\TLCS-900h\TLCS900h_registers.c">
+      <Filter>mednafen\ngp\TLCS-900h</Filter>
+    </ClCompile>
+    <ClCompile Include="mednafen\ngp\bios.c">
+      <Filter>mednafen\ngp</Filter>
+    </ClCompile>
+    <ClCompile Include="mednafen\ngp\biosHLE.cpp">
+      <Filter>mednafen\ngp</Filter>
+    </ClCompile>
+    <ClCompile Include="mednafen\ngp\dma.cpp">
+      <Filter>mednafen\ngp</Filter>
+    </ClCompile>
+    <ClCompile Include="mednafen\ngp\flash.cpp">
+      <Filter>mednafen\ngp</Filter>
+    </ClCompile>
+    <ClCompile Include="mednafen\ngp\gfx.cpp">
+      <Filter>mednafen\ngp</Filter>
+    </ClCompile>
+    <ClCompile Include="mednafen\ngp\interrupt.cpp">
+      <Filter>mednafen\ngp</Filter>
+    </ClCompile>
+    <ClCompile Include="mednafen\ngp\mem.cpp">
+      <Filter>mednafen\ngp</Filter>
+    </ClCompile>
+    <ClCompile Include="mednafen\ngp\rom.cpp">
+      <Filter>mednafen\ngp</Filter>
+    </ClCompile>
+    <ClCompile Include="mednafen\ngp\rtc.c">
+      <Filter>mednafen\ngp</Filter>
+    </ClCompile>
+    <ClCompile Include="mednafen\ngp\sound.cpp">
+      <Filter>mednafen\ngp</Filter>
+    </ClCompile>
+    <ClCompile Include="mednafen\ngp\system.cpp">
+      <Filter>mednafen\ngp</Filter>
+    </ClCompile>
+    <ClCompile Include="mednafen\ngp\T6W28_Apu.cpp">
+      <Filter>mednafen\ngp</Filter>
+    </ClCompile>
+    <ClCompile Include="mednafen\ngp\Z80_interface.cpp">
+      <Filter>mednafen\ngp</Filter>
+    </ClCompile>
+    <ClCompile Include="mednafen\sound\Blip_Buffer.cpp">
+      <Filter>mednafen\sound</Filter>
+    </ClCompile>
+    <ClCompile Include="mednafen\sound\Stereo_Buffer.cpp">
+      <Filter>mednafen\sound</Filter>
+    </ClCompile>
+    <ClCompile Include="libretro-common\encodings\encoding_utf.c">
+      <Filter>libretro-common\encodings</Filter>
+    </ClCompile>
+    <ClCompile Include="libretro-common\vfs\vfs_implementation.c">
+      <Filter>libretro-common\vfs</Filter>
+    </ClCompile>
+    <ClCompile Include="libretro-common\streams\file_stream.c">
+      <Filter>libretro-common\streams</Filter>
+    </ClCompile>
+    <ClCompile Include="libretro-common\compat\compat_strl.c">
+      <Filter>libretro-common\compat</Filter>
+    </ClCompile>
+    <ClCompile Include="libretro-common\compat\fopen_utf8.c">
+      <Filter>libretro-common\compat</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="libretro-common\include\libretro.h">
+      <Filter>libretro-common\include</Filter>
+    </ClInclude>
+    <ClInclude Include="mednafen\driver.h">
+      <Filter>mednafen</Filter>
+    </ClInclude>
+    <ClInclude Include="mednafen\file.h">
+      <Filter>mednafen</Filter>
+    </ClInclude>
+    <ClInclude Include="mednafen\general.h">
+      <Filter>mednafen</Filter>
+    </ClInclude>
+    <ClInclude Include="mednafen\git.h">
+      <Filter>mednafen</Filter>
+    </ClInclude>
+    <ClInclude Include="mednafen\masmem.h">
+      <Filter>mednafen</Filter>
+    </ClInclude>
+    <ClInclude Include="mednafen\mednafen.h">
+      <Filter>mednafen</Filter>
+    </ClInclude>
+    <ClInclude Include="mednafen\mednafen-driver.h">
+      <Filter>mednafen</Filter>
+    </ClInclude>
+    <ClInclude Include="mednafen\mednafen-types.h">
+      <Filter>mednafen</Filter>
+    </ClInclude>
+    <ClInclude Include="mednafen\mempatcher.h">
+      <Filter>mednafen</Filter>
+    </ClInclude>
+    <ClInclude Include="mednafen\mempatcher-driver.h">
+      <Filter>mednafen</Filter>
+    </ClInclude>
+    <ClInclude Include="mednafen\settings.h">
+      <Filter>mednafen</Filter>
+    </ClInclude>
+    <ClInclude Include="mednafen\settings-common.h">
+      <Filter>mednafen</Filter>
+    </ClInclude>
+    <ClInclude Include="mednafen\settings-driver.h">
+      <Filter>mednafen</Filter>
+    </ClInclude>
+    <ClInclude Include="mednafen\state.h">
+      <Filter>mednafen</Filter>
+    </ClInclude>
+    <ClInclude Include="mednafen\video.h">
+      <Filter>mednafen</Filter>
+    </ClInclude>
+    <ClInclude Include="mednafen\include\blargg_common.h">
+      <Filter>mednafen\include</Filter>
+    </ClInclude>
+    <ClInclude Include="mednafen\include\blargg_config.h">
+      <Filter>mednafen\include</Filter>
+    </ClInclude>
+    <ClInclude Include="mednafen\include\blargg_endian.h">
+      <Filter>mednafen\include</Filter>
+    </ClInclude>
+    <ClInclude Include="mednafen\include\blargg_source.h">
+      <Filter>mednafen\include</Filter>
+    </ClInclude>
+    <ClInclude Include="mednafen\include\Fir_Resampler.h">
+      <Filter>mednafen\include</Filter>
+    </ClInclude>
+    <ClInclude Include="mednafen\include\blip\Blip_Buffer.h">
+      <Filter>mednafen\include\blip</Filter>
+    </ClInclude>
+    <ClInclude Include="mednafen\include\blip\Stereo_Buffer.h">
+      <Filter>mednafen\include\blip</Filter>
+    </ClInclude>
+    <ClInclude Include="mednafen\hw_cpu\z80-fuse\z80.h">
+      <Filter>mednafen\hw_cpu\z80-fuse</Filter>
+    </ClInclude>
+    <ClInclude Include="mednafen\hw_cpu\z80-fuse\z80_fns.h">
+      <Filter>mednafen\hw_cpu\z80-fuse</Filter>
+    </ClInclude>
+    <ClInclude Include="mednafen\hw_cpu\z80-fuse\z80_macros.h">
+      <Filter>mednafen\hw_cpu\z80-fuse</Filter>
+    </ClInclude>
+    <ClInclude Include="mednafen\hw_cpu\z80-fuse\z80_types.h">
+      <Filter>mednafen\hw_cpu\z80-fuse</Filter>
+    </ClInclude>
+    <ClInclude Include="mednafen\ngp\TLCS-900h\TLCS900h_disassemble.h">
+      <Filter>mednafen\ngp\TLCS-900h</Filter>
+    </ClInclude>
+    <ClInclude Include="mednafen\ngp\TLCS-900h\TLCS900h_interpret.h">
+      <Filter>mednafen\ngp\TLCS-900h</Filter>
+    </ClInclude>
+    <ClInclude Include="mednafen\ngp\TLCS-900h\TLCS900h_interpret_dst.h">
+      <Filter>mednafen\ngp\TLCS-900h</Filter>
+    </ClInclude>
+    <ClInclude Include="mednafen\ngp\TLCS-900h\TLCS900h_interpret_reg.h">
+      <Filter>mednafen\ngp\TLCS-900h</Filter>
+    </ClInclude>
+    <ClInclude Include="mednafen\ngp\TLCS-900h\TLCS900h_interpret_single.h">
+      <Filter>mednafen\ngp\TLCS-900h</Filter>
+    </ClInclude>
+    <ClInclude Include="mednafen\ngp\TLCS-900h\TLCS900h_interpret_src.h">
+      <Filter>mednafen\ngp\TLCS-900h</Filter>
+    </ClInclude>
+    <ClInclude Include="mednafen\ngp\TLCS-900h\TLCS900h_registers.h">
+      <Filter>mednafen\ngp\TLCS-900h</Filter>
+    </ClInclude>
+    <ClInclude Include="mednafen\ngp\bios.h">
+      <Filter>mednafen\ngp</Filter>
+    </ClInclude>
+    <ClInclude Include="mednafen\ngp\dma.h">
+      <Filter>mednafen\ngp</Filter>
+    </ClInclude>
+    <ClInclude Include="mednafen\ngp\flash.h">
+      <Filter>mednafen\ngp</Filter>
+    </ClInclude>
+    <ClInclude Include="mednafen\ngp\gfx.h">
+      <Filter>mednafen\ngp</Filter>
+    </ClInclude>
+    <ClInclude Include="mednafen\ngp\interrupt.h">
+      <Filter>mednafen\ngp</Filter>
+    </ClInclude>
+    <ClInclude Include="mednafen\ngp\mem.h">
+      <Filter>mednafen\ngp</Filter>
+    </ClInclude>
+    <ClInclude Include="mednafen\ngp\neopop.h">
+      <Filter>mednafen\ngp</Filter>
+    </ClInclude>
+    <ClInclude Include="mednafen\ngp\rom.h">
+      <Filter>mednafen\ngp</Filter>
+    </ClInclude>
+    <ClInclude Include="mednafen\ngp\rtc.h">
+      <Filter>mednafen\ngp</Filter>
+    </ClInclude>
+    <ClInclude Include="mednafen\ngp\sound.h">
+      <Filter>mednafen\ngp</Filter>
+    </ClInclude>
+    <ClInclude Include="mednafen\ngp\system.h">
+      <Filter>mednafen\ngp</Filter>
+    </ClInclude>
+    <ClInclude Include="mednafen\ngp\T6W28_Apu.h">
+      <Filter>mednafen\ngp</Filter>
+    </ClInclude>
+    <ClInclude Include="mednafen\ngp\T6W28_Oscs.h">
+      <Filter>mednafen\ngp</Filter>
+    </ClInclude>
+    <ClInclude Include="mednafen\ngp\Z80_interface.h">
+      <Filter>mednafen\ngp</Filter>
+    </ClInclude>
+  </ItemGroup>
+</Project>

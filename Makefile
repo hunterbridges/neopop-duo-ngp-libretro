@@ -38,7 +38,6 @@ else
    arch = intel
 endif
 
-
 NEED_BPP = 16
 NEED_BLIP = 1
 NEED_STEREO_SOUND = 1
@@ -48,7 +47,7 @@ libdir := $(prefix)/lib
 
 LIBRETRO_DIR := libretro
 
-TARGET_NAME := mednafen_ngp
+TARGET_NAME := neopop_duo_ngp
 
 # GIT HASH
 GIT_VERSION := " $(shell git rev-parse --short HEAD || echo unknown)"
@@ -305,24 +304,24 @@ else ifeq ($(platform), gcw0)
    SHARED := -shared -Wl,--no-undefined -Wl,--version-script=link.T
    FLAGS += -ffast-math -march=mips32 -mtune=mips32r2 -mhard-float
 
-# Windows MSVC 2017 all architectures
-else ifneq (,$(findstring windows_msvc2017,$(platform)))
+# Windows MSVC 2019 all architectures
+else ifneq (,$(findstring windows_msvc2019,$(platform)))
 
-	PlatformSuffix = $(subst windows_msvc2017_,,$(platform))
+	PlatformSuffix = $(subst windows_msvc2019_,,$(platform))
 	ifneq (,$(findstring desktop,$(PlatformSuffix)))
 		WinPartition = desktop
-		MSVC2017CompileFlags = -DWINAPI_FAMILY=WINAPI_FAMILY_DESKTOP_APP -FS
+		MSVC2019CompileFlags = -DWINAPI_FAMILY=WINAPI_FAMILY_DESKTOP_APP -FS
 		LDFLAGS += -MANIFEST -LTCG:incremental -NXCOMPAT -DYNAMICBASE -DEBUG -OPT:REF -INCREMENTAL:NO -SUBSYSTEM:WINDOWS -MANIFESTUAC:"level='asInvoker' uiAccess='false'" -OPT:ICF -ERRORREPORT:PROMPT -NOLOGO -TLBID:1
 		LIBS += kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib
 	else ifneq (,$(findstring uwp,$(PlatformSuffix)))
 		WinPartition = uwp
-		MSVC2017CompileFlags = -DWINAPI_FAMILY=WINAPI_FAMILY_APP -D_WINDLL -D_UNICODE -DUNICODE -D__WRL_NO_DEFAULT_LIB__ -EHsc -FS
+		MSVC2019CompileFlags = -DWINAPI_FAMILY=WINAPI_FAMILY_APP -D_WINDLL -D_UNICODE -DUNICODE -D__WRL_NO_DEFAULT_LIB__ -EHsc -FS
 		LDFLAGS += -APPCONTAINER -NXCOMPAT -DYNAMICBASE -MANIFEST:NO -LTCG -OPT:REF -SUBSYSTEM:CONSOLE -MANIFESTUAC:NO -OPT:ICF -ERRORREPORT:PROMPT -NOLOGO -TLBID:1 -DEBUG:FULL -WINMD:NO
 		LIBS += WindowsApp.lib
 	endif
 
-	CFLAGS += $(MSVC2017CompileFlags)
-	CXXFLAGS += $(MSVC2017CompileFlags)
+	CFLAGS += $(MSVC2019CompileFlags)
+	CXXFLAGS += $(MSVC2019CompileFlags)
 
 	TargetArchMoniker = $(subst $(WinPartition)_,,$(PlatformSuffix))
 
@@ -333,8 +332,9 @@ else ifneq (,$(findstring windows_msvc2017,$(platform)))
 	reg_query = $(call filter_out2,$(subst $2,,$(shell reg query "$2" -v "$1" 2>nul)))
 	fix_path = $(subst $(SPACE),\ ,$(subst \,/,$1))
 
-	ProgramFiles86w := $(shell cmd //c "echo %PROGRAMFILES(x86)%")
-	ProgramFiles86 := $(shell cygpath "$(ProgramFiles86w)")
+	# ProgramFiles86w := $(shell cmd //c "echo %PROGRAMFILES(x86)%")
+	# ProgramFiles86 := $(shell cygpath "$(ProgramFiles86w)")
+	ProgramFiles86 := "C:/Program Files (x86)"
 
 	WindowsSdkDir ?= $(call reg_query,InstallationFolder,HKEY_LOCAL_MACHINE\SOFTWARE\Wow6432Node\Microsoft\Microsoft SDKs\Windows\v10.0)
 	WindowsSdkDir ?= $(call reg_query,InstallationFolder,HKEY_CURRENT_USER\SOFTWARE\Wow6432Node\Microsoft\Microsoft SDKs\Windows\v10.0)
@@ -345,10 +345,10 @@ else ifneq (,$(findstring windows_msvc2017,$(platform)))
 	WindowsSDKVersion ?= $(firstword $(foreach folder,$(subst $(subst \,/,$(WindowsSdkDir)Include/),,$(wildcard $(call fix_path,$(WindowsSdkDir)Include\*))),$(if $(wildcard $(call fix_path,$(WindowsSdkDir)Include/$(folder)/um/Windows.h)),$(folder),)))$(BACKSLASH)
 	WindowsSDKVersion := $(WindowsSDKVersion)
 
-	VsInstallBuildTools = $(ProgramFiles86)/Microsoft Visual Studio/2017/BuildTools
-	VsInstallEnterprise = $(ProgramFiles86)/Microsoft Visual Studio/2017/Enterprise
-	VsInstallProfessional = $(ProgramFiles86)/Microsoft Visual Studio/2017/Professional
-	VsInstallCommunity = $(ProgramFiles86)/Microsoft Visual Studio/2017/Community
+	VsInstallBuildTools = $(ProgramFiles86)/Microsoft Visual Studio/2019/BuildTools
+	VsInstallEnterprise = $(ProgramFiles86)/Microsoft Visual Studio/2019/Enterprise
+	VsInstallProfessional = $(ProgramFiles86)/Microsoft Visual Studio/2019/Professional
+	VsInstallCommunity = $(ProgramFiles86)/Microsoft Visual Studio/2019/Community
 
 	VsInstallRoot ?= $(shell if [ -d "$(VsInstallBuildTools)" ]; then echo "$(VsInstallBuildTools)"; fi)
 	ifeq ($(VsInstallRoot), )
@@ -376,15 +376,15 @@ else ifneq (,$(findstring windows_msvc2017,$(platform)))
 	# Work around it for now by using the strictly x86 compiler for x86, and x64 for x64.
 	# NOTE: What about ARM?
 	ifneq (,$(findstring x64,$(TargetArchMoniker)))
-		VCCompilerToolsBinDir := $(VcCompilerToolsDir)\bin\HostX64
+		VCCompilerToolsBinDir := $(VCToolsInstallDir)\bin\HostX64
 	else
-		VCCompilerToolsBinDir := $(VcCompilerToolsDir)\bin\HostX86
+		VCCompilerToolsBinDir := $(VCToolsInstallDir)\bin\HostX86
 	endif
 
 	PATH := $(shell IFS=$$'\n'; cygpath "$(VCCompilerToolsBinDir)/$(TargetArchMoniker)"):$(PATH)
-	PATH := $(PATH):$(shell IFS=$$'\n'; cygpath "$(VsInstallRoot)/Common7/IDE")
-	INCLUDE := $(shell IFS=$$'\n'; cygpath -w "$(VcCompilerToolsDir)/include")
-	LIB := $(shell IFS=$$'\n'; cygpath -w "$(VcCompilerToolsDir)/lib/$(TargetArchMoniker)")
+	PATH := $(PATH):$(shell IFS=$$'\n'; cygpath "$(VSINSTALLDIR)/Common7/IDE")
+	INCLUDE := $(shell IFS=$$'\n'; cygpath -w "$(VCToolsInstallDir)/include")
+	LIB := $(shell IFS=$$'\n'; cygpath -w "$(VCToolsInstallDir)/lib/$(TargetArchMoniker)")
 	ifneq (,$(findstring uwp,$(PlatformSuffix)))
 		LIB := $(shell IFS=$$'\n'; cygpath -w "$(LIB)/store")
 	endif

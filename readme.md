@@ -1,4 +1,8 @@
-[![Build Status](https://travis-ci.org/libretro/beetle-ngp-libretro.svg?branch=master)](https://travis-ci.org/libretro/beetle-ngp-libretro)
-[![Build status](https://ci.appveyor.com/api/projects/status/cbyyvbdbv1yc8yst/branch/master?svg=true)](https://ci.appveyor.com/project/bparker06/beetle-ngp-libretro/branch/master)
+# "NeoPop Duo" - neopop-duo-ngp-libretro 
+A dual-instance adaptation of the Beetle NeoPop libretro core
 
-# Beetle NeoGeo Pocket
+This is a branch from the following commit of `libretro/beetle-ngp-libretro`:
+https://github.com/libretro/beetle-ngp-libretro/commit/ebe0da22230cde262397518dc423bae5f9616e16
+
+It is also highly influenced by TGB Dual 
+https://github.com/libretro/tgbdual-libretro

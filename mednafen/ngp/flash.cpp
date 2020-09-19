@@ -21,44 +21,9 @@
 #include "system.h"
 
 #include "../state.h"
+#include "../../duo/duo_instance.h"
 
-//-----------------------------------------------------------------------------
-// Local Definitions
-//-----------------------------------------------------------------------------
-//This value is used to verify flash data - it is set to the
-//version number that the flash description was modified for.
-
-#define FLASH_VALID_ID		0x0053
-
-//Number of different flash blocks, this should be enough.
-
-#define FLASH_MAX_BLOCKS	256
-
-typedef struct
-{
-   //Flash Id
-   uint16_t valid_flash_id;		// = FLASH_VALID_ID
-
-   uint16_t block_count;			//Number of flash data blocks
-
-   uint32_t total_file_length;		// header + block[0 - block_count]
-
-} FlashFileHeader;
-
-typedef struct
-{
-	uint32_t start_address;		// 24 bit address
-	uint16_t data_length;		// length of following data
-
-	//Followed by data_length bytes of the actual data.
-
-} FlashFileBlockHeader;
-
-/* Local Data */
-static FlashFileBlockHeader	blocks[256];
-static uint16_t block_count;
-
-void flash_optimise_blocks(void)
+void neopop_flash_t::flash_optimise_blocks()
 {
    int i, j;
 
@@ -113,13 +78,14 @@ void flash_optimise_blocks(void)
    }
 }
 
-void do_flash_read(uint8_t *flashdata)
+void neopop_flash_t::do_flash_read(uint8_t *flashdata)
 {
    FlashFileHeader header;
    uint8_t *fileptr;
    uint16_t i;
    uint32_t j;
-   bool PREV_memory_unlock_flash_write = memory_unlock_flash_write; // kludge, hack, FIXME
+   DuoInstance *duo = GetDuoFromModule(this, flash);
+   bool PREV_memory_unlock_flash_write = duo->mem->memory_unlock_flash_write; // kludge, hack, FIXME
 
    memcpy(&header, flashdata, sizeof(header));
 
@@ -128,7 +94,7 @@ void do_flash_read(uint8_t *flashdata)
    fileptr = flashdata + sizeof(FlashFileHeader);
 
    //Copy blocks
-   memory_unlock_flash_write = 1;
+   duo->mem->memory_unlock_flash_write = 1;
    for (i = 0; i < block_count; i++)
    {
       FlashFileBlockHeader* current = (FlashFileBlockHeader*)fileptr;
@@ -144,7 +110,7 @@ void do_flash_read(uint8_t *flashdata)
          fileptr++;
       }
    }
-   memory_unlock_flash_write = PREV_memory_unlock_flash_write;
+   duo->mem->memory_unlock_flash_write = PREV_memory_unlock_flash_write;
 
    flash_optimise_blocks();		//Optimise
 
@@ -155,7 +121,7 @@ void do_flash_read(uint8_t *flashdata)
       blocks[i].start_address, blocks[i].data_length);*/
 }
 
-void flash_read(void)
+void neopop_flash_t::flash_read()
 {
    FlashFileHeader header;
    uint8_t* flashdata;
@@ -183,12 +149,13 @@ void flash_read(void)
    free(flashdata);
 }
 
-void flash_write(uint32_t start_address, uint16_t length)
+void neopop_flash_t::flash_write(uint32_t start_address, uint16_t length)
 {
    uint16_t i;
+   DuoInstance *duo = GetDuoFromModule(this, flash);
 
    //Now we need a new flash command before the next flash write will work!
-   memory_flash_command = 0;
+   duo->mem->memory_flash_command = 0;
 
    //	system_debug_message("flash write: %06X, %d bytes", start_address, length);
 
@@ -214,7 +181,7 @@ void flash_write(uint32_t start_address, uint16_t length)
    block_count++;
 }
 
-uint8_t *make_flash_commit(int32_t *length)
+uint8_t *neopop_flash_t::make_flash_commit(int32_t *length)
 {
    int i;
    FlashFileHeader header;
@@ -265,7 +232,7 @@ uint8_t *make_flash_commit(int32_t *length)
    return flashdata;
 }
 
-void flash_commit(void)
+void neopop_flash_t::flash_commit()
 {
    int32_t length = 0;
    uint8_t *flashdata = make_flash_commit(&length);
@@ -275,4 +242,55 @@ void flash_commit(void)
 
    system_io_flash_write(flashdata, length);
    free(flashdata);
+}
+
+int FLASH_StateAction(void *data, int load, int data_only)
+{
+   // TODO Where does flash come from in this scope?
+   neopop_flash_t *flash = NULL;
+
+   int32_t FlashLength = 0;
+   uint8_t *flashdata = NULL;
+
+   if(!load)
+      flashdata = flash->make_flash_commit(&FlashLength);
+
+   SFORMAT FINF_StateRegs[] =
+   {
+      { &FlashLength, sizeof(FlashLength), 0x80000000, "FlashLength" },
+      { 0, 0, 0, 0 }
+   };
+
+   if(!MDFNSS_StateAction(data, load, data_only, FINF_StateRegs, "FINF", false))
+      return 0;
+
+   if(!FlashLength) // No flash data to save, OR no flash data to load.
+   {
+      if(flashdata) free(flashdata);
+      return 1;
+   }
+
+   if(load)
+      flashdata = (uint8_t *)malloc(FlashLength);
+
+   SFORMAT FLSH_StateRegs[] =
+   {
+      { flashdata, (uint32_t)FlashLength, 0, "flashdata" },
+      { 0, 0, 0, 0 }
+   };
+
+   if(!MDFNSS_StateAction(data, load, data_only, FLSH_StateRegs, "FLSH", false))
+   {
+      free(flashdata);
+      return 0;
+   }
+
+   if(load)
+   {
+      memcpy(ngpc_rom.data, ngpc_rom.orig_data, ngpc_rom.length);
+      flash->do_flash_read(flashdata);
+   }
+
+   free(flashdata);
+   return 1;
 }

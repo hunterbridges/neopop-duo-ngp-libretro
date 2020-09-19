@@ -19,16 +19,22 @@
 
 #include "../hw_cpu/z80-fuse/z80.h"
 
-uint8_t Z80_ReadComm(void);
-void Z80_WriteComm(uint8_t data);
+struct neopop_z80i_t
+{
+	uint8_t CommByte;
+	bool Z80Enabled;
 
-void Z80_reset(void);	// z80 reset
+	uint8_t Z80_ReadComm(void);
+	void Z80_WriteComm(uint8_t data);
 
-void Z80_irq(void);		// Cause an interrupt
-void Z80_nmi(void);		// Cause an NMI
-void Z80_SetEnable(bool set);
-bool Z80_IsEnabled(void);
-int Z80_RunOP(void);
+	void Z80_reset(void);	// z80 reset
+
+	void Z80_irq(void);		// Cause an interrupt
+	void Z80_nmi(void);		// Cause an NMI
+	void Z80_SetEnable(bool set);
+	bool Z80_IsEnabled(void);
+	int Z80_RunOP(void);
+};
 
 int MDFNNGPCZ80_StateAction(void *data, int load, int data_only);
 

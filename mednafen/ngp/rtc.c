@@ -14,10 +14,9 @@
 
 #include "../mednafen-types.h"
 #include <time.h>
+#include "rtc.h"
 
-static uint8 rtc_latch[7];
-
-static void update_rtc_latch(void)
+static void update_rtc_latch(neopop_rtc_t *rtc)
 {
    uint8 low, high;
 
@@ -30,35 +29,35 @@ static void update_rtc_latch(void)
    if (localTime)
    {
       low = localTime->tm_year - 100; high = low;             /* Years */
-      rtc_latch[0x00] = ((high / 10) << 4) | (low % 10);
+      rtc->rtc_latch[0x00] = ((high / 10) << 4) | (low % 10);
 
       low = localTime->tm_mon + 1; high = low;                /* Months */
-      rtc_latch[0x01] = ((high / 10) << 4) | (low % 10);
+      rtc->rtc_latch[0x01] = ((high / 10) << 4) | (low % 10);
 
       low = localTime->tm_mday; high = low;                   /* Days */
-      rtc_latch[0x02] = ((high / 10) << 4) | (low % 10);
+      rtc->rtc_latch[0x02] = ((high / 10) << 4) | (low % 10);
 
       low = localTime->tm_hour; high = low;                   /* Hours */
-      rtc_latch[0x03] = ((high / 10) << 4) | (low % 10);
+      rtc->rtc_latch[0x03] = ((high / 10) << 4) | (low % 10);
 
       low = localTime->tm_min; high = low;                    /* Minutes */
-      rtc_latch[0x04] = ((high / 10) << 4) | (low % 10);
+      rtc->rtc_latch[0x04] = ((high / 10) << 4) | (low % 10);
 
       low = localTime->tm_sec; high = low;                    /* Seconds */
-      rtc_latch[0x05] = ((high / 10) << 4) | (low % 10);
+      rtc->rtc_latch[0x05] = ((high / 10) << 4) | (low % 10);
 
-      rtc_latch[0x06] = ((rtc_latch[0x00] % 4)<<4) | (localTime->tm_wday & 0x0F);
+      rtc->rtc_latch[0x06] = ((rtc->rtc_latch[0x00] % 4)<<4) | (localTime->tm_wday & 0x0F);
    }
 }
 
-uint8 rtc_read8(uint32 address)
+uint8 rtc_read8(neopop_rtc_t *rtc, uint32 address)
 {
    if(address >= 0x0091 && address <= 0x0097)
    {
       if(address == 0x0091)
-         update_rtc_latch();
+         update_rtc_latch(rtc);
 
-      return rtc_latch[address - 0x0091];
+      return rtc->rtc_latch[address - 0x0091];
    }
    return 0;
 }

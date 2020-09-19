@@ -1,0 +1,24 @@
+libretro.c
+    // Should these be passed into NeoPopInstance?
+    static MDFN_Surface *surf;
+    static MDFNGI *game;
+
+TLCS900h state:
+    TLCS900h_disassemble.h
+    TLCS900h_interpret.h
+    TLCS900h_registers.h
+
+z80 state:
+    z80.h
+    z80_fns.h
+
+mednafen/mempatcher.cpp
+mednafen/ngp/bios.cpp
+mednafen/ngp/biosHLE.cpp
+mednafen/ngp/flash.cpp
+mednafen/ngp/gfx.h
+mednafen/ngp/interrupt.cpp
+mednafen/ngp/mem.cpp
+mednafen/ngp/rom.cpp
+mednafen/ngp/rtc.c
+mednafen/ngp/sound.cpp

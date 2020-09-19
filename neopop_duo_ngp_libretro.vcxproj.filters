@@ -43,6 +43,9 @@
     <Filter Include="libretro-common\vfs">
       <UniqueIdentifier>{656f5e12-ff98-450a-9bdf-e68d0e110596}</UniqueIdentifier>
     </Filter>
+    <Filter Include="duo">
+      <UniqueIdentifier>{15240799-a9e9-4c40-8e65-629e6d30f552}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="libretro.cpp" />
@@ -171,6 +174,9 @@
     </ClCompile>
     <ClCompile Include="libretro-common\compat\fopen_utf8.c">
       <Filter>libretro-common\compat</Filter>
+    </ClCompile>
+    <ClCompile Include="duo\duo_instance.cpp">
+      <Filter>duo</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -317,6 +323,9 @@
     </ClInclude>
     <ClInclude Include="mednafen\ngp\Z80_interface.h">
       <Filter>mednafen\ngp</Filter>
+    </ClInclude>
+    <ClInclude Include="duo\duo_instance.h">
+      <Filter>duo</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

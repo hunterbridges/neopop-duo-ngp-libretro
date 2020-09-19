@@ -18,6 +18,8 @@
 #include "TLCS-900h/TLCS900h_disassemble.h"
 #include "../mednafen.h"
 
+#include "../../duo/duo_instance.h"
+
 #ifdef MSB_FIRST
 #define HTOLE16(l)      ((((l)>>8) & 0xff) | (((l)<<8) & 0xff00))
 #else
@@ -30,7 +32,7 @@
 RomInfo ngpc_rom;
 RomHeader* rom_header = NULL;
 
-static void rom_hack(void)
+void neopop_rom_t::rom_hack(void)
 {
    //=============================
    // SPECIFIC ROM HACKS !
@@ -55,7 +57,7 @@ static void rom_hack(void)
    }
 }
 
-static void rom_display_header(void)
+void neopop_rom_t::rom_display_header(void)
 {
 #if 0
    printf("Name:    %s\n", ngpc_rom.name);
@@ -76,9 +78,10 @@ static void rom_display_header(void)
 #endif
 }
 
-void rom_loaded(void)
+void neopop_rom_t::rom_loaded(void)
 {
    int i;
+   DuoInstance *duo = GetDuoFromModule(this, rom);
 
    ngpc_rom.orig_data = (uint8 *)malloc(ngpc_rom.length);
    memcpy(ngpc_rom.orig_data, ngpc_rom.data, ngpc_rom.length);
@@ -100,16 +103,18 @@ void rom_loaded(void)
 
    rom_display_header();
 
-   flash_read();
+   duo->flash->flash_read();
 }
 
-void rom_unload(void)
+void neopop_rom_t::rom_unload(void)
 {
+   DuoInstance *duo = GetDuoFromModule(this, rom);
+
    if (ngpc_rom.data)
    {
       int i;
 
-      flash_commit();
+      duo->flash->flash_commit();
 
       free(ngpc_rom.data);
       ngpc_rom.data = NULL;

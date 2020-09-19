@@ -31,28 +31,44 @@
 extern "C" {
 #endif
 
-/* Set this value to fix problems with glitching extra lines. */
-extern bool gfx_hack;
+struct neopop_interrupt_t
+{
+	uint32_t timer_hint;
+	uint32_t timer_clock[4];
+	uint8_t timer[4];	//Up-counters
+	uint8_t timer_threshold[4];
 
-void interrupt(uint8_t index, uint8_t level);
-void set_interrupt(uint8_t index, bool set);
+	uint8_t TRUN;
+	uint8_t T01MOD, T23MOD;
+	uint8_t TRDC;
+	uint8_t TFFCR;
+	uint8_t HDMAStartVector[4];
 
-void reset_timers(void);
-void reset_int(void);
+	int32_t ipending[24];
+	int32_t IntPrio[0xB]; // 0070-007a
 
-/* Call this after each instruction */
-bool updateTimers(void *data, int cputicks);
+	bool h_int;
+	bool timer0;
+    bool timer2;
+	bool NGPFrameSkip;
 
-/* H-INT Timer */
-extern uint32_t timer_hint;
+	void interrupt(uint8_t index, uint8_t level);
+	void set_interrupt(uint8_t index, bool set);
 
-void timer_write8(uint32_t address, uint8_t data);
-uint8_t timer_read8(uint32_t address);
+	void reset_timers();
+	void reset_int();
 
-void int_write8(uint32_t address, uint8_t data);
-uint8_t int_read8(uint32_t address);
-void int_check_pending(void);
-void TestIntHDMA(int bios_num, int vec_num);
+	/* Call this after each instruction */
+	bool updateTimers(void *data, int cputicks);
+
+	void timer_write8(uint32_t address, uint8_t data);
+	uint8_t timer_read8(uint32_t address);
+
+	void int_write8(uint32_t address, uint8_t data);
+	uint8_t int_read8(uint32_t address);
+	void int_check_pending();
+	void TestIntHDMA(int bios_num, int vec_num);
+};
 
 int int_timer_StateAction(void *data, int load, int data_only);
 

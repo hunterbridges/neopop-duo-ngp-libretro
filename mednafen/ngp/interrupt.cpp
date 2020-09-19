@@ -24,6 +24,9 @@
 #include "Z80_interface.h"
 #include "dma.h"
 #include "system.h"
+#include "sound.h"
+
+#include "../../duo/duo_instance.h"
 
 #ifndef NDEBUG
 #include <assert.h>
@@ -32,21 +35,6 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
-
-uint32_t timer_hint;
-static uint32_t timer_clock[4];
-static uint8_t timer[4];	//Up-counters
-static uint8_t timer_threshold[4];
-
-static uint8_t TRUN;
-static uint8_t T01MOD, T23MOD;
-static uint8_t TRDC;
-static uint8_t TFFCR;
-static uint8_t HDMAStartVector[4];
-
-static int32_t ipending[24];
-static int32_t IntPrio[0xB]; // 0070-007a
-static bool h_int, timer0, timer2;
 
 // The way interrupt processing is set up is still written towards BIOS HLE emulation, which assumes
 // that the interrupt handler will immediately call DI, clear the interrupt latch(so the interrupt won't happen again when interrupts are re-enabled),
@@ -58,7 +46,7 @@ static bool h_int, timer0, timer2;
 
 // FIXME in the future if we ever add real bios support?
 
-void interrupt(uint8_t index, uint8_t level)
+void neopop_interrupt_t::interrupt(uint8_t index, uint8_t level)
 {
    push32(pc);
    push16(sr);
@@ -71,7 +59,7 @@ void interrupt(uint8_t index, uint8_t level)
    pc = loadL(0x6FB8 + index * 4);
 }
 
-void set_interrupt(uint8_t index, bool set)
+void neopop_interrupt_t::set_interrupt(uint8_t index, bool set)
 {
 #ifndef NDEBUG
    assert(index < 24);
@@ -81,7 +69,7 @@ void set_interrupt(uint8_t index, bool set)
    int_check_pending();
 }
 
-void int_check_pending(void)
+void neopop_interrupt_t::int_check_pending()
 {
    uint8 prio;
    uint8_t curIFF = statusIFF();
@@ -156,7 +144,7 @@ void int_check_pending(void)
 
 }
 
-void int_write8(uint32_t address, uint8_t data)
+void neopop_interrupt_t::int_write8(uint32_t address, uint8_t data)
 {
    switch(address)
    {
@@ -204,7 +192,7 @@ void int_write8(uint32_t address, uint8_t data)
    }
 }
 
-uint8_t int_read8(uint32_t address)
+uint8_t neopop_interrupt_t::int_read8(uint32_t address)
 {
    switch(address)
    {
@@ -223,35 +211,37 @@ uint8_t int_read8(uint32_t address)
    return 0;
 }
 
-void TestIntHDMA(int bios_num, int vec_num)
+void neopop_interrupt_t::TestIntHDMA(int bios_num, int vec_num)
 {
+   DuoInstance *duo = GetDuoFromModule(this, interrupt);
+
    bool WasDMA = 0;
 
    if (HDMAStartVector[0] == vec_num)
    {
       WasDMA = 1;
-      DMA_update(0);
+      duo->dma->DMA_update(0);
    }
    else
    {
       if (HDMAStartVector[1] == vec_num)
       {
          WasDMA = 1;
-         DMA_update(1);
+         duo->dma->DMA_update(1);
       }
       else
       {
          if (HDMAStartVector[2] == vec_num)
          {
             WasDMA = 1;
-            DMA_update(2);
+            duo->dma->DMA_update(2);
          }
          else
          {
             if (HDMAStartVector[3] == vec_num)
             {
                WasDMA = 1;
-               DMA_update(3);
+               duo->dma->DMA_update(3);
             }
          }
       }
@@ -261,14 +251,13 @@ void TestIntHDMA(int bios_num, int vec_num)
 }
 
 
-extern "C" int32_t ngpc_soundTS;
-extern "C" bool NGPFrameSkip;
-
-bool updateTimers(void *data, int cputicks)
+bool neopop_interrupt_t::updateTimers(void *data, int cputicks)
 {
    bool ret = false;
+   DuoInstance *duo = GetDuoFromModule(this, interrupt);
+   ngpgfx_t *NGPGfx = &duo->gfx->NGPGfx;
 
-   ngpc_soundTS += cputicks;
+   duo->sound->ngpc_soundTS += cputicks;
 
    /* increment H-INT timer */
    timer_hint += cputicks;
@@ -284,7 +273,7 @@ bool updateTimers(void *data, int cputicks)
       timer_hint -= TIMER_HINT_RATE;	/* Start of next scanline */
 
       /* Comms. Read interrupt */
-      if ((COMMStatus & 1) == 0 && system_comms_poll(&_data))
+      if ((duo->mem->COMMStatus & 1) == 0 && system_comms_poll(&_data))
       {
          storeB(0x50, _data);
          TestIntHDMA(12, 0x19);
@@ -490,7 +479,7 @@ bool updateTimers(void *data, int cputicks)
    return ret;
 }
 
-void reset_timers(void)
+void neopop_interrupt_t::reset_timers()
 {
    timer_hint = 0;
 
@@ -502,7 +491,7 @@ void reset_timers(void)
    timer2 = false;
 }
 
-void reset_int(void)
+void neopop_interrupt_t::reset_int()
 {
    TRUN = 0;
    T01MOD = 0;
@@ -517,7 +506,7 @@ void reset_int(void)
    h_int = false;
 }
 
-void timer_write8(uint32_t address, uint8_t data)
+void neopop_interrupt_t::timer_write8(uint32_t address, uint8_t data)
 {
    switch(address)
    {
@@ -559,7 +548,7 @@ void timer_write8(uint32_t address, uint8_t data)
    }
 }
 
-uint8_t timer_read8(uint32_t address)
+uint8_t neopop_interrupt_t::timer_read8(uint32_t address)
 {
    switch(address)
    {
@@ -580,22 +569,25 @@ uint8_t timer_read8(uint32_t address)
 
 int int_timer_StateAction(void *data, int load, int data_only)
 {
+   // TODO Where does interrupt_ptr come from in this scope?
+   neopop_interrupt_t *interrupt_ptr = NULL;
+
    SFORMAT StateRegs[] =
    {
-      SFVAR(timer_hint),
-      SFARRAY32(timer_clock, 4),
-      SFARRAY(timer, 4),
-      SFARRAY(timer_threshold, 4),
-      SFVAR(TRUN),
-      SFVAR(T01MOD), SFVAR(T23MOD),
-      SFVAR(TRDC),
-      SFVAR(TFFCR),
-      SFARRAY(HDMAStartVector, 4),
-      SFARRAY32(ipending, 24),
-      SFARRAY32(IntPrio, 0xB),
-      SFVAR(h_int),
-      SFVAR(timer0),
-      SFVAR(timer2),
+      SFVAR(interrupt_ptr->timer_hint),
+      SFARRAY32(interrupt_ptr->timer_clock, 4),
+      SFARRAY(interrupt_ptr->timer, 4),
+      SFARRAY(interrupt_ptr->timer_threshold, 4),
+      SFVAR(interrupt_ptr->TRUN),
+      SFVAR(interrupt_ptr->T01MOD), SFVAR(interrupt_ptr->T23MOD),
+      SFVAR(interrupt_ptr->TRDC),
+      SFVAR(interrupt_ptr->TFFCR),
+      SFARRAY(interrupt_ptr->HDMAStartVector, 4),
+      SFARRAY32(interrupt_ptr->ipending, 24),
+      SFARRAY32(interrupt_ptr->IntPrio, 0xB),
+      SFVAR(interrupt_ptr->h_int),
+      SFVAR(interrupt_ptr->timer0),
+      SFVAR(interrupt_ptr->timer2),
       SFEND
    };
    if(!MDFNSS_StateAction(data, load, data_only, StateRegs, "INTT", false))

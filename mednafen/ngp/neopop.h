@@ -40,6 +40,8 @@
 #define MIN(a,b) ((a)<(b)?(a):(b))
 #endif
 
+// TODO Can we get rid of this header?
+
 typedef enum
 {
 	COLOURMODE_GREYSCALE,
@@ -47,21 +49,10 @@ typedef enum
 	COLOURMODE_AUTO
 } COLOURMODE;
 
-/* Core <--> System-Main Interface */
-
 void reset(void);
-
-/* Core <--> System-Graphics Interface */
 
 /* Physical screen dimensions */
 #define SCREEN_WIDTH    160
 #define SCREEN_HEIGHT   152
 
-extern COLOURMODE system_colour;
-
-/* Core <--> System-Sound Interface */
-
-void int_redo_icache(void);
-
-extern uint8_t NGPJoyLatch;
 #endif

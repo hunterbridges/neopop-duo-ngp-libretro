@@ -28,35 +28,16 @@
 #endif
 
 #include "../settings.h"
-
-/* Hack way of returning good Flash status. */
-bool FlashStatusEnable = false;
-static uint32 FlashStatus;	
-
-uint8_t CPUExRAM[16384];
+#include "../../duo/duo_instance.h"
 
 bool debug_abort_memory = false;
 bool debug_mask_memory_error_messages = false;
 
-bool memory_unlock_flash_write = false;
-bool memory_flash_error = false;
-bool memory_flash_command = false;
-
-
-uint8_t SC0BUF; /* Serial channel 0 buffer. */
-uint8_t COMMStatus;
-
-/* In very very very rare conditions(like on embedded platforms with 
- * no virtual memory and very limited RAM and malloc happens to 
- * return a pointer aligned to a 64KiB boundary), a FastReadMap entry 
- * may be NULL even if it points to valid data when it's added to 
- * the address of the read, but if this happens, it will only 
- * make the emulator slightly slower. */
-static uint8_t *FastReadMap[256], *FastReadMapReal[256];
-
 /* Call this function after ROM is loaded */
-void SetFRM(void) 
+void neopop_mem_t::SetFRM(void) 
 {
+   DuoInstance *duo = GetDuoFromModule(this, mem);
+
    unsigned int x;
 
    for(x = 0; x < 256; x++)
@@ -64,26 +45,28 @@ void SetFRM(void)
 
    for(x = 0x20; x <= 0x3f; x++)
    {
-      if(ngpc_rom.length > (x * 65536 + 65535 - 0x20000))
-         FastReadMapReal[x] = &ngpc_rom.data[x * 65536 - 0x200000] - x * 65536;
+      if(duo->rom->ngpc_rom.length > (x * 65536 + 65535 - 0x20000))
+         FastReadMapReal[x] = &duo->rom->ngpc_rom.data[x * 65536 - 0x200000] - x * 65536;
    }
 
    for(x = 0x80; x <= 0x9f; x++)
    {
-      if(ngpc_rom.length > (x * 65536 + 65535 - 0x80000))
-         FastReadMapReal[x] = &ngpc_rom.data[x * 65536 - 0x800000] - x * 65536;
+      if(duo->rom->ngpc_rom.length > (x * 65536 + 65535 - 0x80000))
+         FastReadMapReal[x] = &duo->rom->ngpc_rom.data[x * 65536 - 0x800000] - x * 65536;
    }
 }
 
-void RecacheFRM(void)
+void neopop_mem_t::RecacheFRM(void)
 {
    int x;
    for (x = 0; x < 256; x++)
       FastReadMap[x] = FlashStatusEnable ? NULL : FastReadMapReal[x];
 }
 
-static void* translate_address_read(uint32 address)
+void* neopop_mem_t::translate_address_read(uint32 address)
 {
+	DuoInstance *duo = GetDuoFromModule(this, mem);
+
 	address &= 0xFFFFFF;
 
 	if (FlashStatusEnable)
@@ -106,27 +89,29 @@ static void* translate_address_read(uint32 address)
 	if (address >= ROM_START && address <= ROM_END)
 	{
       /* ROM (LOW) */
-		if (address < ROM_START + ngpc_rom.length)
-			return ngpc_rom.data + (address - ROM_START);
+		if (address < ROM_START + duo->rom->ngpc_rom.length)
+			return duo->rom->ngpc_rom.data + (address - ROM_START);
       return NULL;
 	}
 
 	if (address >= HIROM_START && address <= HIROM_END)
 	{
       /* ROM (HIGH) */
-		if (address < HIROM_START + (ngpc_rom.length - 0x200000))
-			return ngpc_rom.data + 0x200000 + (address - HIROM_START);
+		if (address < HIROM_START + (duo->rom->ngpc_rom.length - 0x200000))
+			return duo->rom->ngpc_rom.data + 0x200000 + (address - HIROM_START);
       return NULL;
 	}
 
 	/*BIOS Access? */
+    uint8_t *ngpc_bios = duo->bios->bios;
 	if ((address & 0xFF0000) == 0xFF0000)
 		return ngpc_bios + (address & 0xFFFF); /* BIOS ROM */
 	return NULL;
 }
 
-static void *translate_address_write(uint32 address)
+void *neopop_mem_t::translate_address_write(uint32 address)
 {	
+   DuoInstance *duo = GetDuoFromModule(this, mem);
    address &= 0xFFFFFF;
 
    if (memory_unlock_flash_write)
@@ -134,16 +119,16 @@ static void *translate_address_write(uint32 address)
       /* ROM (LOW) */
       if (address >= ROM_START && address <= ROM_END)
       {
-         if (address < ROM_START + ngpc_rom.length)
-            return ngpc_rom.data + (address - ROM_START);
+         if (address < ROM_START + duo->rom->ngpc_rom.length)
+            return duo->rom->ngpc_rom.data + (address - ROM_START);
          return NULL;
       }
 
       /* ROM (HIGH) */
       if (address >= HIROM_START && address <= HIROM_END)
       {
-         if (address < HIROM_START + (ngpc_rom.length - 0x200000))
-            return ngpc_rom.data + 0x200000 + (address - HIROM_START);
+         if (address < HIROM_START + (duo->rom->ngpc_rom.length - 0x200000))
+            return duo->rom->ngpc_rom.data + 0x200000 + (address - HIROM_START);
          return NULL;
       }
    }
@@ -173,7 +158,7 @@ static void *translate_address_write(uint32 address)
          if (memory_flash_command)
          {
             //Write the 256byte block around the flash data
-            flash_write(address & 0xFFFF00, 256);
+            duo->flash->flash_write(address & 0xFFFF00, 256);
 
             //Need to issue a new command before writing will work again.
             memory_flash_command = false;
@@ -182,8 +167,8 @@ static void *translate_address_write(uint32 address)
             //			system_debug_stop();
 
             //Write to the rom itself.
-            if (address < ROM_START + ngpc_rom.length)
-               return ngpc_rom.data + (address - ROM_START);
+            if (address < ROM_START + duo->rom->ngpc_rom.length)
+               return duo->rom->ngpc_rom.data + (address - ROM_START);
          }
       }
    }
@@ -191,18 +176,9 @@ static void *translate_address_write(uint32 address)
    return NULL;
 }
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
-/* WARNING:  32-bit loads and stores apparently DON'T have to be 4-byte-aligned(so we must +2 instead of |2). */
-/* Treat all 32-bit operations as two 16-bit operations */
-extern uint32 pc;
-
-uint8_t lastpoof = 0;
-
-uint8_t loadB(uint32 address)
+uint8_t neopop_mem_t::loadB(uint32 address)
 {
+   DuoInstance *duo = GetDuoFromModule(this, mem);
    uint8_t *ptr;
    address &= 0xFFFFFF;
 
@@ -215,26 +191,26 @@ uint8_t loadB(uint32 address)
       return *ptr;
 
    if(address >= 0x8000 && address <= 0xbfff)
-      return(ngpgfx_read8(NGPGfx, address));
+      return(ngpgfx_read8(&duo->gfx->NGPGfx, address));
 
    if(address >= 0x4000 && address <= 0x7fff)
       return(*(uint8_t *)(CPUExRAM + address - 0x4000));
 
    if(address >= 0x70 && address <= 0x7F)
-      return(int_read8(address));
+      return(duo->interrupt->int_read8(address));
 
    if(address >= 0x90 && address <= 0x97)
-      return(rtc_read8(address));
+      return(rtc_read8(duo->rtc, address));
 
    if(address >= 0x20 && address <= 0x29)
-      return(timer_read8(address));
+      return(duo->interrupt->timer_read8(address));
 
    switch (address)
    {
       case 0x50:
          return(SC0BUF);
       case 0xBC:
-         return Z80_ReadComm();
+         return duo->z80i->Z80_ReadComm();
    }
 
    //printf("UNK B R: %08x\n", address);
@@ -242,8 +218,9 @@ uint8_t loadB(uint32 address)
    return 0;
 }
 
-uint16_t loadW(uint32 address)
+uint16_t neopop_mem_t::loadW(uint32 address)
 {
+   DuoInstance *duo = GetDuoFromModule(this, mem);
    address &= 0xFFFFFF;
 
    if(address & 1)
@@ -277,7 +254,7 @@ uint16_t loadW(uint32 address)
    }
 
    if(address >= 0x8000 && address <= 0xbfff)
-      return(ngpgfx_read16(NGPGfx, address));
+      return(ngpgfx_read16(&duo->gfx->NGPGfx, address));
 
    if(address >= 0x4000 && address <= 0x7fff)
    {
@@ -296,8 +273,8 @@ uint16_t loadW(uint32 address)
    {
       uint16 ret;
 
-      ret = int_read8(address);
-      ret |= int_read8(address + 1) << 8;
+      ret = duo->interrupt->int_read8(address);
+      ret |= duo->interrupt->int_read8(address + 1) << 8;
 
       return(ret);
    }
@@ -306,8 +283,8 @@ uint16_t loadW(uint32 address)
    {
       uint16 ret;
 
-      ret = rtc_read8(address);
-      ret |= rtc_read8(address + 1) << 8;
+      ret = rtc_read8(duo->rtc, address);
+      ret |= rtc_read8(duo->rtc, address + 1) << 8;
 
       return(ret);
    }
@@ -316,21 +293,21 @@ uint16_t loadW(uint32 address)
    {
       uint16 ret;
 
-      ret = timer_read8(address);
-      ret |= timer_read8(address + 1) << 8;
+      ret = duo->interrupt->timer_read8(address);
+      ret |= duo->interrupt->timer_read8(address + 1) << 8;
 
       return(ret);
    }
 
    if(address == 0xBC)
-      return Z80_ReadComm();
+      return duo->z80i->Z80_ReadComm();
 
    //printf("UNK W R: %08x\n", address);
 
    return(0);
 }
 
-uint32 loadL(uint32 address)
+uint32 neopop_mem_t::loadL(uint32 address)
 {
    uint32 ret;
 
@@ -340,8 +317,9 @@ uint32 loadL(uint32 address)
    return(ret);
 }
 
-void storeB(uint32 address, uint8_t data)
+void neopop_mem_t::storeB(uint32 address, uint8_t data)
 {
+   DuoInstance *duo = GetDuoFromModule(this, mem);
    address &= 0xFFFFFF;
 
    if(address < 0x80)
@@ -349,7 +327,7 @@ void storeB(uint32 address, uint8_t data)
 
    if(address >= 0x8000 && address <= 0xbfff)
    {
-      ngpgfx_write8(NGPGfx, address, data);
+      ngpgfx_write8(&duo->gfx->NGPGfx, address, data);
       return;
    }
 
@@ -360,12 +338,12 @@ void storeB(uint32 address, uint8_t data)
    }
    if(address >= 0x70 && address <= 0x7F)
    {
-      int_write8(address, data);
+      duo->interrupt->int_write8(address, data);
       return;
    }
    if(address >= 0x20 && address <= 0x29)
    {
-      timer_write8(address, data);
+       duo->interrupt->timer_write8(address, data);
       return;
    }
 
@@ -381,9 +359,9 @@ void storeB(uint32 address, uint8_t data)
          return;
       case 0xb9:
          if(data == 0x55)
-            Z80_SetEnable(1);
+            duo->z80i->Z80_SetEnable(1);
          else if(data == 0xAA)
-            Z80_SetEnable(0);
+            duo->z80i->Z80_SetEnable(0);
          return;
       case 0xb8:
          if(data == 0x55)
@@ -392,27 +370,27 @@ void storeB(uint32 address, uint8_t data)
             MDFNNGPCSOUND_SetEnable(0);
          return;
       case 0xBA:
-         Z80_nmi();
+         duo->z80i->Z80_nmi();
          return;
       case 0xBC:
-         Z80_WriteComm(data);
+         duo->z80i->Z80_WriteComm(data);
          return;
    }
 
    if(address >= 0xa0 && address <= 0xA3)
    {
-      if(!Z80_IsEnabled())
+      if(!duo->z80i->Z80_IsEnabled())
       {
          if (address == 0xA1)
-            Write_SoundChipLeft(data);
+            duo->sound->Write_SoundChipLeft(data);
          else if (address == 0xA0)
-            Write_SoundChipRight(data);
+            duo->sound->Write_SoundChipRight(data);
       } 
       //DAC Write
       if (address == 0xA2)
-         dac_write_left(data);
+         duo->sound->dac_write_left(data);
       else if (address == 0xA3)
-         dac_write_right(data);
+         duo->sound->dac_write_right(data);
       return;
    }
 
@@ -423,8 +401,9 @@ void storeB(uint32 address, uint8_t data)
       *ptr = data;
 }
 
-void storeW(uint32 address, uint16_t data)
+void neopop_mem_t::storeW(uint32 address, uint16_t data)
 {
+   DuoInstance *duo = GetDuoFromModule(this, mem);
    uint16_t* ptr;
    address &= 0xFFFFFF;
 
@@ -440,7 +419,7 @@ void storeW(uint32 address, uint16_t data)
 
    if(address >= 0x8000 && address <= 0xbfff)
    {
-      ngpgfx_write16(NGPGfx, address, data);
+      ngpgfx_write16(&duo->gfx->NGPGfx, address, data);
       return;
    }
    if(address >= 0x4000 && address <= 0x7fff)
@@ -455,15 +434,15 @@ void storeW(uint32 address, uint16_t data)
    }
    if(address >= 0x70 && address <= 0x7F)
    {
-      int_write8(address, data & 0xFF);
-      int_write8(address + 1, data >> 8);
+      duo->interrupt->int_write8(address, data & 0xFF);
+      duo->interrupt->int_write8(address + 1, data >> 8);
       return;
    }
 
    if(address >= 0x20 && address <= 0x29)
    {
-      timer_write8(address, data & 0xFF);
-      timer_write8(address + 1, data >> 8);
+      duo->interrupt->timer_write8(address, data & 0xFF);
+      duo->interrupt->timer_write8(address + 1, data >> 8);
    }
 
    switch (address)
@@ -478,9 +457,9 @@ void storeW(uint32 address, uint16_t data)
          return;
       case 0xb8:
          if((data & 0xFF00) == 0x5500)
-            Z80_SetEnable(1);
+            duo->z80i->Z80_SetEnable(1);
          else if((data & 0xFF00) == 0xAA00)
-            Z80_SetEnable(0);
+            duo->z80i->Z80_SetEnable(0);
 
          if((data & 0xFF) == 0x55)
             MDFNNGPCSOUND_SetEnable(1);
@@ -488,10 +467,10 @@ void storeW(uint32 address, uint16_t data)
             MDFNNGPCSOUND_SetEnable(0);
          return;
       case 0xBA:
-         Z80_nmi();
+         duo->z80i->Z80_nmi();
          return;
       case 0xBC:
-         Z80_WriteComm(data);
+         duo->z80i->Z80_WriteComm(data);
          return;
    }
 
@@ -515,15 +494,11 @@ void storeW(uint32 address, uint16_t data)
    }
 }
 
-void storeL(uint32 address, uint32 data)
+void neopop_mem_t::storeL(uint32 address, uint32 data)
 {
    storeW(address, data & 0xFFFF);
    storeW(address + 2, data >> 16);
 }
-
-#ifdef __cplusplus
-}
-#endif
 
 static const uint8_t systemMemory[] = 
 {
@@ -561,8 +536,9 @@ static const uint8_t systemMemory[] =
 	0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,		0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00
 };
 
-void reset_memory(void)
+void neopop_mem_t::reset_memory(void)
 {
+	DuoInstance *duo = GetDuoFromModule(this, mem);
 	unsigned int i;
 
 	FlashStatusEnable = false;
@@ -577,21 +553,21 @@ void reset_memory(void)
 
    /* 006C00 -> 006FFF	BIOS Workspace */
 
-	storeL(0x6C00, rom_header->startPC);		//Start
+	storeL(0x6C00, duo->rom->rom_header->startPC);		//Start
 
-	storeW(0x6C04, rom_header->catalog);
-	storeW(0x6E82, rom_header->catalog);
+	storeW(0x6C04, duo->rom->rom_header->catalog);
+	storeW(0x6E82, duo->rom->rom_header->catalog);
 
-	storeB(0x6C06, rom_header->subCatalog);
-	storeB(0x6E84, rom_header->subCatalog);
+	storeB(0x6C06, duo->rom->rom_header->subCatalog);
+	storeB(0x6E84, duo->rom->rom_header->subCatalog);
 
 	for(i = 0; i < 12; i++)
-	 storeB(0x6c08 + i, ngpc_rom.data[0x24 + i]);
+	 storeB(0x6c08 + i, duo->rom->ngpc_rom.data[0x24 + i]);
 
 	storeB(0x6C58, 0x01);
 
 	/* 32MBit cart? */
-	if (ngpc_rom.length > 0x200000)
+	if (duo->rom->ngpc_rom.length > 0x200000)
 		storeB(0x6C59, 0x01);
 	else
 		storeB(0x6C59, 0x00);
@@ -609,8 +585,8 @@ void reset_memory(void)
 	storeB(0x6F87, MDFN_GetSettingB("ngp.language"));
 
 	/* Color Mode Selection: 0x00 = B&W, 0x10 = Colour */
-	storeB(0x6F91, rom_header->mode);
-	storeB(0x6F95, rom_header->mode);
+	storeB(0x6F91, duo->rom->rom_header->mode);
+	storeB(0x6F95, duo->rom->rom_header->mode);
 
 	/* Interrupt table */
 	for (i = 0; i < 0x12; i++)
@@ -659,3 +635,46 @@ void reset_memory(void)
 	 }
 	}
 }
+
+// ---------------
+// Global Wrappers
+// ---------------
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+uint8_t loadB(uint32_t address)
+{
+    return DuoInstance::currentInstance->mem->loadB(address);
+}
+
+uint16_t loadW(uint32_t address)
+{
+    return DuoInstance::currentInstance->mem->loadW(address);
+}
+
+uint32_t loadL(uint32_t address)
+{
+    return DuoInstance::currentInstance->mem->loadL(address);
+}
+
+void storeB(uint32_t address, uint8_t data)
+{
+    DuoInstance::currentInstance->mem->storeB(address, data);
+}
+
+void storeW(uint32_t address, uint16_t data)
+{
+    DuoInstance::currentInstance->mem->storeW(address, data);
+}
+
+void storeL(uint32_t address, uint32_t data)
+{
+    DuoInstance::currentInstance->mem->storeL(address, data);
+}
+
+#ifdef __cplusplus
+}
+#endif
+

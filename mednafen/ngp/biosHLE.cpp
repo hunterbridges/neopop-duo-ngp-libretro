@@ -20,6 +20,7 @@
 #include "flash.h"
 #include "interrupt.h"
 #include "../state.h"
+#include "../../duo/duo_instance.h"
 
 #include <boolean.h>
 
@@ -27,21 +28,16 @@
 extern "C" {
 #endif
 
-/* Interrupt prio registers at 0x0070-0x007a don't have priority readable. */
-/* This should probably be stored in BIOS work RAM somewhere instead of a 
- * separate array, but I don't know where! */
-static uint8 CacheIntPrio[0xB]; 
-
-void BIOSHLE_Reset(void)
+void BIOSHLE_Reset(neopop_bios_t *bios_ptr)
 {
    int x;
 
-   memset(CacheIntPrio, 0, sizeof(CacheIntPrio));
-   CacheIntPrio[0] = 0x02;
-   CacheIntPrio[1] = 0x32;
+   memset(bios_ptr->CacheIntPrio, 0, sizeof(bios_ptr->CacheIntPrio));
+   bios_ptr->CacheIntPrio[0] = 0x02;
+   bios_ptr->CacheIntPrio[1] = 0x32;
 
    for(x = 0; x < 0xB; x++)
-      storeB(0x70 + x, CacheIntPrio[x]);
+      storeB(0x70 + x, bios_ptr->CacheIntPrio[x]);
 }
 
 #define VECT_SHUTDOWN         0xFF27A2
@@ -53,8 +49,13 @@ void BIOSHLE_Reset(void)
 most streamlined way of intercepting a bios call. The operation performed
 is dependant on the current program counter. */
 
-void iBIOSHLE(void)
+void iBIOSHLE(neopop_bios_t *bios_ptr)
 {
+    DuoInstance *duo = GetDuoFromModule(bios_ptr, bios);
+
+	uint8_t *ngpc_bios = bios_ptr->bios;
+	uint8_t *CacheIntPrio = bios_ptr->CacheIntPrio;
+
    /* Only works within the bios */
    if ((pc & 0xFF0000) != 0xFF0000)
       return;
@@ -201,14 +202,14 @@ void iBIOSHLE(void)
             if (rCodeB(0x30) == 1)
                bank = 0x800000;
 
-            memory_flash_error = false;
-            memory_unlock_flash_write = true;
+            duo->mem->memory_flash_error = false;
+            duo->mem->memory_unlock_flash_write = true;
             //Copy as 32 bit values for speed
             for (i = 0; i < rCodeW(0x34) * 64ul; i++)
                storeL(rCodeL(0x38) + bank + (i * 4), loadL(rCodeL(0x3C) + (i * 4)));
-            memory_unlock_flash_write = false;
+            duo->mem->memory_unlock_flash_write = false;
 
-            if (memory_flash_error)
+            if (duo->mem->memory_flash_error)
             {
                rCodeB(0x30) = 0xFF;	//RA3 = SYS_FAILURE
             }
@@ -221,7 +222,7 @@ void iBIOSHLE(void)
                   address += 0x200000;
 
                //Save this data to an external file
-               flash_write(address, rCodeW(0x34) * 256);
+               duo->flash->flash_write(address, rCodeW(0x34) * 256);
 
                rCodeB(0x30) = 0;		//RA3 = SYS_SUCCESS
             }
@@ -243,22 +244,22 @@ void iBIOSHLE(void)
 
 		    //printf("flash erase: %d 0x%02x\n", bank, flash_block);
 
-		    if((ngpc_rom.length & ~0x1FFF) == 0x200000 && bank == 0 && flash_block == 31)
+		    if((duo->rom->ngpc_rom.length & ~0x1FFF) == 0x200000 && bank == 0 && flash_block == 31)
 		    {
 		       const uint32 addr = 0x3F0000;
 		       const uint32 size = 0x008000;
 
-		       flash_optimise_blocks();
-		       flash_write(addr, size);
-		       flash_optimise_blocks();
+               duo->flash->flash_optimise_blocks();
+               duo->flash->flash_write(addr, size);
+               duo->flash->flash_optimise_blocks();
 
-		       memory_flash_error = false;
-		       memory_unlock_flash_write = true;
+               duo->mem->memory_flash_error = false;
+               duo->mem->memory_unlock_flash_write = true;
 		       for(uint32 i = 0; i < size; i += 4)
 		       {
 		        storeL(addr + i, 0xFFFFFFFF);
 		       }
-		       memory_unlock_flash_write = false;
+               duo->mem->memory_unlock_flash_write = false;
 		    }
 
 		    rCodeB(0x30) = 0;	//RA3 = SYS_SUCCESS
@@ -310,13 +311,13 @@ void iBIOSHLE(void)
          {
             //Write the byte
             uint8 data = rCodeB(0x35);
-            system_comms_write(data);
+            duo->comms->system_comms_write(data);
          }
 
          //Restore $PC after BIOS-HLE instruction
          pc = pop32();
 
-         TestIntHDMA(11, 0x18);
+         duo->interrupt->TestIntHDMA(11, 0x18);
 
          //Always COM_BUF_OK because the write call always succeeds.
          rCodeB(0x30) = 0x0;			//RA3 = COM_BUF_OK
@@ -327,7 +328,7 @@ void iBIOSHLE(void)
          {
             uint8 data;
 
-            if (system_comms_read(&data))
+            if (duo->comms->system_comms_read(&data))
             {
                rCodeB(0x30) = 0;	//COM_BUF_OK
                rCodeB(0x35) = data;
@@ -336,7 +337,7 @@ void iBIOSHLE(void)
 
                //Comms. Read interrupt
                storeB(0x50, data);
-               TestIntHDMA(12, 0x19);
+               duo->interrupt->TestIntHDMA(12, 0x19);
 
                return;
             }
@@ -368,7 +369,7 @@ void iBIOSHLE(void)
       case 0xFF2D4E:
 
          // Receive Buffer Count
-         rCodeW(0x30) = system_comms_read(NULL);
+         rCodeW(0x30) = duo->comms->system_comms_read(NULL);
 
          break;
 
@@ -381,13 +382,13 @@ void iBIOSHLE(void)
             data = loadB(rCodeL(0x3C));
 
             //Write data from (XHL3++)
-            system_comms_write(data);
+            duo->comms->system_comms_write(data);
             rCodeL(0x3C)++; //Next data
 
             rCodeB(0x35)--;	//RB3 = Count Left
          }
 
-         TestIntHDMA(11, 0x18);
+         duo->interrupt->TestIntHDMA(11, 0x18);
          return;
       case VECT_COMGETBUFDATA:
 	  {
@@ -397,7 +398,7 @@ void iBIOSHLE(void)
          {
             uint8 data;
 
-            if (system_comms_read(&data))
+            if (duo->comms->system_comms_read(&data))
             {
                //Read data into (XHL3++)
                storeB(rCodeL(0x3C), data);
@@ -406,7 +407,7 @@ void iBIOSHLE(void)
 
                //Comms. Read interrupt
                storeB(0x50, data);
-               TestIntHDMA(12, 0x19);
+               duo->interrupt->TestIntHDMA(12, 0x19);
                return;
             }
             else
@@ -428,6 +429,9 @@ void iBIOSHLE(void)
 
 int BIOSHLE_StateAction(void *data, int load, int data_only)
 {
+   // TODO Where does CacheIntPrio come from in this scope?
+   uint8_t *CacheIntPrio = NULL;
+
    SFORMAT StateRegs[] =
    {
       { CacheIntPrio, (uint32_t)((0xB)), 0, "CacheIntPrio" },

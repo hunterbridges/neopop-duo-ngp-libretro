@@ -17,16 +17,9 @@
 #include "mem.h"
 #include "interrupt.h"
 #include "../state.h"
+#include "../../duo/duo_instance.h"
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
-static uint32_t dmaS[4], dmaD[4];
-static uint16_t dmaC[4];
-static uint8_t dmaM[4];
-
-void reset_dma(void)
+void neopop_dma_t::reset_dma(void)
 {
 	memset(dmaS, 0, sizeof(dmaS));
 	memset(dmaD, 0, sizeof(dmaD));
@@ -34,8 +27,9 @@ void reset_dma(void)
 	memset(dmaM, 0, sizeof(dmaM));
 }
 
-void DMA_update(int channel)
+void neopop_dma_t::DMA_update(int channel)
 {
+    DuoInstance *duo = GetDuoFromModule(this, dma);
 	uint8_t mode = (dmaM[channel] & 0x1C) >> 2;
 	uint8_t size = (dmaM[channel] & 0x03);			//byte, word or long
 
@@ -148,12 +142,12 @@ void DMA_update(int channel)
 	dmaC[channel] --;
 	if (dmaC[channel] == 0)
 	{
-		interrupt(14 + channel, 7);
+        duo->interrupt->interrupt(14 + channel, 7);
 		storeB(0x7C + channel, 0);
 	}
 }
 
-void dmaStoreB(uint8_t cr, uint8_t data)
+void neopop_dma_t::dmaStoreB(uint8_t cr, uint8_t data)
 {
 	switch(cr)
    {
@@ -175,7 +169,7 @@ void dmaStoreB(uint8_t cr, uint8_t data)
    }
 }
 
-void dmaStoreW(uint8_t cr, uint16_t data)
+void neopop_dma_t::dmaStoreW(uint8_t cr, uint16_t data)
 {
    switch(cr)
    {
@@ -198,7 +192,7 @@ void dmaStoreW(uint8_t cr, uint16_t data)
    }
 }
 
-void dmaStoreL(uint8_t cr, uint32_t data)
+void neopop_dma_t::dmaStoreL(uint8_t cr, uint32_t data)
 {
    switch(cr)
    {
@@ -233,7 +227,7 @@ void dmaStoreL(uint8_t cr, uint32_t data)
    }
 }
 
-uint8_t dmaLoadB(uint8_t cr)
+uint8_t neopop_dma_t::dmaLoadB(uint8_t cr)
 {
 
    switch(cr)
@@ -253,7 +247,7 @@ uint8_t dmaLoadB(uint8_t cr)
    return 0;
 }
 
-uint16_t dmaLoadW(uint8_t cr)
+uint16_t neopop_dma_t::dmaLoadW(uint8_t cr)
 {
    switch(cr)
    {
@@ -272,7 +266,7 @@ uint16_t dmaLoadW(uint8_t cr)
    return 0;
 }
 
-uint32_t dmaLoadL(uint8_t cr)
+uint32_t neopop_dma_t::dmaLoadL(uint8_t cr)
 {
    switch(cr)
    {
@@ -301,12 +295,15 @@ uint32_t dmaLoadL(uint8_t cr)
 
 int MDFNNGPCDMA_StateAction(void *data, int load, int data_only)
 {
+   // TODO where does dma_ptr come from in this scope?
+   neopop_dma_t *dma_ptr = NULL;
+
    SFORMAT StateRegs[] =
    {
-      { dmaS, (uint32_t)((4) * sizeof(uint32_t)), 0x40000000, "DMAS" },
-      { dmaD, (uint32_t)((4) * sizeof(uint32_t)), 0x40000000, "DMAD" },
-      { dmaC, (uint32_t)((4) * sizeof(uint16_t)), 0x20000000, "DMAC" },
-      { dmaM, (uint32_t)(4), 0, "DMAM" },
+      { dma_ptr->dmaS, (uint32_t)((4) * sizeof(uint32_t)), 0x40000000, "DMAS" },
+      { dma_ptr->dmaD, (uint32_t)((4) * sizeof(uint32_t)), 0x40000000, "DMAD" },
+      { dma_ptr->dmaC, (uint32_t)((4) * sizeof(uint16_t)), 0x20000000, "DMAC" },
+      { dma_ptr->dmaM, (uint32_t)(4), 0, "DMAM" },
       { 0, 0, 0, 0 }
    };
 
@@ -314,6 +311,44 @@ int MDFNNGPCDMA_StateAction(void *data, int load, int data_only)
       return 0;
 
    return 1; 
+}
+
+// ---------------
+// Global Wrappers
+// ---------------
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+uint8_t dmaLoadB(uint8_t cr)
+{
+    return DuoInstance::currentInstance->dma->dmaLoadB(cr);
+}
+
+uint16_t dmaLoadW(uint8_t cr)
+{
+    return DuoInstance::currentInstance->dma->dmaLoadW(cr);
+}
+
+uint32_t dmaLoadL(uint8_t cr)
+{
+    return DuoInstance::currentInstance->dma->dmaLoadL(cr);
+}
+
+void dmaStoreB(uint8_t cr, uint8_t data)
+{
+    DuoInstance::currentInstance->dma->dmaStoreB(cr, data);
+}
+
+void dmaStoreW(uint8_t cr, uint16_t data)
+{
+    DuoInstance::currentInstance->dma->dmaStoreW(cr, data);
+}
+
+void dmaStoreL(uint8_t cr, uint32_t data)
+{
+    DuoInstance::currentInstance->dma->dmaStoreL(cr, data);
 }
 
 #ifdef __cplusplus

@@ -155,6 +155,10 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="duo\duo_instance.cpp">
+      <SubType>
+      </SubType>
+    </ClCompile>
     <ClCompile Include="libretro-common\compat\compat_strl.c" />
     <ClCompile Include="libretro-common\compat\fopen_utf8.c" />
     <ClCompile Include="libretro-common\encodings\encoding_utf.c" />
@@ -225,6 +229,10 @@
     <ClCompile Include="mednafen\state.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="duo\duo_instance.h">
+      <SubType>
+      </SubType>
+    </ClInclude>
     <ClInclude Include="libretro-common\include\libretro.h" />
     <ClInclude Include="mednafen\driver.h" />
     <ClInclude Include="mednafen\file.h" />

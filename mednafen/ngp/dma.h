@@ -21,10 +21,6 @@
 extern "C" {
 #endif
 
-void reset_dma(void);
-
-void DMA_update(int channel);
-
 uint8_t  dmaLoadB(uint8_t cr);
 uint16_t dmaLoadW(uint8_t cr);
 uint32_t dmaLoadL(uint8_t cr);
@@ -33,10 +29,30 @@ void dmaStoreB(uint8_t cr, uint8_t data);
 void dmaStoreW(uint8_t cr, uint16_t data);
 void dmaStoreL(uint8_t cr, uint32_t data);
 
-int MDFNNGPCDMA_StateAction(void *data, int load, int data_only);
-
 #ifdef __cplusplus
 }
 #endif
+
+struct neopop_dma_t
+{
+	uint32_t dmaS[4];
+	uint32_t dmaD[4];
+	uint16_t dmaC[4];
+	uint8_t dmaM[4];
+
+	void reset_dma(void);
+
+	void DMA_update(int channel);
+
+	uint8_t  dmaLoadB(uint8_t cr);
+	uint16_t dmaLoadW(uint8_t cr);
+	uint32_t dmaLoadL(uint8_t cr);
+
+	void dmaStoreB(uint8_t cr, uint8_t data);
+	void dmaStoreW(uint8_t cr, uint16_t data);
+	void dmaStoreL(uint8_t cr, uint32_t data);
+};
+
+int MDFNNGPCDMA_StateAction(void *data, int load, int data_only);
 
 #endif

@@ -17,19 +17,49 @@
 
 #include <stdint.h>
 
-void flash_read(void);
+//This value is used to verify flash data - it is set to the
+//version number that the flash description was modified for.
 
-uint8_t *make_flash_commit(int32_t *length);
+#define FLASH_VALID_ID		0x0053
 
-/* Marks flash blocks for saving. */
-void flash_write(uint32_t start_address, uint16_t length);
-void flash_optimise_blocks(void);
+//Number of different flash blocks, this should be enough.
 
-/* Stores the flash data */
-void flash_commit(void);
+#define FLASH_MAX_BLOCKS	256
+
+typedef struct
+{
+	//Flash Id
+	uint16_t valid_flash_id;		// = FLASH_VALID_ID
+	uint16_t block_count;			//Number of flash data blocks
+	uint32_t total_file_length;		// header + block[0 - block_count]
+} FlashFileHeader;
+
+typedef struct
+{
+	uint32_t start_address;		// 24 bit address
+	uint16_t data_length;		// length of following data
+	//Followed by data_length bytes of the actual data.
+} FlashFileBlockHeader;
+
+struct neopop_flash_t
+{
+	FlashFileBlockHeader blocks[256];
+	uint16_t block_count;
+
+	void flash_read();
+
+	uint8_t *make_flash_commit(int32_t *length);
+
+	/* Marks flash blocks for saving. */
+	void flash_write(uint32_t start_address, uint16_t length);
+	void flash_optimise_blocks();
+
+	/* Stores the flash data */
+	void flash_commit();
+
+	void do_flash_read(uint8_t *flashdata);
+};
 
 int FLASH_StateAction(void *data, int load, int data_only);
-
-void do_flash_read(uint8_t *flashdata);
 
 #endif

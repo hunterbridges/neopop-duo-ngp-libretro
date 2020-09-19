@@ -24,6 +24,8 @@
 #include "../masmem.h"
 #endif
 
+#include "../../duo/duo_instance.h"
+
 static const unsigned char mirrored[] = {
     0x00, 0x40, 0x80, 0xc0, 0x10, 0x50, 0x90, 0xd0,
     0x20, 0x60, 0xa0, 0xe0, 0x30, 0x70, 0xb0, 0xf0,
@@ -665,6 +667,10 @@ void ngpgfx_set_pixel_format(ngpgfx_t *gfx, int depth)
 
 bool ngpgfx_draw(ngpgfx_t *gfx, void *data, bool skip)
 {
+   // NOTE: First 'gfx' refers to the param, second 'gfx' refers to the
+   //       member name on DuoInstance.
+   DuoInstance *duo = GetDuoFromModule(gfx, gfx);
+
    unsigned x;
    bool ret = 0;
    MDFN_Surface *surface = (MDFN_Surface*)data;
@@ -706,7 +712,7 @@ bool ngpgfx_draw(ngpgfx_t *gfx, void *data, bool skip)
       ret = 1;
 
       if(gfx->CONTROL_INT & 0x80) /* (statusIFF() <= 4 */
-         TestIntHDMA(5, 0x0B);
+         duo->interrupt->TestIntHDMA(5, 0x0B);
    }
 
    /* End of V_Int */
@@ -928,6 +934,10 @@ void ngpgfx_write16(ngpgfx_t *gfx, uint32 address, uint16 data)
 
 uint8_t ngpgfx_read8(ngpgfx_t *gfx, uint32_t address)
 {
+   // NOTE: First 'gfx' refers to the param, second 'gfx' refers to the
+   //       member name on DuoInstance.
+   DuoInstance *duo = GetDuoFromModule(gfx, gfx);
+
    if(address >= 0x9000 && address <= 0x9fff)
       return(gfx->ScrollVRAM[address - 0x9000]);
    else if(address >= 0xa000 && address <= 0xbfff)
@@ -953,7 +963,7 @@ uint8_t ngpgfx_read8(ngpgfx_t *gfx, uint32_t address)
       case 0x8006:
          return gfx->SCREEN_PERIOD;
       case 0x8008:
-         return( (uint8)((abs(TIMER_HINT_RATE - (int)timer_hint)) >> 2) ); //RAS.H read (Simulated horizontal raster position)
+         return( (uint8)((abs(TIMER_HINT_RATE - (int)duo->interrupt->timer_hint)) >> 2) ); //RAS.H read (Simulated horizontal raster position)
       case 0x8009:
          return gfx->raster_line;
       case 0x8010:

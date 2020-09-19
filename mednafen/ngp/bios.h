@@ -21,15 +21,24 @@
 extern "C" {
 #endif
 
-extern uint8_t ngpc_bios[0x10000];
+/* NOTE: C-style interface */
+typedef struct neopop_bios
+{
+	/* Holds BIOS program data */
+	uint8_t bios[0x10000];
 
-void iBIOSHLE(void);
+	/* Interrupt prio registers at 0x0070-0x007a don't have priority readable. */
+	/* This should probably be stored in BIOS work RAM somewhere instead of a 
+	 * separate array, but I don't know where! */
+	uint8_t CacheIntPrio[0xB];
+} neopop_bios_t;
+
+void iBIOSHLE(neopop_bios_t *bios_ptr);
 
 /* Fill the bios rom area with a bios. call once at program start */
-int bios_install(void);
+int bios_install(neopop_bios_t *bios_ptr);
 
-void biosDecode(int function);
-void BIOSHLE_Reset(void);
+void BIOSHLE_Reset(neopop_bios_t *bios_ptr);
 int BIOSHLE_StateAction(void *data, int load, int data_only);
 
 #ifdef __cplusplus

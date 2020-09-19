@@ -15,7 +15,7 @@ static int RETRO_PIX_DEPTH = 15;
 
 // ====================================================
 
-static MDFNGI *game;
+// Global (Per core)
 
 struct retro_perf_callback perf_cb;
 retro_get_cpu_features_t perf_get_cpu_features_cb = NULL;
@@ -26,21 +26,20 @@ static retro_environment_t environ_cb;
 static retro_input_poll_t input_poll_cb;
 static retro_input_state_t input_state_cb;
 
-static bool overscan;
-
-static MDFN_Surface *surf;
-
 static bool failed_init;
-
 static bool libretro_supports_bitmasks = false;
-
 static void hookup_ports(bool force);
-
 static bool initial_ports_hookup = false;
+static bool overscan;
 
 extern "C" char retro_base_directory[1024];
 std::string retro_base_name;
 char retro_save_directory[1024];
+
+// Per instance
+
+static MDFN_Surface *surf;
+static MDFNGI *game;
 
 //---------------------------------------------------------------------------
 // NEOPOP : Emulator as in Dreamland
@@ -82,9 +81,6 @@ uint8 NGPJoyLatch;
 static uint8 *chee;
 
 static int32 z80_runtime;
-
-extern "C" bool NGPFrameSkip;
-extern "C" int32_t ngpc_soundTS;
 
 static void Emulate(EmulateSpecStruct *espec)
 {

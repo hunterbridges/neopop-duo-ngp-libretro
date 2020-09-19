@@ -23,8 +23,6 @@
 #define ZDEPTH_FOREGROUND_SCROLL    5
 #define ZDEPTH_FRONT_SPRITE			6
 
-extern uint16_t cfb_scanline[256];	// __attribute__ ((aligned (8)));
-
 typedef struct ngpgfx
 {
    uint8_t winx, winw;
@@ -62,6 +60,12 @@ typedef struct ngpgfx
    int layer_enable;
 } ngpgfx_t;
 
+struct neopop_gfx_t
+{
+	ngpgfx_t NGPGfx;
+	uint16_t cfb_scanline[256];	// __attribute__ ((aligned (8)));
+};
+
 void ngpgfx_set_pixel_format(ngpgfx_t *fx, int depth);
 
 void ngpgfx_SetLayerEnableMask(ngpgfx_t *gfx, uint64_t mask);
@@ -81,8 +85,6 @@ uint16_t ngpgfx_read16(ngpgfx_t *gfx, uint32_t address);
 void ngpgfx_write16(ngpgfx_t *gfx, uint32_t address, uint16_t data);
 
 void ngpgfx_write8(ngpgfx_t *gfx, uint32_t address, uint8_t data);
-
-extern ngpgfx_t *NGPGfx;
 
 #endif
 

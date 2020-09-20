@@ -32,9 +32,15 @@
 #include <assert.h>
 #endif
 
-#ifdef __cplusplus
-extern "C" {
-#endif
+extern "C" void int_check_pending()
+{
+	return DuoInstance::currentInstance->interrupt->int_check_pending();
+}
+
+extern "C" void set_interrupt(uint8_t index, bool set)
+{
+	DuoInstance::currentInstance->interrupt->set_interrupt(index, set);
+}
 
 // The way interrupt processing is set up is still written towards BIOS HLE emulation, which assumes
 // that the interrupt handler will immediately call DI, clear the interrupt latch(so the interrupt won't happen again when interrupts are re-enabled),
@@ -273,7 +279,7 @@ bool neopop_interrupt_t::updateTimers(void *data, int cputicks)
       timer_hint -= TIMER_HINT_RATE;	/* Start of next scanline */
 
       /* Comms. Read interrupt */
-      if ((duo->mem->COMMStatus & 1) == 0 && system_comms_poll(&_data))
+      if ((duo->mem->COMMStatus & 1) == 0 && duo->comms->system_comms_poll(&_data))
       {
          storeB(0x50, _data);
          TestIntHDMA(12, 0x19);
@@ -471,7 +477,7 @@ bool neopop_interrupt_t::updateTimers(void *data, int cputicks)
       {
          timer[3] = 0;
 
-         Z80_irq();
+         duo->z80i->Z80_irq();
          TestIntHDMA(10, 0x13);
       }
    }
@@ -596,6 +602,3 @@ int int_timer_StateAction(void *data, int load, int data_only)
    return 1;
 }
 
-#ifdef __cplusplus
-}
-#endif

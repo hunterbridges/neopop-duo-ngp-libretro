@@ -8,8 +8,11 @@
 #include <stdint.h>
 #include "../mednafen/ngp/bios.h"
 #include "../mednafen/ngp/rtc.h"
+#include "../mednafen/mednafen-types.h"
 #include "../mednafen/git.h"
 #include "../mednafen/video.h"
+
+#include "duo_settings.h"
 
 struct neopop_comms_t;
 struct neopop_dma_t;
@@ -55,11 +58,18 @@ public:
 	};
 
 	// Mednafen metadata
+	EmulateSpecStruct spec;
 	MDFNGI *game;
 	MDFN_Surface *surface;
 
 	uint8_t system_colour;
 	int32_t z80_runtime;
+
+	// Frame output
+	int32 SoundBufSize;
+	unsigned width, height;
+	int16_t sound_buf[0x10000];
+	MDFN_Rect rects[FB_MAX_HEIGHT];
 
 	// Input
 	uint8_t input_buf;
@@ -84,16 +94,23 @@ public:
 	neopop_z80i_t *z80i;
 
 	DuoInstance();
-	DuoInstance(MDFNGI *game, MDFN_Surface *surface);
+
+	bool Initialize();
+	void Deinitialize();
 
 	/*! WARNING: Make sure the instance is active before running this! */
 	void Reset();
 
 	/*! WARNING: Make sure the instance is active before running this! */
-	int LoadGame(const char *name, MDFNFILE *fp, const uint8_t *data, size_t size);
+	bool LoadGame(MDFNGI *game_info, uint32 rom_size, const void *rom_data);
 
 	/*! WARNING: Make sure the instance is active before running this! */
-	void ProcessFrame(EmulateSpecStruct *espec);
+	void UnloadGame();
+
+	void ConfigureSpec();
+
+	/*! WARNING: Make sure the instance is active before running this! */
+	void ProcessFrame();
 
 private:
 

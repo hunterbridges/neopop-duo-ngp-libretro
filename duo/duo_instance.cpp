@@ -3,19 +3,23 @@
 // ----------
 
 #include "duo_instance.h"
+#include "duo_runner.h"
+
+#include <malloc.h>
 
 #include "../mednafen/ngp/bios.h"
 #include "../mednafen/ngp/dma.h"
+#include "../mednafen/ngp/flash.h"
 #include "../mednafen/ngp/gfx.h"
 #include "../mednafen/ngp/interrupt.h"
 #include "../mednafen/ngp/mem.h"
 #include "../mednafen/ngp/rom.h"
 #include "../mednafen/ngp/sound.h"
+#include "../mednafen/ngp/system.h"
 #include "../mednafen/ngp/Z80_interface.h"
 #include "../mednafen/ngp/TLCS-900h/TLCS900h_interpret.h"
 #include "../mednafen/ngp/TLCS-900h/TLCS900h_registers.h"
 
-DuoInstance *DuoInstance::currentInstance = nullptr;
 DuoInstance *DuoInstance::currentInstance = nullptr;
 DuoInstance DuoInstance::instances[MAX_INSTANCES];
 
@@ -57,107 +61,329 @@ DuoInstance::DuoInstance()
 	this->surface = nullptr;
 }
 
-DuoInstance::DuoInstance(MDFNGI *game, MDFN_Surface *surface)
+bool DuoInstance::Initialize()
 {
-	this->game = game;
-	this->surface = surface;
+	bios = (neopop_bios_t*)calloc(1, sizeof(neopop_bios_t));
+	if (bios == NULL) goto error;
+	// C-style, no constructor
+
+	comms = (neopop_comms_t*)calloc(1, sizeof(neopop_comms_t));
+	if (comms == NULL) goto error;
+	new (comms) neopop_comms_t();
+
+	dma = (neopop_dma_t*)calloc(1, sizeof(neopop_dma_t));
+	if (dma == NULL) goto error;
+	new (dma) neopop_dma_t();
+
+	flash = (neopop_flash_t*)calloc(1, sizeof(neopop_flash_t));
+	if (flash == NULL) goto error;
+	new (flash) neopop_flash_t();
+
+	gfx = (neopop_gfx_t*)calloc(1, sizeof(neopop_gfx_t));
+	if (gfx == NULL) goto error;
+	new (gfx) neopop_gfx_t();
+
+	interrupt = (neopop_interrupt_t*)calloc(1, sizeof(neopop_interrupt_t));
+	if (interrupt == NULL) goto error;
+	new (interrupt) neopop_interrupt_t();
+
+	io = (neopop_io_t*)calloc(1, sizeof(neopop_io_t));
+	if (io == NULL) goto error;
+	new (io) neopop_io_t();
+
+	mem = (neopop_mem_t*)calloc(1, sizeof(neopop_mem_t));
+	if (mem == NULL) goto error;
+	new (mem) neopop_mem_t();
+
+	rom = (neopop_rom_t*)calloc(1, sizeof(neopop_rom_t));
+	if (rom == NULL) goto error;
+	new (rom) neopop_rom_t();
+
+	rtc = (neopop_rtc_t*)calloc(1, sizeof(neopop_rtc_t));
+	if (rtc == NULL) goto error;
+	// C-style, no constructor
+
+	sound = (neopop_sound_t*)calloc(1, sizeof(neopop_sound_t));
+	if (sound == NULL) goto error;
+	new (sound) neopop_sound_t();
+
+	z80i = (neopop_z80i_t*)calloc(1, sizeof(neopop_z80i_t));
+	if (z80i == NULL) goto error;
+	new (z80i) neopop_z80i_t();
+
+	return true;
+error:
+	Deinitialize();
+	return false;
+}
+
+void DuoInstance::Deinitialize()
+{
+	if (bios)
+	{
+		free(bios);
+		bios = NULL;
+	}
+
+	if (comms)
+	{
+		comms->~neopop_comms_t();
+		free(comms);
+		comms = NULL;
+	}
+
+	if (dma)
+	{
+		dma->~neopop_dma_t();
+		free(dma);
+		dma = NULL;
+	}
+
+	if (flash)
+	{
+		flash->~neopop_flash_t();
+		free(flash);
+		flash = NULL;
+	}
+
+	if (gfx)
+	{
+		gfx->~neopop_gfx_t();
+		free(gfx);
+		gfx = NULL;
+	}
+
+	if (interrupt)
+	{
+		interrupt->~neopop_interrupt_t();
+		free(interrupt);
+		interrupt = NULL;
+	}
+
+	if (io)
+	{
+		io->~neopop_io_t();
+		free(io);
+		io = NULL;
+	}
+
+	if (mem)
+	{
+		mem->~neopop_mem_t();
+		free(mem);
+		mem = NULL;
+	}
+
+	if (rom)
+	{
+		rom->~neopop_rom_t();
+		free(rom);
+		rom = NULL;
+	}
+
+	if (rtc)
+	{
+		free(rtc);
+		rtc = NULL;
+	}
+
+	if (sound)
+	{
+		sound->~neopop_sound_t();
+		free(sound);
+		sound = NULL;
+	}
+
+	if (z80i)
+	{
+		z80i->~neopop_z80i_t();
+		free(z80i);
+		z80i = NULL;
+	}
+
+	if (surface)
+	{
+		if (surface->pixels)
+			free(surface->pixels);
+
+		free(surface);
+		surface = NULL;
+	}
 }
 
 void DuoInstance::Reset()
 {
-   ngpgfx_power(&gfx->NGPGfx);
-   z80i->Z80_reset();
-   interrupt->reset_int();
-   interrupt->reset_timers();
+	ngpgfx_power(&gfx->NGPGfx);
+	z80i->Z80_reset();
+	interrupt->reset_int();
+	interrupt->reset_timers();
 
-   mem->reset_memory();
-   BIOSHLE_Reset(bios);
-   reset_registers();	/* TLCS900H registers */
-   dma->reset_dma();
+	mem->reset_memory();
+	BIOSHLE_Reset(bios);
+	reset_registers();	/* TLCS900H registers */
+	dma->reset_dma();
 }
 
-int DuoInstance::LoadGame(const char *name, MDFNFILE *fp, const uint8_t *data, size_t size)
+bool DuoInstance::LoadGame(MDFNGI *game_info, uint32 rom_size, const void *rom_data)
 {
-   if ((data != NULL) && (size != 0)) {
-      if (!(ngpc_rom.data = (uint8 *)malloc(size)))
-         return(0);
-      ngpc_rom.length = size;
-      memcpy(ngpc_rom.data, data, size);
-   }
-   else
-   {
-      if(!(ngpc_rom.data = (uint8 *)malloc(fp->size)))
-         return(0);
+	// Copy the rom data into the instance
+	rom->ngpc_rom.data = (uint8*)malloc(rom_size);
+	if (rom->ngpc_rom.data == NULL)
+		goto error;
 
-      ngpc_rom.length = fp->size;
-      memcpy(ngpc_rom.data, fp->data, fp->size);
-   }
+	rom->ngpc_rom.length = rom_size;
+	memcpy(rom->ngpc_rom.data, rom_data, rom_size);
 
-   rom_loaded();
+	rom->rom_loaded();
 
-   NGPGfx = (ngpgfx_t*)calloc(1, sizeof(*NGPGfx));
-   NGPGfx->layer_enable = 1 | 2 | 4;
+	// Initialize runtime aspects of subsystems
+	memset(&gfx->NGPGfx, 0, sizeof(ngpgfx_t));
+	gfx->NGPGfx.layer_enable = 1 | 2 | 4;
 
-   MDFNGameInfo->fps = (uint32)((uint64)6144000 * 65536 * 256 / 515 / 198); // 3072000 * 2 * 10000 / 515 / 198
+	sound->Init();
 
-   MDFNNGPCSOUND_Init();
+	// Set up fast read memory mapping
+	mem->SetFRM();
 
-   SetFRM(); // Set up fast read memory mapping
+	bios_install(bios);
 
-   bios_install();
+	z80_runtime = 0;
 
-   z80_runtime = 0;
+	Reset();
 
-   Reset();
+	// Init output surface (instance)
+	surface = (MDFN_Surface*)calloc(1, sizeof(MDFN_Surface));
 
-   return(1);
+	if (surface == NULL)
+		goto error;
+
+	surface->width = FB_WIDTH;
+	surface->height = FB_HEIGHT;
+	surface->pitch = FB_WIDTH;
+	surface->depth = DuoRunner::shared.RETRO_PIX_DEPTH;
+
+	surface->pixels = (uint16_t*)calloc(1, FB_WIDTH * FB_HEIGHT * sizeof(uint32_t));
+
+	if (surface->pixels == NULL)
+		goto error;
+
+	// Set core gfx settings (instance)
+	ngpgfx_set_pixel_format(&gfx->NGPGfx, surface->depth);
+
+	// Set core sound settings (instance)
+	sound->SetSoundRate(DuoRunner::shared.RETRO_SAMPLE_RATE);
+
+	game = game_info;
+
+	return true;
+
+error:
+	if (surface)
+	{
+		if (surface->pixels)
+			free(surface->pixels);
+
+		free(surface);
+	}
+
+	if (rom->ngpc_rom.data)
+		free(rom->ngpc_rom.data);
+
+	game = NULL;
+
+	return false;
 }
 
-void DuoInstance::ProcessFrame(EmulateSpecStruct *espec)
+void DuoInstance::UnloadGame()
 {
-   bool drewFrame = false;
+	if (game != NULL)
+	{
+		rom->rom_unload();
+		memset(&gfx->NGPGfx, 0, sizeof(ngpgfx_t));
+		game = NULL;
+	}
 
-   espec->DisplayRect.x = 0;
-   espec->DisplayRect.y = 0;
-   espec->DisplayRect.w = 160;
-   espec->DisplayRect.h = 152;
+	if (surface)
+	{
+		if (surface->pixels)
+			free(surface->pixels);
 
-   if(espec->VideoFormatChanged)
-      ngpgfx_set_pixel_format(&gfx->NGPGfx, espec->surface->depth);
+		free(surface);
+	}
 
-   if (espec->SoundFormatChanged)
-	  sound->SetSoundRate(espec->SoundRate);
+	if (rom->ngpc_rom.data)
+		free(rom->ngpc_rom.data);
+}
 
-   NGPJoyLatch = input_buf;
+void DuoInstance::ConfigureSpec()
+{
+	spec.surface = surface;
+	spec.SoundRate = DuoRunner::shared.RETRO_SAMPLE_RATE;
+	spec.SoundBuf = sound_buf;
+	spec.LineWidths = rects;
+	spec.SoundBufMaxSize = sizeof(sound_buf) / 2;
+	spec.SoundVolume = 1.0;
+	spec.soundmultiplier = 1.0;
+	spec.SoundBufSize = 0;
+	spec.VideoFormatChanged = DuoRunner::shared.update_video;
+	spec.SoundFormatChanged = DuoRunner::shared.update_audio;
+}
 
-   storeB(0x6F82, input_buf);
+void DuoInstance::ProcessFrame()
+{
+	bool drewFrame = false;
 
-   sound->ngpc_soundTS = 0;
-   interrupt->NGPFrameSkip = espec->skip;
+	rects[0].w = ~0;
 
-   do
-   {
-      int32 timetime = (uint8)TLCS900h_interpret();
-      drewFrame |= interrupt->updateTimers(espec->surface, timetime);
-      z80_runtime += timetime;
+	spec.DisplayRect.x = 0;
+	spec.DisplayRect.y = 0;
+	spec.DisplayRect.w = 160;
+	spec.DisplayRect.h = 152;
 
-      while(z80_runtime > 0)
-      {
-         int z80rantime = z80i->Z80_RunOP();
+	if (spec.VideoFormatChanged)
+		ngpgfx_set_pixel_format(&gfx->NGPGfx, spec.surface->depth);
 
-         if (z80rantime < 0) // Z80 inactive, so take up all run time!
-         {
-            z80_runtime = 0;
-            break;
-         }
+	if (spec.SoundFormatChanged)
+		sound->SetSoundRate(spec.SoundRate);
 
-         z80_runtime -= z80rantime << 1;
+	NGPJoyLatch = input_buf;
 
-      }
-   } while(!drewFrame);
+	storeB(0x6F82, input_buf);
 
-   espec->MasterCycles = sound->ngpc_soundTS;
-   espec->SoundBufSize = sound->Flush(espec->SoundBuf, espec->SoundBufMaxSize);
+	sound->ngpc_soundTS = 0;
+	interrupt->NGPFrameSkip = spec.skip;
+
+	do
+	{
+		int32 timetime = (uint8)TLCS900h_interpret();
+		drewFrame |= interrupt->updateTimers(spec.surface, timetime);
+		z80_runtime += timetime;
+
+		while (z80_runtime > 0)
+		{
+			int z80rantime = z80i->Z80_RunOP();
+
+			if (z80rantime < 0) // Z80 inactive, so take up all run time!
+			{
+				z80_runtime = 0;
+				break;
+			}
+
+			z80_runtime -= z80rantime << 1;
+
+		}
+	} while (!drewFrame);
+
+	spec.MasterCycles = sound->ngpc_soundTS;
+	spec.SoundBufSize = sound->Flush(spec.SoundBuf, spec.SoundBufMaxSize);
+
+	// Set frame output vars
+	SoundBufSize = spec.SoundBufSize - spec.SoundBufSizeALMS;
+
+	spec.SoundBufSize = spec.SoundBufSizeALMS + SoundBufSize;
+
+	width = spec.DisplayRect.w;
+	height = spec.DisplayRect.h;
 }
 
 // ------------------
@@ -167,7 +393,7 @@ void DuoInstance::ProcessFrame(EmulateSpecStruct *espec)
 void DuoInstance::StageInstance(DuoInstance *instance)
 {
 	UnstageCurrentInstance();
-	
+
 	if (instance == nullptr)
 		return;
 

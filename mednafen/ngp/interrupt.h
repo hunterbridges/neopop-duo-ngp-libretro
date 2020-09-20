@@ -31,6 +31,16 @@
 extern "C" {
 #endif
 
+void int_check_pending();
+void set_interrupt(uint8_t index, bool set);
+
+int int_timer_StateAction(void *data, int load, int data_only);
+
+#ifdef __cplusplus
+}
+#endif
+
+#ifdef __cplusplus
 struct neopop_interrupt_t
 {
 	uint32_t timer_hint;
@@ -69,11 +79,6 @@ struct neopop_interrupt_t
 	void int_check_pending();
 	void TestIntHDMA(int bios_num, int vec_num);
 };
-
-int int_timer_StateAction(void *data, int load, int data_only);
-
-#ifdef __cplusplus
-}
 #endif
 
 #endif

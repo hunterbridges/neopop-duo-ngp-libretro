@@ -45,6 +45,7 @@ void storeL(uint32_t address, uint32_t data);
 }
 #endif
 
+#ifdef __cplusplus
 struct neopop_mem_t
 {
    bool memory_unlock_flash_write;
@@ -88,5 +89,6 @@ private:
    void* translate_address_read(uint32_t address);
    void* translate_address_write(uint32_t address);
 };
+#endif
 
 #endif

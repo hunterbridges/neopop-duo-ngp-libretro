@@ -125,12 +125,13 @@ void neopop_flash_t::flash_read()
 {
    FlashFileHeader header;
    uint8_t* flashdata;
+   DuoInstance *duo = GetDuoFromModule(this, flash);
 
    //Initialise the internal flash configuration
    block_count = 0;
 
    //Read flash buffer header
-   if (system_io_flash_read((uint8_t*)&header, sizeof(FlashFileHeader)) == 0)
+   if (duo->io->system_io_flash_read((uint8_t*)&header, sizeof(FlashFileHeader)) == 0)
       return; //Silent failure - no flash data yet.
 
    //Verify correct flash id
@@ -142,7 +143,7 @@ void neopop_flash_t::flash_read()
 
    //Read the flash data
    flashdata = (uint8_t*)malloc(header.total_file_length * sizeof(uint8_t));
-   system_io_flash_read(flashdata, header.total_file_length);
+   duo->io->system_io_flash_read(flashdata, header.total_file_length);
 
    do_flash_read(flashdata);
 
@@ -236,18 +237,20 @@ void neopop_flash_t::flash_commit()
 {
    int32_t length = 0;
    uint8_t *flashdata = make_flash_commit(&length);
+   DuoInstance *duo = GetDuoFromModule(this, flash);
 
    if (!flashdata)
       return;
 
-   system_io_flash_write(flashdata, length);
+   duo->io->system_io_flash_write(flashdata, length);
    free(flashdata);
 }
 
 int FLASH_StateAction(void *data, int load, int data_only)
 {
    // TODO Where does flash come from in this scope?
-   neopop_flash_t *flash = NULL;
+   DuoInstance *duo = DuoInstance::currentInstance;
+   neopop_flash_t *flash = duo->flash;
 
    int32_t FlashLength = 0;
    uint8_t *flashdata = NULL;
@@ -287,7 +290,7 @@ int FLASH_StateAction(void *data, int load, int data_only)
 
    if(load)
    {
-      memcpy(ngpc_rom.data, ngpc_rom.orig_data, ngpc_rom.length);
+      memcpy(duo->rom->ngpc_rom.data, duo->rom->ngpc_rom.orig_data, duo->rom->ngpc_rom.length);
       flash->do_flash_read(flashdata);
    }
 

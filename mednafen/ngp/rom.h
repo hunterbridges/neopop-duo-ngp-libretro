@@ -53,10 +53,13 @@ typedef struct
 } __attribute__((__packed__)) RomHeader;
 #endif
 
+RomHeader *rom_GetHeaderPtr();
+
 #ifdef __cplusplus
 }
 #endif
 
+#ifdef __cplusplus
 struct neopop_rom_t
 {
 	RomInfo ngpc_rom;
@@ -74,5 +77,6 @@ private:
 	void rom_display_header(void);
 
 };
+#endif
 
 #endif

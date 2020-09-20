@@ -159,11 +159,19 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="duo\duo_helper.cpp">
+      <SubType>
+      </SubType>
+    </ClCompile>
     <ClCompile Include="duo\duo_instance.cpp">
       <SubType>
       </SubType>
     </ClCompile>
     <ClCompile Include="duo\duo_runner.cpp">
+      <SubType>
+      </SubType>
+    </ClCompile>
+    <ClCompile Include="duo\duo_settings.cpp">
       <SubType>
       </SubType>
     </ClCompile>
@@ -237,11 +245,19 @@
     <ClCompile Include="mednafen\state.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="duo\duo_helper.h">
+      <SubType>
+      </SubType>
+    </ClInclude>
     <ClInclude Include="duo\duo_instance.h">
       <SubType>
       </SubType>
     </ClInclude>
     <ClInclude Include="duo\duo_runner.h">
+      <SubType>
+      </SubType>
+    </ClInclude>
+    <ClInclude Include="duo\duo_settings.h">
       <SubType>
       </SubType>
     </ClInclude>

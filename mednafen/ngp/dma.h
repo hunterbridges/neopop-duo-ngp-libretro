@@ -33,6 +33,7 @@ void dmaStoreL(uint8_t cr, uint32_t data);
 }
 #endif
 
+#ifdef __cplusplus
 struct neopop_dma_t
 {
 	uint32_t dmaS[4];
@@ -52,6 +53,7 @@ struct neopop_dma_t
 	void dmaStoreW(uint8_t cr, uint16_t data);
 	void dmaStoreL(uint8_t cr, uint32_t data);
 };
+#endif
 
 int MDFNNGPCDMA_StateAction(void *data, int load, int data_only);
 

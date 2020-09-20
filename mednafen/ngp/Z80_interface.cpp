@@ -69,10 +69,10 @@ static void NGP_z80_writebyte(uint16_t address, uint8_t value)
           duo->z80i->CommByte = value;
          break;
       case 0x4001:
-         Write_SoundChipLeft(value);
+         duo->sound->Write_SoundChipLeft(value);
          break;
       case 0x4000:
-         Write_SoundChipRight(value);
+         duo->sound->Write_SoundChipRight(value);
          break;
       case 0xC000:
           duo->interrupt->TestIntHDMA(6, 0x0C);

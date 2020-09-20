@@ -37,8 +37,7 @@
 
 #include <string.h>
 #include "TLCS900h_registers.h"
-#include "../neopop.h"
-#include "../interrupt.h"
+#include "../rom.h"
 
 #ifdef MSB_FIRST
 #define BYTE0	3
@@ -950,7 +949,8 @@ void reset_registers(void)
 	memset(gprBank, 0, sizeof(gprBank));
 	memset(gpr, 0, sizeof(gpr));
 
-	if (ngpc_rom.data)
+    RomHeader *rom_header = rom_GetHeaderPtr();
+	if (rom_header != NULL)
 		pc = le32toh(rom_header->startPC) & 0xFFFFFF;
 	else
 		pc = 0xFFFFFE;

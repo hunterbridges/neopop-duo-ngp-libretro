@@ -2,6 +2,7 @@
 #include "sound.h"
 
 #include "../state.h"
+#include "../../duo/duo_instance.h"
 
 // ----------------
 // Instance methods
@@ -39,7 +40,7 @@ void neopop_sound_t::RedoVolume(void)
 
 void neopop_sound_t::Init(void)
 {
-   MDFNNGPC_SetSoundRate(0);
+   SetSoundRate(0);
    buf.clock_rate((long)(3072000));
 
    RedoVolume();
@@ -88,40 +89,13 @@ void neopop_sound_t::dac_write_right(uint8_t data)
 
 void MDFNNGPCSOUND_SetEnable(bool set)
 {
-   // TODO Where does sound ptr come from in this scope?
-   neopop_sound_t *sound = NULL;
-
+   neopop_sound_t *sound = DuoInstance::currentInstance->sound;
    sound->SetEnable(set);
-}
-
-int32_t MDFNNGPCSOUND_Flush(int16_t *SoundBuf, const int32_t MaxSoundFrames)
-{
-   // TODO Where does sound ptr come from in this scope?
-   neopop_sound_t *sound = NULL;
-
-   return sound->Flush(SoundBuf, MaxSoundFrames);
-}
-
-void MDFNNGPCSOUND_Init(void)
-{
-   // TODO Where does sound ptr come from in this scope?
-   neopop_sound_t *sound = NULL;
-
-   sound->Init();
-}
-
-bool MDFNNGPC_SetSoundRate(uint32_t rate)
-{
-   // TODO Where does sound ptr come from in this scope?
-   neopop_sound_t *sound = NULL;
-
-   return sound->SetSoundRate(rate);
 }
 
 int MDFNNGPCSOUND_StateAction(void *data, int load, int data_only)
 {
-   // TODO Where does sound ptr come from in this scope?
-   neopop_sound_t *sound = NULL;
+   neopop_sound_t *sound = DuoInstance::currentInstance->sound;
 
    T6W28_ApuState *sn_state;
 

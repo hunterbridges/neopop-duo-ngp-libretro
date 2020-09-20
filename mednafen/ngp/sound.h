@@ -57,7 +57,6 @@ private:
    void RedoVolume();
 };
 
-void MDFNNGPCSOUND_Init(void);
 int MDFNNGPCSOUND_StateAction(void *data, int load, int data_only);
 void MDFNNGPCSOUND_SetEnable(bool set);
 

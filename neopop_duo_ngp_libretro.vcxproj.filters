@@ -181,6 +181,12 @@
     <ClCompile Include="duo\duo_runner.cpp">
       <Filter>duo</Filter>
     </ClCompile>
+    <ClCompile Include="duo\duo_helper.cpp">
+      <Filter>duo</Filter>
+    </ClCompile>
+    <ClCompile Include="duo\duo_settings.cpp">
+      <Filter>duo</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="libretro-common\include\libretro.h">
@@ -331,6 +337,12 @@
       <Filter>mednafen</Filter>
     </ClInclude>
     <ClInclude Include="duo\duo_runner.h">
+      <Filter>duo</Filter>
+    </ClInclude>
+    <ClInclude Include="duo\duo_helper.h">
+      <Filter>duo</Filter>
+    </ClInclude>
+    <ClInclude Include="duo\duo_settings.h">
       <Filter>duo</Filter>
     </ClInclude>
   </ItemGroup>

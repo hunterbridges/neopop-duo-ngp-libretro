@@ -18,6 +18,12 @@ public:
 	int RETRO_PIX_DEPTH = 15;
 
 	std::string retro_base_name;
+	char retro_base_directory[1024];
+	char retro_save_directory[1024];
+
+	MDFNGI game_info;
+
+	int instance_count = 1;
 
 	uint32_t setting_ngp_language = 0;
 
@@ -54,6 +60,8 @@ public:
 	int SaveStateAction(StateMem *sm, int load, int data_only);
 
 private:
+	void MixFrameAV(void);
+
 	void UpdateInput(void);
 
 	void SetBasename(const char *path);
@@ -62,12 +70,19 @@ private:
 	void CheckColorDepth(void);
 	void CheckVariables(void);
 
-	MDFNGI *LoadGameFromFile(const char *name);
-	MDFNGI *LoadGameFromData(const uint8_t *data, size_t size);
+	void InitGameInfo();
+	bool LoadGameFromFile(const char *name);
+	bool LoadGameFromData(const uint8_t *data, size_t size);
 
 public:
 	static DuoRunner shared;
+};
 
+extern "C"
+{
+	const char *DuoRunner_GetBaseDir();
+	const char *DuoRunner_GetSaveDir();
+	uint32_t DuoRunner_GetLangSetting();
 };
 
 #endif

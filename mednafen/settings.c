@@ -21,6 +21,17 @@
 #include <boolean.h>
 #include "settings.h"
 
+// ---------------------------------------------------------
+// From duo_runner.cpp
+// (Defining as extern to not have to mess with C++ interop)
+// ---------------------------------------------------------
+
+extern const char *DuoRunner_GetBaseDir();
+extern const char *DuoRunner_GetSaveDir();
+extern uint32_t DuoRunner_GetLangSetting();
+
+// ---------------------------------------------------------
+
 uint64_t MDFN_GetSettingUI(const char *name)
 {
    fprintf(stderr, "unhandled setting UI: %s\n", name);
@@ -45,7 +56,7 @@ bool MDFN_GetSettingB(const char *name)
       return 0;
    /* LIBRETRO */
    if (!strcmp("ngp.language", name))
-      return setting_ngp_language;
+      return DuoRunner_GetLangSetting();
    /* FILESYS */
    if (!strcmp("filesys.untrusted_fip_check", name))
       return 0;
@@ -60,15 +71,15 @@ const char *MDFN_GetSettingS(const char *name)
 {
    /* FILESYS */
    if (!strcmp("filesys.path_firmware", name))
-      return retro_base_directory;
+      return DuoRunner_GetBaseDir();
    if (!strcmp("filesys.path_palette", name))
-      return retro_base_directory;
+      return DuoRunner_GetBaseDir();
    if (!strcmp("filesys.path_sav", name))
-      return retro_base_directory;
+      return DuoRunner_GetBaseDir();
    if (!strcmp("filesys.path_state", name))
-      return retro_base_directory;
+      return DuoRunner_GetBaseDir();
    if (!strcmp("filesys.path_cheat", name))
-      return retro_base_directory;
+      return DuoRunner_GetBaseDir();
    fprintf(stderr, "unhandled setting S: %s\n", name);
    return 0;
 }

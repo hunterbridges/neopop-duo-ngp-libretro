@@ -29,8 +29,10 @@
 #define MATCH_CATALOG(c, s)	(rom_header->catalog == HTOLE16(c) \
 				 && rom_header->subCatalog == (s))
 
-RomInfo ngpc_rom;
-RomHeader* rom_header = NULL;
+extern "C" RomHeader * rom_GetHeaderPtr()
+{
+    return DuoInstance::currentInstance->rom->rom_header;
+}
 
 void neopop_rom_t::rom_hack(void)
 {

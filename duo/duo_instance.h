@@ -131,7 +131,20 @@ public:
 
 };
 
+inline DuoInstance *GetDuoWithModuleAtOffset(void *ptr, size_t offset)
+{
+	for (int i = 0; i < DuoInstance::MAX_INSTANCES; i++)
+	{
+		uint8 *duoPtr = (uint8*)&DuoInstance::instances[i];
+		uint8 *modulePtr = duoPtr + offset;
+		if (*(void**)modulePtr == ptr)
+			return &DuoInstance::instances[i];
+	}
+
+	return NULL;
+}
+
 #define GetDuoFromModule(MODULE_PTR, MODULE_NAME) \
-	((DuoInstance*)(((uint8_t*)MODULE_PTR) - offsetof(DuoInstance, MODULE_NAME)))
+	GetDuoWithModuleAtOffset(MODULE_PTR, offsetof(DuoInstance, MODULE_NAME))
 
 #endif

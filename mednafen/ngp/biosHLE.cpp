@@ -49,9 +49,11 @@ void BIOSHLE_Reset(neopop_bios_t *bios_ptr)
 most streamlined way of intercepting a bios call. The operation performed
 is dependant on the current program counter. */
 
-void iBIOSHLE(neopop_bios_t *bios_ptr)
+void iBIOSHLE()
 {
-    DuoInstance *duo = GetDuoFromModule(bios_ptr, bios);
+    // WARNING! Using global state!
+    DuoInstance *duo = DuoInstance::currentInstance;
+    neopop_bios_t *bios_ptr = duo->bios;
 
 	uint8_t *ngpc_bios = bios_ptr->bios;
 	uint8_t *CacheIntPrio = bios_ptr->CacheIntPrio;

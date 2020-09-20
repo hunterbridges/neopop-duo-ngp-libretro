@@ -33,7 +33,7 @@ typedef struct neopop_bios
 	uint8_t CacheIntPrio[0xB];
 } neopop_bios_t;
 
-void iBIOSHLE(neopop_bios_t *bios_ptr);
+void iBIOSHLE();
 
 /* Fill the bios rom area with a bios. call once at program start */
 int bios_install(neopop_bios_t *bios_ptr);

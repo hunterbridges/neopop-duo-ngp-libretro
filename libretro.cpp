@@ -23,18 +23,6 @@
 #include "mednafen/ngp/neopop.h"
 #include "mednafen/general.h"
 
-#include "mednafen/ngp/TLCS-900h/TLCS900h_interpret.h"
-#include "mednafen/ngp/TLCS-900h/TLCS900h_registers.h"
-#include "mednafen/ngp/Z80_interface.h"
-#include "mednafen/ngp/interrupt.h"
-#include "mednafen/ngp/mem.h"
-#include "mednafen/ngp/gfx.h"
-#include "mednafen/ngp/sound.h"
-#include "mednafen/ngp/dma.h"
-#include "mednafen/ngp/bios.h"
-#include "mednafen/ngp/flash.h"
-#include "mednafen/ngp/system.h"
-
 // --------------
 // libretro hooks
 // --------------

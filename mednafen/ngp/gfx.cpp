@@ -794,6 +794,10 @@ void ngpgfx_SetLayerEnableMask(ngpgfx_t *gfx, uint64_t mask)
 
 void ngpgfx_write8(ngpgfx_t *gfx, uint32 address, uint8 data)
 {
+   // NOTE: First 'gfx' refers to the param, second 'gfx' refers to the
+   //       member name on DuoInstance.
+   DuoInstance *duo = GetDuoFromModule(gfx, gfx);
+
 #if 0
    if(address >= 0x8032 && address <= 0x8035)
       printf("%08x %02x %d\n", address, data, ngpc_soundTS);
@@ -917,7 +921,7 @@ void ngpgfx_write8(ngpgfx_t *gfx, uint32 address, uint8 data)
          if(data == 0x52) 
          {
             puts("GEreset");
-            reset(); 
+            duo->Reset(); 
          }
          break;
       case 0x87e2:

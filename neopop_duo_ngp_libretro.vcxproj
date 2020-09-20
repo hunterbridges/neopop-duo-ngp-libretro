@@ -74,21 +74,25 @@
     <LinkIncremental>false</LinkIncremental>
     <OutDir>$(SolutionDir)</OutDir>
     <IncludePath>$(SolutionDir)libretro-common\compat;$(SolutionDir)mednafen\include;$(SolutionDir)mednafen;$(SolutionDir)libretro-common\include;$(IncludePath)</IncludePath>
+    <CodeAnalysisRuleSet>..\..\BlueMoon\Submodules\StarEngine\Source\Rulesets\Unused.ruleset</CodeAnalysisRuleSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LinkIncremental>false</LinkIncremental>
     <OutDir>$(SolutionDir)</OutDir>
     <IncludePath>$(SolutionDir)libretro-common\compat;$(SolutionDir)mednafen\include;$(SolutionDir)mednafen;$(SolutionDir)libretro-common\include;$(IncludePath)</IncludePath>
+    <CodeAnalysisRuleSet>..\..\BlueMoon\Submodules\StarEngine\Source\Rulesets\Unused.ruleset</CodeAnalysisRuleSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <LinkIncremental>false</LinkIncremental>
     <OutDir>$(SolutionDir)</OutDir>
     <IncludePath>$(SolutionDir)libretro-common\compat;$(SolutionDir)mednafen\include;$(SolutionDir)mednafen;$(SolutionDir)libretro-common\include;$(IncludePath)</IncludePath>
+    <CodeAnalysisRuleSet>..\..\BlueMoon\Submodules\StarEngine\Source\Rulesets\Unused.ruleset</CodeAnalysisRuleSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <LinkIncremental>false</LinkIncremental>
     <OutDir>$(SolutionDir)</OutDir>
     <IncludePath>$(SolutionDir)libretro-common\compat;$(SolutionDir)mednafen\include;$(SolutionDir)mednafen;$(SolutionDir)libretro-common\include;$(IncludePath)</IncludePath>
+    <CodeAnalysisRuleSet>..\..\BlueMoon\Submodules\StarEngine\Source\Rulesets\Unused.ruleset</CodeAnalysisRuleSet>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -156,6 +160,10 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="duo\duo_instance.cpp">
+      <SubType>
+      </SubType>
+    </ClCompile>
+    <ClCompile Include="duo\duo_runner.cpp">
       <SubType>
       </SubType>
     </ClCompile>
@@ -230,6 +238,10 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="duo\duo_instance.h">
+      <SubType>
+      </SubType>
+    </ClInclude>
+    <ClInclude Include="duo\duo_runner.h">
       <SubType>
       </SubType>
     </ClInclude>

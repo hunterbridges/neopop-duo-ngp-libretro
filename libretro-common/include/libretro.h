@@ -288,7 +288,7 @@ enum retro_language
  * If the memory type doesn't apply to the
  * implementation NULL/0 can be returned.
  */
-#define RETRO_MEMORY_MASK        0xff
+#define RETRO_MEMORY_MASK        0
 
 /* Regular save RAM. This RAM is usually found on a game cartridge,
  * backed up by a battery.

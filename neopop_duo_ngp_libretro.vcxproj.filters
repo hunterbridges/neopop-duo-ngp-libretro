@@ -178,6 +178,9 @@
     <ClCompile Include="duo\duo_instance.cpp">
       <Filter>duo</Filter>
     </ClCompile>
+    <ClCompile Include="duo\duo_runner.cpp">
+      <Filter>duo</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="libretro-common\include\libretro.h">
@@ -208,9 +211,6 @@
       <Filter>mednafen</Filter>
     </ClInclude>
     <ClInclude Include="mednafen\mempatcher.h">
-      <Filter>mednafen</Filter>
-    </ClInclude>
-    <ClInclude Include="mednafen\mempatcher-driver.h">
       <Filter>mednafen</Filter>
     </ClInclude>
     <ClInclude Include="mednafen\settings.h">
@@ -325,6 +325,12 @@
       <Filter>mednafen\ngp</Filter>
     </ClInclude>
     <ClInclude Include="duo\duo_instance.h">
+      <Filter>duo</Filter>
+    </ClInclude>
+    <ClInclude Include="mednafen\mempatcher-driver.h">
+      <Filter>mednafen</Filter>
+    </ClInclude>
+    <ClInclude Include="duo\duo_runner.h">
       <Filter>duo</Filter>
     </ClInclude>
   </ItemGroup>

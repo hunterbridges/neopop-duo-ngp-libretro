@@ -188,8 +188,8 @@ typedef struct
 	// The framebuffer pointed to by surface->pixels is written to by the system emulation code.
 	MDFN_Surface *surface;
 
-	// Will be set to TRUE if the video pixel format has changed since the last call to Emulate(), FALSE otherwise.
-	// Will be set to TRUE on the first call to the Emulate() function/method
+	// Will be set to TRUE if the video pixel format has changed since the last call to ProcessFrame(), FALSE otherwise.
+	// Will be set to TRUE on the first call to the ProcessFrame() function/method
 	bool VideoFormatChanged;
 
 	// Set by the system emulation code every frame, to denote the horizontal and vertical offsets of the image, and the size
@@ -218,8 +218,8 @@ typedef struct
 	//
 	// If sound is disabled, the driver code must set SoundRate to false, SoundBuf to NULL, SoundBufMaxSize to 0.
 
-        // Will be set to TRUE if the sound format(only rate for now, at least) has changed since the last call to Emulate(), FALSE otherwise.
-        // Will be set to TRUE on the first call to the Emulate() function/method
+        // Will be set to TRUE if the sound format(only rate for now, at least) has changed since the last call to ProcessFrame(), FALSE otherwise.
+        // Will be set to TRUE on the first call to the ProcessFrame() function/method
 	bool SoundFormatChanged;
 
 	// Sound rate.  Set by driver side.
@@ -245,11 +245,11 @@ typedef struct
 	int64 MasterCyclesALMS;	// MasterCycles value at last MidSync(), 0
 				// if mid sync isn't implemented for the emulation module in use.
 
-	// Current sound volume(0.000...<=volume<=1.000...).  If, after calling Emulate(), it is still != 1, Mednafen will handle it internally.
+	// Current sound volume(0.000...<=volume<=1.000...).  If, after calling ProcessFrame(), it is still != 1, Mednafen will handle it internally.
 	// Emulation modules can handle volume themselves if they like, for speed reasons.  If they do, afterwards, they should set its value to 1.
 	double SoundVolume;
 
-	// Current sound speed multiplier.  Set by the driver code.  If, after calling Emulate(), it is still != 1, Mednafen will handle it internally
+	// Current sound speed multiplier.  Set by the driver code.  If, after calling ProcessFrame(), it is still != 1, Mednafen will handle it internally
 	// by resampling the audio.  This means that emulation modules can handle(and set the value to 1 after handling it) it if they want to get the most
 	// performance possible.  HOWEVER, emulation modules must make sure the value is in a range(with minimum and maximum) that their code can handle
 	// before they try to handle it.
@@ -300,7 +300,7 @@ typedef struct
  //
  // nominal_width and nominal_height specify the resolution that Mednafen should display
  // the framebuffer image in at 1x scaling, scaled from the dimensions of DisplayRect, and optionally the LineWidths array
- // passed through espec to the Emulate() function.
+ // passed through espec to the ProcessFrame() function.
  //
  bool multires;
 
@@ -313,7 +313,7 @@ typedef struct
  int nominal_height;
 
  int fb_width;		// Width of the framebuffer(not necessarily width of the image).  MDFN_Surface width should be >= this.
- int fb_height;		// Height of the framebuffer passed to the Emulate() function(not necessarily height of the image)
+ int fb_height;		// Height of the framebuffer passed to the ProcessFrame() function(not necessarily height of the image)
 
  int soundchan; 	// Number of output sound channels.
 

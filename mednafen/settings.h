@@ -8,8 +8,6 @@
 extern "C" {
 #endif
 
-extern uint32_t setting_ngp_language;
-
 uint64_t MDFN_GetSettingUI(const char *name);
 int64_t MDFN_GetSettingI(const char *name);
 double MDFN_GetSettingF(const char *name);

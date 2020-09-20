@@ -49,8 +49,6 @@ typedef enum
 	COLOURMODE_AUTO
 } COLOURMODE;
 
-void reset(void);
-
 /* Physical screen dimensions */
 #define SCREEN_WIDTH    160
 #define SCREEN_HEIGHT   152

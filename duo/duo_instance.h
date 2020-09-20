@@ -2,8 +2,8 @@
 // NeoPop Duo
 // ----------
 
-#ifndef _DUO_INSTANCE_H
-#define _DUO_INSTANCE_H
+#ifndef DUO_INSTANCE_H
+#define DUO_INSTANCE_H
 
 #include <stdint.h>
 #include "../mednafen/ngp/bios.h"
@@ -56,10 +56,13 @@ public:
 
 	// Mednafen metadata
 	MDFNGI *game;
-	uint8 system_colour;
 	MDFN_Surface *surface;
 
+	uint8_t system_colour;
+	int32_t z80_runtime;
+
 	// Input
+	uint8_t input_buf;
 	uint8_t NGPJoyLatch;
 
 	// Processor state
@@ -82,6 +85,15 @@ public:
 
 	DuoInstance();
 	DuoInstance(MDFNGI *game, MDFN_Surface *surface);
+
+	/*! WARNING: Make sure the instance is active before running this! */
+	void Reset();
+
+	/*! WARNING: Make sure the instance is active before running this! */
+	int LoadGame(const char *name, MDFNFILE *fp, const uint8_t *data, size_t size);
+
+	/*! WARNING: Make sure the instance is active before running this! */
+	void ProcessFrame(EmulateSpecStruct *espec);
 
 private:
 

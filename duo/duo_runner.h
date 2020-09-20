@@ -1,0 +1,73 @@
+// ----------
+// NeoPop Duo
+// ----------
+
+#ifndef DUO_RUNNER_H
+#define DUO_RUNNER_H
+
+#include <stdint.h>
+#include <libretro.h>
+#include <string>
+#include "duo_instance.h"
+
+class DuoRunner
+{
+public:
+	int RETRO_SAMPLE_RATE = 44100;
+	int RETRO_PIX_BYTES = 2;
+	int RETRO_PIX_DEPTH = 15;
+
+	std::string retro_base_name;
+
+	uint32_t setting_ngp_language = 0;
+
+	bool update_video;
+	bool update_audio;
+	uint64_t video_frames;
+	uint64_t audio_frames;
+
+	struct retro_perf_callback perf_cb;
+	retro_get_cpu_features_t perf_get_cpu_features_cb;
+	retro_log_printf_t log_cb;
+	retro_video_refresh_t video_cb;
+	retro_audio_sample_batch_t audio_batch_cb;
+	retro_environment_t environ_cb;
+	retro_input_poll_t input_poll_cb;
+	retro_input_state_t input_state_cb;
+
+	bool failed_init;
+	bool libretro_supports_bitmasks;
+	bool overscan;
+
+	void Initialize(void);
+	void Deinitialize(void);
+
+	void Reset(void);
+
+	bool LoadGame(const struct retro_game_info *info);
+	void UnloadGame();
+	void Run(void);
+
+	void GetSystemInfo(struct retro_system_info *info);
+	void GetAvInfo(struct retro_system_av_info *info);
+
+	int SaveStateAction(StateMem *sm, int load, int data_only);
+
+private:
+	void UpdateInput(void);
+
+	void SetBasename(const char *path);
+
+	void CheckSystemSpecs(void);
+	void CheckColorDepth(void);
+	void CheckVariables(void);
+
+	MDFNGI *LoadGameFromFile(const char *name);
+	MDFNGI *LoadGameFromData(const uint8_t *data, size_t size);
+
+public:
+	static DuoRunner shared;
+
+};
+
+#endif

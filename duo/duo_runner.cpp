@@ -193,15 +193,102 @@ void DuoRunner::Run()
 
 void DuoRunner::MixFrameAV()
 {
+	static uint8_t joined_buf_16[FB_WIDTH * FB_HEIGHT * 2 * 2]; // two screens' worth of 16-bit data
+	static uint8_t joined_buf_24[FB_WIDTH * FB_HEIGHT * 4 * 2];
+	const int half_16 = sizeof(joined_buf_16) / 2;
+	const int half_24 = sizeof(joined_buf_16) / 2;
+	int pitch = FB_WIDTH * ((RETRO_PIX_DEPTH + 7) / 8);;
+
+	static int16_t audio_mix_buf[0x10000];
+
+	uint8_t *joined_buf = joined_buf_16;
+	int half = half_16;
+	if (RETRO_PIX_BYTES == 4)
+	{
+		joined_buf = joined_buf_24;
+		half = half_24;
+	}
+
 	int total = 0;
 
-	// TODO rework to support multi screen layout
-	for (int i = 0; i < instance_count; i++)
+	// ------------
+	// Video Mixing
+	// ------------
+
+	if (videoMixMode == AV_BOTH_PLAYERS && instance_count > 1)
 	{
-		DuoInstance *duo = &DuoInstance::instances[i];
-		video_cb(duo->surface->pixels, duo->width, duo->height, FB_WIDTH * RETRO_PIX_BYTES);
+		// Display both screens
+		DuoInstance *duoP1 = &DuoInstance::instances[0];
+		DuoInstance *duoP2 = &DuoInstance::instances[1];
+
+		if (videoLayout & AV_LAYOUT_SWITCH_MASK)
+		{
+			DuoInstance *tmp = duoP2;
+			duoP2 = duoP1;
+			duoP1 = tmp;
+		}
+
+		if (videoLayout & AV_LAYOUT_V)
+		{
+			memcpy(joined_buf, duoP1->surface->pixels, half);
+			memcpy(joined_buf + half, duoP2->surface->pixels, half);
+			video_cb(joined_buf, duoP1->width, duoP1->height * 2, pitch);
+		}
+		else
+		{
+			for (int row = 0; row < duoP1->height; row++)
+			{
+				memcpy(joined_buf + pitch * (2 * row), (uint8_t*)duoP1->surface->pixels + pitch * row, pitch);
+				memcpy(joined_buf + pitch * (2 * row + 1), (uint8_t*)duoP2->surface->pixels + pitch * row, pitch);
+			}
+
+			video_cb(joined_buf, duoP1->width * 2, duoP1->height, pitch * 2);
+		}
 
 		video_frames++;
+	}
+	else
+	{
+		// Display single screen
+		int instance_i = (videoMixMode == AV_P2_ONLY ? 1 : 0);
+
+		DuoInstance *duo = &DuoInstance::instances[instance_i];
+		video_cb(duo->surface->pixels, duo->width, duo->height, pitch);
+		video_frames++;
+	}
+
+	// ------------
+	// Audio Mixing
+	// ------------
+
+	if (audioMixMode == AV_BOTH_PLAYERS && instance_count > 1)
+	{
+		// Mix P1 and P2 audio
+
+		DuoInstance *duoP1 = &DuoInstance::instances[0];
+		DuoInstance *duoP2 = &DuoInstance::instances[1];
+
+		memset(audio_mix_buf, 0, sizeof(audio_mix_buf));
+
+		int minSize = MIN(duoP1->spec.SoundBufSize, duoP2->spec.SoundBufSize);
+
+		memcpy(audio_mix_buf, duoP1->spec.SoundBuf, sizeof(audio_mix_buf));
+		for (int i = 0; i < minSize * 2; i++)
+		{
+			audio_mix_buf[i] += duoP2->spec.SoundBuf[i];
+		}
+
+		audio_frames += minSize;
+
+		for (total = 0; total < minSize; )
+			total += audio_batch_cb(audio_mix_buf + total * 2, minSize - total);
+	}
+	else
+	{
+		// P1 or P2 audio only
+		int instance_i = (audioMixMode == AV_P2_ONLY ? 1 : 0);
+
+		DuoInstance *duo = &DuoInstance::instances[instance_i];
 		audio_frames += duo->spec.SoundBufSize;
 
 		for (total = 0; total < duo->spec.SoundBufSize; )
@@ -279,9 +366,22 @@ void DuoRunner::GetAvInfo(struct retro_system_av_info *info)
 	info->timing.sample_rate = RETRO_SAMPLE_RATE;
 	info->geometry.base_width = MEDNAFEN_CORE_GEOMETRY_BASE_W;
 	info->geometry.base_height = MEDNAFEN_CORE_GEOMETRY_BASE_H;
-	info->geometry.max_width = MEDNAFEN_CORE_GEOMETRY_MAX_W;
-	info->geometry.max_height = MEDNAFEN_CORE_GEOMETRY_MAX_H;
-	info->geometry.aspect_ratio = MEDNAFEN_CORE_GEOMETRY_ASPECT_RATIO;
+	info->geometry.max_width = MEDNAFEN_CORE_GEOMETRY_MAX_W * 2;
+	info->geometry.max_height = MEDNAFEN_CORE_GEOMETRY_MAX_H * 2;
+
+	if (videoMixMode == AV_BOTH_PLAYERS)
+	{
+		if (videoLayout & AV_LAYOUT_V)
+			info->geometry.base_height *= 2;
+		else
+			info->geometry.base_width *= 2;
+
+		info->geometry.aspect_ratio = float(info->geometry.base_width) / float(info->geometry.base_height);
+	}
+	else
+	{
+		info->geometry.aspect_ratio = MEDNAFEN_CORE_GEOMETRY_ASPECT_RATIO;
+	}
 
 	CheckColorDepth();
 }

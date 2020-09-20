@@ -29,12 +29,40 @@ DuoInstance DuoInstance::instances[MAX_INSTANCES];
 
 void DuoTLCS900hState::Capture()
 {
-	// TODO
+	memcpy(&this->mem, &::mem, sizeof(::mem));
+	memcpy(&this->size, &::size, sizeof(::size));
+	memcpy(&this->first, &::first, sizeof(::first));
+	memcpy(&this->second, &::second, sizeof(::second));
+	memcpy(&this->R, &::R, sizeof(::R));
+	memcpy(&this->rCode, &::rCode, sizeof(::rCode));
+	memcpy(&this->cycles, &::cycles, sizeof(::cycles));
+	memcpy(&this->brCode, &::brCode, sizeof(::brCode));
+	memcpy(&this->pc, &::pc, sizeof(::pc));
+	memcpy(&this->sr, &::sr, sizeof(::sr));
+	memcpy(&this->f_dash, &::f_dash, sizeof(::f_dash));
+	memcpy(&this->gprBank, &::gprBank, sizeof(::gprBank));
+	memcpy(&this->gpr, &::gpr, sizeof(::gpr));
+	memcpy(&this->rErr, &::rErr, sizeof(::rErr));
+	memcpy(&this->statusRFP, &::statusRFP, sizeof(::statusRFP));
 }
 
 void DuoTLCS900hState::Restore()
 {
-	// TODO
+	memcpy(&::mem, &this->mem, sizeof(::mem));
+	memcpy(&::size, &this->size, sizeof(::size));
+	memcpy(&::first, &this->first, sizeof(::first));
+	memcpy(&::second, &this->second, sizeof(::second));
+	memcpy(&::R, &this->R, sizeof(::R));
+	memcpy(&::rCode, &this->rCode, sizeof(::rCode));
+	memcpy(&::cycles, &this->cycles, sizeof(::cycles));
+	memcpy(&::brCode, &this->brCode, sizeof(::brCode));
+	memcpy(&::pc, &this->pc, sizeof(::pc));
+	memcpy(&::sr, &this->sr, sizeof(::sr));
+	memcpy(&::f_dash, &this->f_dash, sizeof(::f_dash));
+	memcpy(&::gprBank, &this->gprBank, sizeof(::gprBank));
+	memcpy(&::gpr, &this->gpr, sizeof(::gpr));
+	memcpy(&::rErr, &this->rErr, sizeof(::rErr));
+	memcpy(&::statusRFP, &this->statusRFP, sizeof(::statusRFP));
 }
 
 // -----------
@@ -43,12 +71,16 @@ void DuoTLCS900hState::Restore()
 
 void DuoZ80State::Capture()
 {
-	// TODO
+	memcpy(&this->z80, &::z80, sizeof(::z80));
+	memcpy(&this->last_z80_tstates, &::last_z80_tstates, sizeof(::last_z80_tstates));
+	memcpy(&this->z80_tstates, &::z80_tstates, sizeof(::z80_tstates));
 }
 
 void DuoZ80State::Restore()
 {
-	// TODO
+	memcpy(&::z80, &this->z80, sizeof(::z80));
+	memcpy(&::last_z80_tstates, &this->last_z80_tstates, sizeof(::last_z80_tstates));
+	memcpy(&::z80_tstates, &this->z80_tstates, sizeof(::z80_tstates));
 }
 
 // -----------
@@ -306,13 +338,21 @@ void DuoInstance::UnloadGame()
 	if (surface)
 	{
 		if (surface->pixels)
+		{
 			free(surface->pixels);
+			surface->pixels = NULL;
+		}
 
 		free(surface);
+		surface = NULL;
 	}
 
 	if (rom->ngpc_rom.data)
+	{
 		free(rom->ngpc_rom.data);
+		rom->ngpc_rom.data = NULL;
+		rom->rom_header = NULL;
+	}
 }
 
 void DuoInstance::ConfigureSpec()

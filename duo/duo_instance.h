@@ -12,6 +12,8 @@
 #include "../mednafen/git.h"
 #include "../mednafen/video.h"
 
+#include "../mednafen/hw_cpu/z80-fuse/z80_types.h"
+
 #include "duo_settings.h"
 
 struct neopop_comms_t;
@@ -27,6 +29,33 @@ struct neopop_z80i_t;
 
 struct DuoTLCS900hState
 {
+	uint32_t mem;
+	int size;
+	uint8_t first;
+	uint8_t second;
+	uint8_t R;
+	uint8_t rCode;
+	int32_t cycles;
+	bool brCode;
+
+	uint32_t pc;
+	uint16_t sr;
+	uint8_t f_dash;
+
+	uint32_t gprBank[4][4];
+	uint32_t gpr[4];
+
+	uint32_t rErr;
+
+	uint8_t statusRFP;
+
+	// TODO Are these tables needed?
+	// uint8_t* gprMapB[4][8];
+	// uint16_t* gprMapW[4][8];
+	// uint32_t* gprMapL[4][8];
+	// uint8_t* regCodeMapB[4][256];
+	// uint16_t* regCodeMapW[4][128];
+	// uint32_t* regCodeMapL[4][64];
 
 	/*! Captures the state from the global TLCS900h interpreter and
 		stores it in this struct */
@@ -39,6 +68,14 @@ struct DuoTLCS900hState
 
 struct DuoZ80State
 {
+	struct processor z80;
+	uint64_t last_z80_tstates;
+	uint64_t z80_tstates;
+
+	// TODO Are these tables needed?
+	// uint8_t sz53_table[0x100];
+	// uint8_t parity_table[0x100];
+	// uint8_t sz53p_table[0x100];
 
 	/*! Captures the state from the global z80 interpreter and
 		stores it in this struct */
@@ -66,7 +103,7 @@ public:
 	int32_t z80_runtime;
 
 	// Frame output
-	int32 SoundBufSize;
+	int32_t SoundBufSize;
 	unsigned width, height;
 	int16_t sound_buf[0x10000];
 	MDFN_Rect rects[FB_MAX_HEIGHT];

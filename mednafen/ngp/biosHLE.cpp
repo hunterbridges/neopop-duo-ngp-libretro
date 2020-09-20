@@ -51,12 +51,12 @@ is dependant on the current program counter. */
 
 void iBIOSHLE()
 {
-    // WARNING! Using global state!
-    DuoInstance *duo = DuoInstance::currentInstance;
-    neopop_bios_t *bios_ptr = duo->bios;
+   // WARNING! Using global state!
+   DuoInstance *duo = DuoInstance::currentInstance;
+   neopop_bios_t *bios_ptr = duo->bios;
 
-	uint8_t *ngpc_bios = bios_ptr->bios;
-	uint8_t *CacheIntPrio = bios_ptr->CacheIntPrio;
+   uint8_t *ngpc_bios = bios_ptr->bios;
+   uint8_t *CacheIntPrio = bios_ptr->CacheIntPrio;
 
    /* Only works within the bios */
    if ((pc & 0xFF0000) != 0xFF0000)

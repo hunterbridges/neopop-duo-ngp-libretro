@@ -13,6 +13,24 @@
 class DuoRunner
 {
 public:
+	enum AVMode
+	{
+		AV_P1_ONLY,
+		AV_P2_ONLY,
+		AV_BOTH_PLAYERS
+	};
+
+	enum AVLayout
+	{
+		AV_LAYOUT_H,
+		AV_LAYOUT_V,
+		AV_LAYOUT_SWITCH_H,
+		AV_LAYOUT_SWITCH_V,
+
+		AV_LAYOUT_DIR_MASK = 0x1,
+		AV_LAYOUT_SWITCH_MASK = 0x2
+	};
+
 	int RETRO_SAMPLE_RATE = 44100;
 	int RETRO_PIX_BYTES = 2;
 	int RETRO_PIX_DEPTH = 15;
@@ -23,7 +41,7 @@ public:
 
 	MDFNGI game_info;
 
-	int instance_count = 1;
+	int instance_count = 2;
 
 	uint32_t setting_ngp_language = 0;
 
@@ -31,6 +49,10 @@ public:
 	bool update_audio;
 	uint64_t video_frames;
 	uint64_t audio_frames;
+
+	AVMode videoMixMode = AV_BOTH_PLAYERS;
+	AVLayout videoLayout = AV_LAYOUT_H;
+	AVMode audioMixMode = AV_BOTH_PLAYERS;
 
 	struct retro_perf_callback perf_cb;
 	retro_get_cpu_features_t perf_get_cpu_features_cb;

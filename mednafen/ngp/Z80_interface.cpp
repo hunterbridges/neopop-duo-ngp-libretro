@@ -13,6 +13,7 @@
 //---------------------------------------------------------------------------
 
 #include "neopop.h"
+#include "../../duo/duo_instance.h"
 #include "mem.h"
 #include "sound.h"
 #include "Z80_interface.h"
@@ -23,7 +24,6 @@
 #include "../hw_cpu/z80-fuse/z80_macros.h"
 
 #include "../state.h"
-#include "../../duo/duo_instance.h"
 
 uint8_t neopop_z80i_t::Z80_ReadComm(void)
 {

@@ -125,12 +125,12 @@ void retro_run(void)
 
 void retro_get_system_info(struct retro_system_info *info)
 {
-   return DuoRunner::shared.GetSystemInfo(info);
+   DuoRunner::shared.GetSystemInfo(info);
 }
 
 void retro_get_system_av_info(struct retro_system_av_info *info)
 {
-   return DuoRunner::shared.GetAvInfo(info);
+   DuoRunner::shared.GetAvInfo(info);
 }
 
 unsigned retro_get_region(void)

@@ -313,13 +313,21 @@ error:
 	if (surface)
 	{
 		if (surface->pixels)
+		{
 			free(surface->pixels);
+			surface->pixels = NULL;
+		}
 
 		free(surface);
+		surface = NULL;
 	}
 
 	if (rom->ngpc_rom.data)
+	{
 		free(rom->ngpc_rom.data);
+		rom->ngpc_rom.data = NULL;
+		rom->rom_header = NULL;
+	}
 
 	game = NULL;
 

@@ -52,7 +52,7 @@ public:
 
 	AVMode videoMixMode = AV_BOTH_PLAYERS;
 	AVLayout videoLayout = AV_LAYOUT_H;
-	AVMode audioMixMode = AV_BOTH_PLAYERS;
+	AVMode audioMixMode = AV_P1_ONLY;
 
 	struct retro_perf_callback perf_cb;
 	retro_get_cpu_features_t perf_get_cpu_features_cb;

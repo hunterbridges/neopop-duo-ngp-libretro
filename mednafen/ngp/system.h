@@ -15,12 +15,17 @@
 #ifndef __SYSTEM__
 #define __SYSTEM__
 
+#include "../../third_party/ringbuf.h"
+
 /* Core <--> System-IO Interface */
 
 struct neopop_comms_t
 {
-	uint8_t tx_byte;
 	uint8_t rx_byte;
+	ringbuf_t rx_buf;
+
+	neopop_comms_t();
+	~neopop_comms_t();
 
 	/*! Reads a byte from the other system. If no data is available or no
 		high-level communications have been established, then return FALSE.

@@ -46,6 +46,9 @@
     <Filter Include="duo">
       <UniqueIdentifier>{15240799-a9e9-4c40-8e65-629e6d30f552}</UniqueIdentifier>
     </Filter>
+    <Filter Include="third_party">
+      <UniqueIdentifier>{d9942c9b-4cc2-4652-849a-14e9550160b2}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="libretro.cpp" />
@@ -186,6 +189,9 @@
     </ClCompile>
     <ClCompile Include="duo\duo_settings.cpp">
       <Filter>duo</Filter>
+    </ClCompile>
+    <ClCompile Include="third_party\ringbuf.c">
+      <Filter>third_party</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -344,6 +350,9 @@
     </ClInclude>
     <ClInclude Include="duo\duo_settings.h">
       <Filter>duo</Filter>
+    </ClInclude>
+    <ClInclude Include="third_party\ringbuf.h">
+      <Filter>third_party</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

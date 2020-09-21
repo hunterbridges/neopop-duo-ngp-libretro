@@ -11,23 +11,55 @@
 
 #include <streams/file_stream.h>
 #include "../../duo/duo_runner.h"
+#include "../../duo/duo_instance.h"
 
 // -----
 // Comms
 // -----
 
+DuoInstance *GetOtherInstance(DuoInstance *fromInstance)
+{
+    if (fromInstance == &DuoInstance::instances[0])
+        return &DuoInstance::instances[1];
+    else
+        return &DuoInstance::instances[0];
+}
+
+neopop_comms_t::neopop_comms_t()
+{
+    rx_buf = ringbuf_new(64);
+}
+
+neopop_comms_t::~neopop_comms_t()
+{
+    ringbuf_free(&rx_buf);
+    rx_buf = NULL;
+}
+
 bool neopop_comms_t::system_comms_read(uint8_t* buffer)
 {
-   return 0;
+   if (ringbuf_bytes_used(rx_buf) == 0)
+      return false;
+
+   ringbuf_memcpy_from(buffer, rx_buf, 1);
+   return true;
 }
 
 bool neopop_comms_t::system_comms_poll(uint8_t* buffer)
 {
-   return 0;
+   if (ringbuf_bytes_used(rx_buf) == 0)
+      return false;
+
+   *buffer = *(uint8_t*)ringbuf_head(rx_buf);
+   return true;
 }
 
 void neopop_comms_t::system_comms_write(uint8_t data)
 {
+    DuoInstance *duo = DuoInstance::currentInstance;
+    DuoInstance *other = GetOtherInstance(duo);
+
+    ringbuf_memcpy_into(other->comms->rx_buf, &data, 1);
 }
 
 // --

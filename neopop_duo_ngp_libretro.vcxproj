@@ -243,6 +243,7 @@
     <ClCompile Include="mednafen\sound\Blip_Buffer.cpp" />
     <ClCompile Include="mednafen\sound\Stereo_Buffer.cpp" />
     <ClCompile Include="mednafen\state.cpp" />
+    <ClCompile Include="third_party\ringbuf.c" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="duo\duo_helper.h">
@@ -309,6 +310,7 @@
     <ClInclude Include="mednafen\settings.h" />
     <ClInclude Include="mednafen\state.h" />
     <ClInclude Include="mednafen\video.h" />
+    <ClInclude Include="third_party\ringbuf.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

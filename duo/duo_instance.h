@@ -55,6 +55,7 @@ public:
 	uint8_t NGPJoyLatch;
 
 	// Processor state
+	uint32_t absTime;
 	struct tlcs900h_state tlcs900h_state;
 	struct z80state z80_state;
 

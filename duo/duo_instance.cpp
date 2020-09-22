@@ -45,6 +45,7 @@ DuoInstance::DuoInstance()
 	rtc = NULL;
 	sound = NULL;
 	z80i = NULL;
+	absTime = 0;
 }
 
 bool DuoInstance::Initialize()
@@ -384,7 +385,7 @@ void DuoInstance::ProcessFrame()
 
 	do
 	{
-		int32 timetime = (uint8)TLCS900h_interpret();
+		int32 timetime = TLCS900h_interpret();
 		drewFrame |= interrupt->updateTimers(spec.surface, timetime);
 		z80_runtime += timetime;
 
@@ -427,7 +428,7 @@ void DuoInstance::ProcessFrame_Interleaved(DuoInstance *other)
 
 			DuoInstance::StageInstance(instances[i]);
 
-			int32 tlcsCycles = (uint8)TLCS900h_interpret();
+			int32 tlcsCycles = TLCS900h_interpret();
 			drewFrame[i] |= instances[i]->interrupt->updateTimers(instances[i]->spec.surface, tlcsCycles);
 			instances[i]->z80_runtime += tlcsCycles;
 
@@ -445,6 +446,7 @@ void DuoInstance::ProcessFrame_Interleaved(DuoInstance *other)
 
 			}
 
+			instances[i]->absTime += tlcsCycles;
 			DuoInstance::UnstageCurrentInstance();
 		}
 	} while (!drewFrame[0] || !drewFrame[1]);

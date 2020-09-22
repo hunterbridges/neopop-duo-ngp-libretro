@@ -85,18 +85,6 @@
     <ClCompile Include="mednafen\hw_cpu\z80-fuse\z80_ops.c">
       <Filter>mednafen\hw_cpu\z80-fuse</Filter>
     </ClCompile>
-    <ClCompile Include="mednafen\ngp\TLCS-900h\TLCS900h_disassemble_dst.c">
-      <Filter>mednafen\ngp\TLCS-900h</Filter>
-    </ClCompile>
-    <ClCompile Include="mednafen\ngp\TLCS-900h\TLCS900h_disassemble_extra.c">
-      <Filter>mednafen\ngp\TLCS-900h</Filter>
-    </ClCompile>
-    <ClCompile Include="mednafen\ngp\TLCS-900h\TLCS900h_disassemble_reg.c">
-      <Filter>mednafen\ngp\TLCS-900h</Filter>
-    </ClCompile>
-    <ClCompile Include="mednafen\ngp\TLCS-900h\TLCS900h_disassemble_src.c">
-      <Filter>mednafen\ngp\TLCS-900h</Filter>
-    </ClCompile>
     <ClCompile Include="mednafen\ngp\TLCS-900h\TLCS900h_interpret.c">
       <Filter>mednafen\ngp\TLCS-900h</Filter>
     </ClCompile>
@@ -190,9 +178,6 @@
     <ClCompile Include="third_party\ringbuf.c">
       <Filter>third_party</Filter>
     </ClCompile>
-    <ClCompile Include="mednafen\ngp\TLCS-900h\TLCS900h_disassemble.c">
-      <Filter>mednafen\ngp\TLCS-900h</Filter>
-    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="libretro-common\include\libretro.h">
@@ -272,9 +257,6 @@
     </ClInclude>
     <ClInclude Include="mednafen\hw_cpu\z80-fuse\z80_types.h">
       <Filter>mednafen\hw_cpu\z80-fuse</Filter>
-    </ClInclude>
-    <ClInclude Include="mednafen\ngp\TLCS-900h\TLCS900h_disassemble.h">
-      <Filter>mednafen\ngp\TLCS-900h</Filter>
     </ClInclude>
     <ClInclude Include="mednafen\ngp\TLCS-900h\TLCS900h_interpret.h">
       <Filter>mednafen\ngp\TLCS-900h</Filter>

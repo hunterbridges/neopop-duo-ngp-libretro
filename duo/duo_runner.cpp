@@ -191,7 +191,7 @@ void DuoRunner::Run()
 		duo->ProcessFrame();
 		DuoInstance::UnstageCurrentInstance();
 	}
-	*/ 
+	*/
 
 	// Mix AV
 	MixFrameAV();
@@ -287,7 +287,7 @@ void DuoRunner::MixFrameAV()
 		audio_frames += minSize;
 
 		for (total = 0; total < minSize; )
-			total += audio_batch_cb(audio_mix_buf + total * 2, minSize - total);
+			total += audio_batch_cb(audio_mix_buf + ptrdiff_t(total * 2), ptrdiff_t(minSize - total));
 	}
 	else
 	{
@@ -298,7 +298,7 @@ void DuoRunner::MixFrameAV()
 		audio_frames += duo->spec.SoundBufSize;
 
 		for (total = 0; total < duo->spec.SoundBufSize; )
-			total += audio_batch_cb(duo->spec.SoundBuf + total * 2, duo->spec.SoundBufSize - total);
+			total += audio_batch_cb(duo->spec.SoundBuf + ptrdiff_t(total * 2), ptrdiff_t(duo->spec.SoundBufSize - total));
 	}
 }
 

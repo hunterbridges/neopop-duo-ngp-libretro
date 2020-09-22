@@ -97,6 +97,10 @@ bool DuoInstance::Initialize()
 	if (z80i == NULL) goto error;
 	new (z80i) neopop_z80i_t();
 
+	// Zero out the CPU states
+	memset(&tlcs900h_state, 0, sizeof(tlcs900h_state));
+	memset(&z80_state, 0, sizeof(z80_state));
+
 	// Initialize the TLCS900h tables
 	initGPRTables(&tlcs900h_state);
 	initRegCodeTables(&tlcs900h_state);

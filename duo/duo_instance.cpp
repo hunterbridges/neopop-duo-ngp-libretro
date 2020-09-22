@@ -23,74 +23,28 @@
 DuoInstance *DuoInstance::currentInstance = nullptr;
 DuoInstance DuoInstance::instances[MAX_INSTANCES];
 
-// ----------------
-// DuoTLCS900hState
-// ----------------
-
-void DuoTLCS900hState::Capture()
-{
-	memcpy(&this->mem, &::mem, sizeof(::mem));
-	memcpy(&this->size, &::size, sizeof(::size));
-	memcpy(&this->first, &::first, sizeof(::first));
-	memcpy(&this->second, &::second, sizeof(::second));
-	memcpy(&this->R, &::R, sizeof(::R));
-	memcpy(&this->rCode, &::rCode, sizeof(::rCode));
-	memcpy(&this->cycles, &::cycles, sizeof(::cycles));
-	memcpy(&this->brCode, &::brCode, sizeof(::brCode));
-	memcpy(&this->pc, &::pc, sizeof(::pc));
-	memcpy(&this->sr, &::sr, sizeof(::sr));
-	memcpy(&this->f_dash, &::f_dash, sizeof(::f_dash));
-	memcpy(&this->gprBank, &::gprBank, sizeof(::gprBank));
-	memcpy(&this->gpr, &::gpr, sizeof(::gpr));
-	memcpy(&this->rErr, &::rErr, sizeof(::rErr));
-	memcpy(&this->statusRFP, &::statusRFP, sizeof(::statusRFP));
-}
-
-void DuoTLCS900hState::Restore()
-{
-	memcpy(&::mem, &this->mem, sizeof(::mem));
-	memcpy(&::size, &this->size, sizeof(::size));
-	memcpy(&::first, &this->first, sizeof(::first));
-	memcpy(&::second, &this->second, sizeof(::second));
-	memcpy(&::R, &this->R, sizeof(::R));
-	memcpy(&::rCode, &this->rCode, sizeof(::rCode));
-	memcpy(&::cycles, &this->cycles, sizeof(::cycles));
-	memcpy(&::brCode, &this->brCode, sizeof(::brCode));
-	memcpy(&::pc, &this->pc, sizeof(::pc));
-	memcpy(&::sr, &this->sr, sizeof(::sr));
-	memcpy(&::f_dash, &this->f_dash, sizeof(::f_dash));
-	memcpy(&::gprBank, &this->gprBank, sizeof(::gprBank));
-	memcpy(&::gpr, &this->gpr, sizeof(::gpr));
-	memcpy(&::rErr, &this->rErr, sizeof(::rErr));
-	memcpy(&::statusRFP, &this->statusRFP, sizeof(::statusRFP));
-}
-
-// -----------
-// DuoZ80State
-// -----------
-
-void DuoZ80State::Capture()
-{
-	memcpy(&this->z80, &::z80, sizeof(::z80));
-	memcpy(&this->last_z80_tstates, &::last_z80_tstates, sizeof(::last_z80_tstates));
-	memcpy(&this->z80_tstates, &::z80_tstates, sizeof(::z80_tstates));
-}
-
-void DuoZ80State::Restore()
-{
-	memcpy(&::z80, &this->z80, sizeof(::z80));
-	memcpy(&::last_z80_tstates, &this->last_z80_tstates, sizeof(::last_z80_tstates));
-	memcpy(&::z80_tstates, &this->z80_tstates, sizeof(::z80_tstates));
-}
-
 // -----------
 // DuoInstance
 // -----------
 
 DuoInstance::DuoInstance()
 {
-	this->game = nullptr;
-	this->surface = nullptr;
+	game = NULL;
+	surface = NULL;
+	NGPJoyLatch = 0;
+	SoundBufSize = 0;
+	bios = NULL;
+	comms = NULL;
+	dma = NULL;
+	flash = NULL;
+	gfx = NULL;
+	interrupt = NULL;
+	io = NULL;
+	mem = NULL;
+	rom = NULL;
+	rtc = NULL;
+	sound = NULL;
+	z80i = NULL;
 }
 
 bool DuoInstance::Initialize()
@@ -142,6 +96,10 @@ bool DuoInstance::Initialize()
 	z80i = (neopop_z80i_t*)calloc(1, sizeof(neopop_z80i_t));
 	if (z80i == NULL) goto error;
 	new (z80i) neopop_z80i_t();
+
+	// Initialize the TLCS900h tables
+	initGPRTables(&tlcs900h_state);
+	initRegCodeTables(&tlcs900h_state);
 
 	return true;
 error:
@@ -377,10 +335,8 @@ void DuoInstance::ConfigureSpec()
 	spec.SoundFormatChanged = DuoRunner::shared.update_audio;
 }
 
-void DuoInstance::ProcessFrame()
+void DuoInstance::StartFrame()
 {
-	bool drewFrame = false;
-
 	rects[0].w = ~0;
 
 	spec.DisplayRect.x = 0;
@@ -400,6 +356,27 @@ void DuoInstance::ProcessFrame()
 
 	sound->ngpc_soundTS = 0;
 	interrupt->NGPFrameSkip = spec.skip;
+}
+
+void DuoInstance::FinishFrame()
+{
+	spec.MasterCycles = sound->ngpc_soundTS;
+	spec.SoundBufSize = sound->Flush(spec.SoundBuf, spec.SoundBufMaxSize);
+
+	// Set frame output vars
+	SoundBufSize = spec.SoundBufSize - spec.SoundBufSizeALMS;
+
+	spec.SoundBufSize = spec.SoundBufSizeALMS + SoundBufSize;
+
+	width = spec.DisplayRect.w;
+	height = spec.DisplayRect.h;
+}
+
+void DuoInstance::ProcessFrame()
+{
+	bool drewFrame = false;
+
+	StartFrame();
 
 	do
 	{
@@ -422,16 +399,58 @@ void DuoInstance::ProcessFrame()
 		}
 	} while (!drewFrame);
 
-	spec.MasterCycles = sound->ngpc_soundTS;
-	spec.SoundBufSize = sound->Flush(spec.SoundBuf, spec.SoundBufMaxSize);
+	FinishFrame();
+}
 
-	// Set frame output vars
-	SoundBufSize = spec.SoundBufSize - spec.SoundBufSizeALMS;
+void DuoInstance::ProcessFrame_Interleaved(DuoInstance *other)
+{
+	DuoInstance *instances[2] = { this, other };
+	bool drewFrame[2] = { false, false };
 
-	spec.SoundBufSize = spec.SoundBufSizeALMS + SoundBufSize;
+	for (int i = 0; i < 2; i++)
+	{
+		DuoInstance::StageInstance(instances[i]);
+		instances[i]->StartFrame();
+		DuoInstance::UnstageCurrentInstance();
+	}
 
-	width = spec.DisplayRect.w;
-	height = spec.DisplayRect.h;
+	do
+	{
+		for (int i = 0; i < 2; i++)
+		{
+			if (drewFrame[i] == true)
+				return;
+
+			DuoInstance::StageInstance(instances[i]);
+
+			int32 tlcsCycles = (uint8)TLCS900h_interpret();
+			drewFrame[i] |= instances[i]->interrupt->updateTimers(instances[i]->spec.surface, tlcsCycles);
+			instances[i]->z80_runtime += tlcsCycles;
+
+			while (instances[i]->z80_runtime > 0)
+			{
+				int z80rantime = instances[i]->z80i->Z80_RunOP();
+
+				if (z80rantime < 0) // Z80 inactive, so take up all run time!
+				{
+					instances[i]->z80_runtime = 0;
+					break;
+				}
+
+				instances[i]->z80_runtime -= z80rantime << 1;
+
+			}
+
+			DuoInstance::UnstageCurrentInstance();
+		}
+	} while (!drewFrame[0] || !drewFrame[1]);
+
+	for (int i = 0; i < 2; i++)
+	{
+		DuoInstance::StageInstance(instances[i]);
+		instances[i]->FinishFrame();
+		DuoInstance::UnstageCurrentInstance();
+	}
 }
 
 // ------------------
@@ -442,21 +461,21 @@ void DuoInstance::StageInstance(DuoInstance *instance)
 {
 	UnstageCurrentInstance();
 
-	if (instance == nullptr)
+	if (instance == NULL)
 		return;
 
 	currentInstance = instance;
-	currentInstance->tlcs900hState.Restore();
-	currentInstance->z80State.Restore();
+	cur_tlcs900h = &instance->tlcs900h_state;
+	cur_z80 = &instance->z80_state;
 }
 
 void DuoInstance::UnstageCurrentInstance()
 {
-	if (currentInstance == nullptr)
+	if (currentInstance == NULL)
 		return;
 
-	currentInstance->tlcs900hState.Capture();
-	currentInstance->z80State.Capture();
-	currentInstance = nullptr;
+	cur_tlcs900h = NULL;
+	cur_z80 = NULL;
+	currentInstance = NULL;
 }
 

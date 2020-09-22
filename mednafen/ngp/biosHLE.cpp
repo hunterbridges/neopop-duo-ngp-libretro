@@ -59,13 +59,13 @@ void iBIOSHLE()
    uint8_t *CacheIntPrio = bios_ptr->CacheIntPrio;
 
    /* Only works within the bios */
-   if ((pc & 0xFF0000) != 0xFF0000)
+   if ((cur_tlcs900h->pc & 0xFF0000) != 0xFF0000)
       return;
 
-   pc      --;	    /* Compensate for processing this instruction. */
-   cycles = 8;		/* TODO: Correct cycle counts (or approx?) */
+   cur_tlcs900h->pc      --;	    /* Compensate for processing this instruction. */
+   cur_tlcs900h->cycles = 8;		/* TODO: Correct cycle counts (or approx?) */
 
-   switch (pc & 0xffffff)
+   switch (cur_tlcs900h->pc & 0xffffff)
    {	
       case VECT_SHUTDOWN:
          {
@@ -295,17 +295,21 @@ void iBIOSHLE()
          //VECT_COMINIT
       case 0xFF2BBD:
          // Nothing to do.
+         if (duo->comms->rx_buf != NULL)
+            ringbuf_reset(duo->comms->rx_buf);
+
          rCodeB(0x30) = 0;	//RA3 = COM_BUF_OK
          break;
 
          //VECT_COMSENDSTART
       case 0xFF2C0C:
-         // Nothing to do.
+		 duo->comms->system_comms_write(duo->comms->tx_byte);
          break;
 
          //VECT_COMRECIVESTART
       case 0xFF2C44:
-         // Nothing to do.
+         if (duo->comms->rx_buf != NULL)
+            ringbuf_reset(duo->comms->rx_buf);
          break;
 
          //VECT_COMCREATEDATA
@@ -313,11 +317,12 @@ void iBIOSHLE()
          {
             //Write the byte
             uint8 data = rCodeB(0x35);
-            duo->comms->system_comms_write(data);
+            duo->comms->tx_byte = data;
+            duo->comms->write_flag = true;
          }
 
          //Restore $PC after BIOS-HLE instruction
-         pc = pop32();
+         cur_tlcs900h->pc = pop32();
 
          duo->interrupt->TestIntHDMA(11, 0x18);
 
@@ -335,7 +340,7 @@ void iBIOSHLE()
                rCodeB(0x30) = 0;	//COM_BUF_OK
                rCodeB(0x35) = data;
 
-               pc = pop32();
+               cur_tlcs900h->pc = pop32();
 
                //Comms. Read interrupt
                storeB(0x50, data);
@@ -354,11 +359,13 @@ void iBIOSHLE()
          //VECT_COMONRTS
       case 0xFF2D27:
          storeB(0xB2, 0);
+         duo->comms->receive = true;
          break;
 
          //VECT_COMOFFRTS
       case 0xFF2D33: 	
          storeB(0xB2, 1);
+         duo->comms->receive = false;
          break;	
 
          //VECT_COMSENDSTATUS
@@ -376,7 +383,7 @@ void iBIOSHLE()
          break;
 
       case VECT_COMCREATEBUFDATA:
-         pc = pop32();
+         cur_tlcs900h->pc = pop32();
 
          while(rCodeB(0x35) > 0)
          {
@@ -394,7 +401,7 @@ void iBIOSHLE()
          return;
       case VECT_COMGETBUFDATA:
 	  {
-         pc = pop32();
+         cur_tlcs900h->pc = pop32();
 
          while(rCodeB(0x35) > 0)
          {
@@ -422,7 +429,7 @@ void iBIOSHLE()
    }
 
    //RET
-   pc = pop32();
+   cur_tlcs900h->pc = pop32();
 }
 
 #ifdef __cplusplus

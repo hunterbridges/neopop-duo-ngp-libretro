@@ -36,6 +36,18 @@ typedef struct processor {
 
 } processor;
 
+struct z80state
+{
+	/* This is what everything acts on! */
+	struct processor z80;
+
+	uint64_t last_z80_tstates;
+	uint64_t z80_tstates;
+	int iline;
+};
+
+extern struct z80state *cur_z80;
+
 #ifdef __cplusplus
 }
 #endif

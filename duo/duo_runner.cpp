@@ -178,7 +178,12 @@ void DuoRunner::Run()
 		update_audio = false;
 	}
 
+	DuoInstance *duoA = &DuoInstance::instances[0];
+	DuoInstance *duoB = &DuoInstance::instances[1];
+	duoA->ProcessFrame_Interleaved(duoB);
+
 	// Process frame for each instance
+	/*
 	for (int i = 0; i < instance_count; i++)
 	{
 		DuoInstance *duo = &DuoInstance::instances[i];
@@ -186,6 +191,7 @@ void DuoRunner::Run()
 		duo->ProcessFrame();
 		DuoInstance::UnstageCurrentInstance();
 	}
+	*/ 
 
 	// Mix AV
 	MixFrameAV();
@@ -238,11 +244,11 @@ void DuoRunner::MixFrameAV()
 		{
 			for (int row = 0; row < duoP1->height; row++)
 			{
-				memcpy(joined_buf + pitch * (2 * row), (uint8_t*)duoP1->surface->pixels + pitch * row, pitch);
-				memcpy(joined_buf + pitch * (2 * row + 1), (uint8_t*)duoP2->surface->pixels + pitch * row, pitch);
+				memcpy(joined_buf + ptrdiff_t(pitch * (2 * row)), (uint8_t*)duoP1->surface->pixels + ptrdiff_t(pitch * row), pitch);
+				memcpy(joined_buf + ptrdiff_t(pitch * (2 * row + 1)), (uint8_t*)duoP2->surface->pixels + ptrdiff_t(pitch * row), pitch);
 			}
 
-			video_cb(joined_buf, duoP1->width * 2, duoP1->height, pitch * 2);
+			video_cb(joined_buf, duoP1->width * 2, duoP1->height, ptrdiff_t(pitch * 2));
 		}
 
 		video_frames++;

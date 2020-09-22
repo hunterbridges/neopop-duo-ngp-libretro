@@ -61,46 +61,33 @@
 #include "TLCS900h_interpret_dst.h"
 #include "TLCS900h_interpret_reg.h"
 
+struct tlcs900h_state *cur_tlcs900h = NULL;
+
 static void DUMMY_instruction_error(const char* vaMessage,...) { }
 
 void (*instruction_error)(const char* vaMessage,...) = DUMMY_instruction_error;
 
 //=========================================================================
 
-uint32	mem;		//Result of addressing mode
-int		size;		//operand size, 0 = Byte, 1 = Word, 2 = Long
-
-uint8		first;		//The first byte
-uint8		R;			//big R
-uint8		second;		//The second opcode
-
-bool	brCode;		//Register code used?
-uint8		rCode;		//The code
-
-int32		cycles;		//How many state changes?
-int32		cycles_extra;	//How many extra state changes?
-
-//=========================================================================
-
 uint16 fetch16(void)
 {
-	uint16 a = loadW(pc);
-	pc += 2;
+	uint16 a = loadW(cur_tlcs900h->pc);
+	cur_tlcs900h->pc += 2;
 	return a;
 }
 
 uint32 fetch24(void)
 {
-	uint32 b, a = loadW(pc);
-	pc += 2;
-	b = loadB(pc++);
+	uint32 b, a = loadW(cur_tlcs900h->pc);
+	cur_tlcs900h->pc += 2;
+	b = loadB(cur_tlcs900h->pc++);
 	return (b << 16) | a;
 }
 
 uint32 fetch32(void)
 {
-	uint32 a = loadL(pc);
-	pc += 4;
+	uint32 a = loadL(cur_tlcs900h->pc);
+	cur_tlcs900h->pc += 4;
 	return a;
 }
 
@@ -569,31 +556,31 @@ uint8 get_rr_Target(void)
 {
 	uint8 target = 0x80;
 
-	if (size == 0 && first == 0xC7)
-		return rCode;
+	if (cur_tlcs900h->size == 0 && cur_tlcs900h->first == 0xC7)
+		return cur_tlcs900h->rCode;
 
 	//Create a regCode
-	switch(first & 7)
+	switch(cur_tlcs900h->first & 7)
 	{
-	case 0: if (size == 1)	target = 0xE0;	break;
+	case 0: if (cur_tlcs900h->size == 1)	target = 0xE0;	break;
 	case 1:	
-		if (size == 0)	target = 0xE0;
-		if (size == 1)	target = 0xE4;
+		if (cur_tlcs900h->size == 0)	target = 0xE0;
+		if (cur_tlcs900h->size == 1)	target = 0xE4;
 		break;
-	case 2: if (size == 1)	target = 0xE8;	break;
+	case 2: if (cur_tlcs900h->size == 1)	target = 0xE8;	break;
 	case 3:
-		if (size == 0)	target = 0xE4;
-		if (size == 1)	target = 0xEC;
+		if (cur_tlcs900h->size == 0)	target = 0xE4;
+		if (cur_tlcs900h->size == 1)	target = 0xEC;
 		break;
-	case 4: if (size == 1)	target = 0xF0;	break;
+	case 4: if (cur_tlcs900h->size == 1)	target = 0xF0;	break;
 	case 5:	
-		if (size == 0)	target = 0xE8;
-		if (size == 1)	target = 0xF4;
+		if (cur_tlcs900h->size == 0)	target = 0xE8;
+		if (cur_tlcs900h->size == 1)	target = 0xF4;
 		break;
-	case 6: if (size == 1)	target = 0xF8;	break;
+	case 6: if (cur_tlcs900h->size == 1)	target = 0xF8;	break;
 	case 7:
-		if (size == 0)	target = 0xEC;
-		if (size == 1)	target = 0xFC;
+		if (cur_tlcs900h->size == 0)	target = 0xEC;
+		if (cur_tlcs900h->size == 1)	target = 0xFC;
 		break;
 	}
 
@@ -605,46 +592,46 @@ uint8 get_RR_Target(void)
    uint8 target = 0x80;
 
    //Create a regCode
-   switch(second & 7)
+   switch(cur_tlcs900h->second & 7)
    {
       case 0:
-         if (size == 1)
+         if (cur_tlcs900h->size == 1)
             target = 0xE0;
          break;
       case 1:	
-         if (size == 0)
+         if (cur_tlcs900h->size == 0)
             target = 0xE0;
-         if (size == 1)
+         if (cur_tlcs900h->size == 1)
             target = 0xE4;
          break;
       case 2:
-         if (size == 1)
+         if (cur_tlcs900h->size == 1)
             target = 0xE8;
          break;
       case 3:
-         if (size == 0)
+         if (cur_tlcs900h->size == 0)
             target = 0xE4;
-         if (size == 1)
+         if (cur_tlcs900h->size == 1)
             target = 0xEC;
          break;
       case 4:
-         if (size == 1)
+         if (cur_tlcs900h->size == 1)
             target = 0xF0;
          break;
       case 5:	
-         if (size == 0)
+         if (cur_tlcs900h->size == 0)
             target = 0xE8;
-         if (size == 1)
+         if (cur_tlcs900h->size == 1)
             target = 0xF4;
          break;
       case 6:
-         if (size == 1)
+         if (cur_tlcs900h->size == 1)
             target = 0xF8;
          break;
       case 7:
-         if (size == 0)
+         if (cur_tlcs900h->size == 0)
             target = 0xEC;
-         if (size == 1)
+         if (cur_tlcs900h->size == 1)
             target = 0xFC;
          break;
    }
@@ -654,40 +641,40 @@ uint8 get_RR_Target(void)
 
 //=========================================================================
 
-static void ExXWA()		{mem = regL(0);}
-static void ExXBC()		{mem = regL(1);}
-static void ExXDE()		{mem = regL(2);}
-static void ExXHL()		{mem = regL(3);}
-static void ExXIX()		{mem = regL(4);}
-static void ExXIY()		{mem = regL(5);}
-static void ExXIZ()		{mem = regL(6);}
-static void ExXSP()		{mem = regL(7);}
+static void ExXWA()		{cur_tlcs900h->mem = regL(0);}
+static void ExXBC()		{cur_tlcs900h->mem = regL(1);}
+static void ExXDE()		{cur_tlcs900h->mem = regL(2);}
+static void ExXHL()		{cur_tlcs900h->mem = regL(3);}
+static void ExXIX()		{cur_tlcs900h->mem = regL(4);}
+static void ExXIY()		{cur_tlcs900h->mem = regL(5);}
+static void ExXIZ()		{cur_tlcs900h->mem = regL(6);}
+static void ExXSP()		{cur_tlcs900h->mem = regL(7);}
 
-static void ExXWAd()	{mem = regL(0) + (int8)FETCH8; cycles_extra = 2;}
-static void ExXBCd()	{mem = regL(1) + (int8)FETCH8; cycles_extra = 2;}
-static void ExXDEd()	{mem = regL(2) + (int8)FETCH8; cycles_extra = 2;}
-static void ExXHLd()	{mem = regL(3) + (int8)FETCH8; cycles_extra = 2;}
-static void ExXIXd()	{mem = regL(4) + (int8)FETCH8; cycles_extra = 2;}
-static void ExXIYd()	{mem = regL(5) + (int8)FETCH8; cycles_extra = 2;}
-static void ExXIZd()	{mem = regL(6) + (int8)FETCH8; cycles_extra = 2;}
-static void ExXSPd()	{mem = regL(7) + (int8)FETCH8; cycles_extra = 2;}
+static void ExXWAd()	{cur_tlcs900h->mem = regL(0) + (int8)FETCH8; cur_tlcs900h->cycles_extra = 2;}
+static void ExXBCd()	{cur_tlcs900h->mem = regL(1) + (int8)FETCH8; cur_tlcs900h->cycles_extra = 2;}
+static void ExXDEd()	{cur_tlcs900h->mem = regL(2) + (int8)FETCH8; cur_tlcs900h->cycles_extra = 2;}
+static void ExXHLd()	{cur_tlcs900h->mem = regL(3) + (int8)FETCH8; cur_tlcs900h->cycles_extra = 2;}
+static void ExXIXd()	{cur_tlcs900h->mem = regL(4) + (int8)FETCH8; cur_tlcs900h->cycles_extra = 2;}
+static void ExXIYd()	{cur_tlcs900h->mem = regL(5) + (int8)FETCH8; cur_tlcs900h->cycles_extra = 2;}
+static void ExXIZd()	{cur_tlcs900h->mem = regL(6) + (int8)FETCH8; cur_tlcs900h->cycles_extra = 2;}
+static void ExXSPd()	{cur_tlcs900h->mem = regL(7) + (int8)FETCH8; cur_tlcs900h->cycles_extra = 2;}
 
 static void Ex8(void)
 {
-   mem = FETCH8;
-   cycles_extra = 2;
+	cur_tlcs900h->mem = FETCH8;
+	cur_tlcs900h->cycles_extra = 2;
 }
 
 static void Ex16(void)
 {
-   mem = fetch16();
-   cycles_extra = 2;
+	cur_tlcs900h->mem = fetch16();
+	cur_tlcs900h->cycles_extra = 2;
 }
 
 static void Ex24(void)
 {
-   mem = fetch24();
-   cycles_extra = 3;
+	cur_tlcs900h->mem = fetch24();
+	cur_tlcs900h->cycles_extra = 3;
 }
 
 static void ExR32(void)
@@ -699,8 +686,8 @@ static void ExR32(void)
 		uint8 rIndex, r32;
 		r32 = FETCH8;		//r32
 		rIndex = FETCH8;	//r8
-		mem = rCodeL(r32) + (int8)rCodeB(rIndex);
-		cycles_extra = 8;
+		cur_tlcs900h->mem = rCodeL(r32) + (int8)rCodeB(rIndex);
+		cur_tlcs900h->cycles_extra = 8;
 		return;
 	}
 
@@ -709,8 +696,8 @@ static void ExR32(void)
 		uint8 rIndex, r32;
 		r32 = FETCH8;		//r32
 		rIndex = FETCH8;	//r16
-		mem = rCodeL(r32) + (int16)rCodeW(rIndex);
-		cycles_extra = 8;
+		cur_tlcs900h->mem = rCodeL(r32) + (int16)rCodeW(rIndex);
+		cur_tlcs900h->cycles_extra = 8;
 		return;
 	}
 
@@ -718,16 +705,16 @@ static void ExR32(void)
 	if (data == 0x13)
 	{
 		int16 disp = fetch16();
-		mem = pc + disp;
-		cycles_extra = 8;	//Unconfirmed... doesn't make much difference
+		cur_tlcs900h->mem = cur_tlcs900h->pc + disp;
+		cur_tlcs900h->cycles_extra = 8;	//Unconfirmed... doesn't make much difference
 		return;
 	}
 
-	cycles_extra = 5;
+	cur_tlcs900h->cycles_extra = 5;
 
-   mem = rCodeL(data);
+	cur_tlcs900h->mem = rCodeL(data);
 	if ((data & 3) == 1)
-		mem += (int16)fetch16();
+		cur_tlcs900h->mem += (int16)fetch16();
 }
 
 static void ExDec()
@@ -735,13 +722,13 @@ static void ExDec()
 	uint8 data = FETCH8;
 	uint8 r32 = data & 0xFC;
 
-	cycles_extra = 3;
+	cur_tlcs900h->cycles_extra = 3;
 
 	switch(data & 3)
 	{
-	case 0:	rCodeL(r32) -= 1;	mem = rCodeL(r32);	break;
-	case 1:	rCodeL(r32) -= 2;	mem = rCodeL(r32);	break;
-	case 2:	rCodeL(r32) -= 4;	mem = rCodeL(r32);	break;
+	case 0:	rCodeL(r32) -= 1; cur_tlcs900h->mem = rCodeL(r32);	break;
+	case 1:	rCodeL(r32) -= 2; cur_tlcs900h->mem = rCodeL(r32);	break;
+	case 2:	rCodeL(r32) -= 4; cur_tlcs900h->mem = rCodeL(r32);	break;
 	}
 }
 
@@ -750,20 +737,20 @@ static void ExInc()
    uint8 data = FETCH8;
    uint8 r32 = data & 0xFC;
 
-   cycles_extra = 3;
+   cur_tlcs900h->cycles_extra = 3;
 
    switch(data & 3)
    {
       case 0:
-         mem = rCodeL(r32);
+		 cur_tlcs900h->mem = rCodeL(r32);
          rCodeL(r32) += 1;
          break;
       case 1:
-         mem = rCodeL(r32);
+		 cur_tlcs900h->mem = rCodeL(r32);
          rCodeL(r32) += 2;
          break;
       case 2:
-         mem = rCodeL(r32);
+		 cur_tlcs900h->mem = rCodeL(r32);
          rCodeL(r32) += 4;
          break;
    }
@@ -771,9 +758,9 @@ static void ExInc()
 
 static void ExRC()
 {
-	brCode = true;
-	rCode = FETCH8;
-	cycles_extra = 1;
+	cur_tlcs900h->brCode = true;
+	cur_tlcs900h->rCode = FETCH8;
+	cur_tlcs900h->cycles_extra = 1;
 }
 
 //=========================================================================
@@ -811,7 +798,7 @@ static void (*decodeExtra[256])() =
 
 static void e(void)
 {
-	instruction_error("Unknown instruction %02X", first);
+	instruction_error("Unknown instruction %02X", cur_tlcs900h->first);
 }
 
 static void es(void)
@@ -946,37 +933,37 @@ static void (*regDecode[256])() =
 
 static void src_B()
 {
-	second = FETCH8;			//Get the second opcode
-	R = second & 7;
-	size = 0;					//Byte Size
+	cur_tlcs900h->second = FETCH8;			//Get the second opcode
+	cur_tlcs900h->R = cur_tlcs900h->second & 7;
+	cur_tlcs900h->size = 0;					//Byte Size
 
-	(*srcDecode[second])();		//Call
+	(*srcDecode[cur_tlcs900h->second])();		//Call
 }
 
 static void src_W()
 {
-	second = FETCH8;			//Get the second opcode
-	R = second & 7;
-	size = 1;					//Word Size
+	cur_tlcs900h->second = FETCH8;			//Get the second opcode
+	cur_tlcs900h->R = cur_tlcs900h->second & 7;
+	cur_tlcs900h->size = 1;					//Word Size
 
-	(*srcDecode[second])();		//Call
+	(*srcDecode[cur_tlcs900h->second])();		//Call
 }
 
 static void src_L()
 {
-	second = FETCH8;			//Get the second opcode
-	R = second & 7;
-	size = 2;					//Long Size
+	cur_tlcs900h->second = FETCH8;			//Get the second opcode
+	cur_tlcs900h->R = cur_tlcs900h->second & 7;
+	cur_tlcs900h->size = 2;					//Long Size
 
-	(*srcDecode[second])();		//Call
+	(*srcDecode[cur_tlcs900h->second])();		//Call
 }
 
 static void dst()
 {
-	second = FETCH8;			//Get the second opcode
-	R = second & 7;
+	cur_tlcs900h->second = FETCH8;			//Get the second opcode
+	cur_tlcs900h->R = cur_tlcs900h->second & 7;
 
-	(*dstDecode[second])();		//Call
+	(*dstDecode[cur_tlcs900h->second])();		//Call
 }
 
 static uint8 rCodeConversionB[8] = { 0xE1, 0xE0, 0xE5, 0xE4, 0xE9, 0xE8, 0xED, 0xEC };
@@ -985,47 +972,47 @@ static uint8 rCodeConversionL[8] = { 0xE0, 0xE4, 0xE8, 0xEC, 0xF0, 0xF4, 0xF8, 0
 
 static void reg_B(void)
 {
-	second = FETCH8;			//Get the second opcode
-	R = second & 7;
-	size = 0;					//Byte Size
+	cur_tlcs900h->second = FETCH8;			//Get the second opcode
+	cur_tlcs900h->R = cur_tlcs900h->second & 7;
+	cur_tlcs900h->size = 0;					//Byte Size
 
-	if (brCode == false)
+	if (cur_tlcs900h->brCode == false)
 	{
-		brCode = true;
-		rCode = rCodeConversionB[first & 7];
+		cur_tlcs900h->brCode = true;
+		cur_tlcs900h->rCode = rCodeConversionB[cur_tlcs900h->first & 7];
 	}
 
-	(*regDecode[second])();		//Call
+	(*regDecode[cur_tlcs900h->second])();		//Call
 }
 
 static void reg_W(void)
 {
-	second = FETCH8;			//Get the second opcode
-	R = second & 7;
-	size = 1;					//Word Size
+	cur_tlcs900h->second = FETCH8;			//Get the second opcode
+	cur_tlcs900h->R = cur_tlcs900h->second & 7;
+	cur_tlcs900h->size = 1;					//Word Size
 
-	if (brCode == false)
+	if (cur_tlcs900h->brCode == false)
 	{
-		brCode = true;
-		rCode = rCodeConversionW[first & 7];
+		cur_tlcs900h->brCode = true;
+		cur_tlcs900h->rCode = rCodeConversionW[cur_tlcs900h->first & 7];
 	}
 
-	(*regDecode[second])();		//Call
+	(*regDecode[cur_tlcs900h->second])();		//Call
 }
 
 static void reg_L(void)
 {
-	second = FETCH8;			//Get the second opcode
-	R = second & 7;
-	size = 2;					//Long Size
+	cur_tlcs900h->second = FETCH8;			//Get the second opcode
+	cur_tlcs900h->R = cur_tlcs900h->second & 7;
+	cur_tlcs900h->size = 2;					//Long Size
 
-	if (brCode == false)
+	if (cur_tlcs900h->brCode == false)
 	{
-		brCode = true;
-		rCode = rCodeConversionL[first & 7];
+		cur_tlcs900h->brCode = true;
+		cur_tlcs900h->rCode = rCodeConversionL[cur_tlcs900h->first & 7];
 	}
 
-	(*regDecode[second])();		//Call
+	(*regDecode[cur_tlcs900h->second])();		//Call
 }
 
 //=============================================================================
@@ -1071,18 +1058,18 @@ static void (*decode[256])() =
 
 int32 TLCS900h_interpret(void)
 {
-	brCode = false;
+	cur_tlcs900h->brCode = false;
 
-	first = FETCH8;	//Get the first byte
+	cur_tlcs900h->first = FETCH8;	//Get the first byte
 
 	//Is any extra data used by this instruction?
-	cycles_extra = 0;
-	if (decodeExtra[first])
-		(*decodeExtra[first])();
+	cur_tlcs900h->cycles_extra = 0;
+	if (decodeExtra[cur_tlcs900h->first])
+		(*decodeExtra[cur_tlcs900h->first])();
 
-	(*decode[first])();	//Decode
+	(*decode[cur_tlcs900h->first])();	//Decode
 
-	return cycles + cycles_extra;
+	return cur_tlcs900h->cycles + cur_tlcs900h->cycles_extra;
 }
 
 //=============================================================================

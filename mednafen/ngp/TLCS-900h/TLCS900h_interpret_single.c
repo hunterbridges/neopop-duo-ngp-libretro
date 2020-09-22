@@ -57,42 +57,42 @@
 //===== NOP
 void sngNOP()
 {
-	cycles = 2;
+	cur_tlcs900h->cycles = 2;
 }
 
 //===== NORMAL
 void sngNORMAL()
 {
 	//Not supported
-	cycles = 4;
+	cur_tlcs900h->cycles = 4;
 }
 
 //===== PUSH SR
 void sngPUSHSR()
 {
-	push16(sr);
-	cycles = 4;
+	push16(cur_tlcs900h->sr);
+	cur_tlcs900h->cycles = 4;
 }
 
 //===== POP SR
 void sngPOPSR()
 {
-	sr = pop16();	changedSP();
-	cycles = 6;
+	cur_tlcs900h->sr = pop16();	changedSP();
+	cur_tlcs900h->cycles = 6;
 }
 
 //===== MAX
 void sngMAX()
 {
 	//Not supported
-	cycles = 4;
+	cur_tlcs900h->cycles = 4;
 }
 
 //===== HALT
 void sngHALT()
 {
 	//MDFN_printf("CPU halt requested and ignored.\nPlease send me a saved state.");
-	cycles = 8;
+	cur_tlcs900h->cycles = 8;
 }
 
 //===== EI #3
@@ -100,16 +100,16 @@ void sngEI()
 {
 	setStatusIFF(FETCH8);
 	int_check_pending();
-	cycles = 5;
+	cur_tlcs900h->cycles = 5;
 }
 
 //===== RETI
 void sngRETI()
 {
 	uint16 temp = pop16();
-	pc = pop32();
-	sr = temp; changedSP();
-	cycles = 12;
+	cur_tlcs900h->pc = pop32();
+	cur_tlcs900h->sr = temp; changedSP();
+	cur_tlcs900h->cycles = 12;
 }
 
 //===== LD (n), n
@@ -118,7 +118,7 @@ void sngLD8_8()
 	uint8 dst = FETCH8;
 	uint8 src = FETCH8;
 	storeB(dst, src);
-	cycles = 5;
+	cur_tlcs900h->cycles = 5;
 }
 
 //===== PUSH n
@@ -126,7 +126,7 @@ void sngPUSH8()
 {
 	uint8 data = FETCH8;
 	push8(data);
-	cycles = 4;
+	cur_tlcs900h->cycles = 4;
 }
 
 //===== LD (n), nn
@@ -135,44 +135,44 @@ void sngLD8_16()
 	uint8 dst = FETCH8;
 	uint16 src = fetch16();
 	storeW(dst, src);
-	cycles = 6;
+	cur_tlcs900h->cycles = 6;
 }
 
 //===== PUSH nn
 void sngPUSH16()
 {
 	push16(fetch16());
-	cycles = 5;
+	cur_tlcs900h->cycles = 5;
 }
 
 //===== INCF
 void sngINCF()
 {
-	setStatusRFP(((sr & 0x300) >> 8) + 1);
-	cycles = 2;
+	setStatusRFP(((cur_tlcs900h->sr & 0x300) >> 8) + 1);
+	cur_tlcs900h->cycles = 2;
 }
 
 //===== DECF
 void sngDECF()
 {
-	setStatusRFP(((sr & 0x300) >> 8) - 1);
-	cycles = 2;
+	setStatusRFP(((cur_tlcs900h->sr & 0x300) >> 8) - 1);
+	cur_tlcs900h->cycles = 2;
 }
 
 //===== RET condition
 void sngRET()
 {
-	pc = pop32();
-	cycles = 9;
+	cur_tlcs900h->pc = pop32();
+	cur_tlcs900h->cycles = 9;
 }
 
 //===== RETD dd
 void sngRETD()
 {
 	int16 d = (int16)fetch16();
-	pc = pop32();
+	cur_tlcs900h->pc = pop32();
 	REGXSP += d;
-	cycles = 9;
+	cur_tlcs900h->cycles = 9;
 }
 
 //===== RCF
@@ -181,7 +181,7 @@ void sngRCF()
 	SETFLAG_N0;
 	SETFLAG_V0;
 	SETFLAG_C0;
-	cycles = 2;
+	cur_tlcs900h->cycles = 2;
 }
 
 //===== SCF
@@ -190,7 +190,7 @@ void sngSCF()
 	SETFLAG_H0;
 	SETFLAG_N0;
 	SETFLAG_C1;
-	cycles = 2;
+	cur_tlcs900h->cycles = 2;
 }
 
 //===== CCF
@@ -198,7 +198,7 @@ void sngCCF()
 {
 	SETFLAG_N0;
 	SETFLAG_C(!FLAG_C);
-	cycles = 2;
+	cur_tlcs900h->cycles = 2;
 }
 
 //===== ZCF
@@ -206,157 +206,157 @@ void sngZCF()
 {
 	SETFLAG_N0;
 	SETFLAG_C(!FLAG_Z);
-	cycles = 2;
+	cur_tlcs900h->cycles = 2;
 }
 
 //===== PUSH A
 void sngPUSHA()
 {
 	push8(REGA);
-	cycles = 3;
+	cur_tlcs900h->cycles = 3;
 }
 
 //===== POP A
 void sngPOPA()
 {
 	REGA = pop8();
-	cycles = 4;
+	cur_tlcs900h->cycles = 4;
 }
 
 //===== EX F,F'
 void sngEX()
 {
-	uint8 f = sr & 0xFF;
-	sr = (sr & 0xFF00) | f_dash;
-	f_dash = f;
-	cycles = 2;
+	uint8 f = cur_tlcs900h->sr & 0xFF;
+	cur_tlcs900h->sr = (cur_tlcs900h->sr & 0xFF00) | cur_tlcs900h->f_dash;
+	cur_tlcs900h->f_dash = f;
+	cur_tlcs900h->cycles = 2;
 }
 
 //===== LDF #3
 void sngLDF()
 {
 	setStatusRFP(FETCH8);
-	cycles = 2;
+	cur_tlcs900h->cycles = 2;
 }
 
 //===== PUSH F
 void sngPUSHF()
 {
-	push8(sr & 0xFF);
-	cycles = 3;
+	push8(cur_tlcs900h->sr & 0xFF);
+	cur_tlcs900h->cycles = 3;
 }
 
 //===== POP F
 void sngPOPF()
 {
-	sr = (sr & 0xFF00) | pop8();
-	cycles = 4;
+	cur_tlcs900h->sr = (cur_tlcs900h->sr & 0xFF00) | pop8();
+	cur_tlcs900h->cycles = 4;
 }
 
 //===== JP nn
 void sngJP16()
 {
-	pc = fetch16();
-	cycles = 7;
+	cur_tlcs900h->pc = fetch16();
+	cur_tlcs900h->cycles = 7;
 }
 
 //===== JP nnn
 void sngJP24()
 {
-	pc = fetch24();
-	cycles = 7;
+	cur_tlcs900h->pc = fetch24();
+	cur_tlcs900h->cycles = 7;
 }
 
 //===== CALL #16
 void sngCALL16()
 {
 	uint32 target = fetch16();
-	push32(pc);
-	pc = target;
-	cycles = 12;
+	push32(cur_tlcs900h->pc);
+	cur_tlcs900h->pc = target;
+	cur_tlcs900h->cycles = 12;
 }
 
 //===== CALL #24
 void sngCALL24()
 {
 	uint32 target = fetch24();
-	push32(pc);
-	pc = target;
-	cycles = 12;
+	push32(cur_tlcs900h->pc);
+	cur_tlcs900h->pc = target;
+	cur_tlcs900h->cycles = 12;
 }
 
 //===== CALR $+3+d16
 void sngCALR()
 {
 	int16 displacement = (int16)fetch16();
-	uint32 target = pc + displacement;
-	push32(pc);
-	pc = target;
-	cycles = 12;
+	uint32 target = cur_tlcs900h->pc + displacement;
+	push32(cur_tlcs900h->pc);
+	cur_tlcs900h->pc = target;
+	cur_tlcs900h->cycles = 12;
 }
 
 //===== LD R, n
 void sngLDB()
 {
-	regB(first & 7) = FETCH8;
-	cycles = 2;
+	regB(cur_tlcs900h->first & 7) = FETCH8;
+	cur_tlcs900h->cycles = 2;
 }
 
 //===== PUSH RR
 void sngPUSHW()
 {
-	push16(regW(first & 7));
-	cycles = 3;
+	push16(regW(cur_tlcs900h->first & 7));
+	cur_tlcs900h->cycles = 3;
 }
 
 //===== LD RR, nn
 void sngLDW()
 {
-	regW(first & 7) = fetch16();
-	cycles = 3;
+	regW(cur_tlcs900h->first & 7) = fetch16();
+	cur_tlcs900h->cycles = 3;
 }
 
 //===== PUSH XRR
 void sngPUSHL()
 {
-	push32(regL(first & 7));
-	cycles = 5;
+	push32(regL(cur_tlcs900h->first & 7));
+	cur_tlcs900h->cycles = 5;
 }
 
 //===== LD XRR, nnnn
 void sngLDL()
 {
-	regL(first & 7) = fetch32();
-	cycles = 5;
+	regL(cur_tlcs900h->first & 7) = fetch32();
+	cur_tlcs900h->cycles = 5;
 }
 
 //===== POP RR
 void sngPOPW()
 {
-	regW(first & 7) = pop16();
-	cycles = 4;
+	regW(cur_tlcs900h->first & 7) = pop16();
+	cur_tlcs900h->cycles = 4;
 }
 
 //===== POP XRR
 void sngPOPL()
 {
-	regL(first & 7) = pop32();
-	cycles = 6;
+	regL(cur_tlcs900h->first & 7) = pop32();
+	cur_tlcs900h->cycles = 6;
 }
 
 //===== JR cc,PC + d
 void sngJR()
 {
-	if (conditionCode(first & 0xF))
+	if (conditionCode(cur_tlcs900h->first & 0xF))
 	{
 		int8 displacement = (int8)FETCH8;
 
-		cycles = 8;
-		pc += displacement;
+		cur_tlcs900h->cycles = 8;
+		cur_tlcs900h->pc += displacement;
 	}
 	else
 	{
-		cycles = 4;
+		cur_tlcs900h->cycles = 4;
 		FETCH8;
 	}
 }
@@ -364,15 +364,15 @@ void sngJR()
 //===== JR cc,PC + dd
 void sngJRL()
 {
-	if (conditionCode(first & 0xF))
+	if (conditionCode(cur_tlcs900h->first & 0xF))
 	{
 		int16 displacement = (int16)fetch16();
-		cycles = 8;
-		pc += displacement;
+		cur_tlcs900h->cycles = 8;
+		cur_tlcs900h->pc += displacement;
 	}
 	else
 	{
-		cycles = 4;
+		cur_tlcs900h->cycles = 4;
 		fetch16();
 	}
 }
@@ -389,20 +389,20 @@ void sngLDX()
 	FETCH8;			//00
 
 	storeB(dst, src);
-	cycles = 9;
+	cur_tlcs900h->cycles = 9;
 }
 
 //===== SWI num
 void sngSWI()
 {
-	cycles = 16;
+	cur_tlcs900h->cycles = 16;
 
-	//printf("SWI: %02x\n", first & 0x7);
-	switch(first & 7)
+	//printf("SWI: %02x\n", cur_tlcs900h->first & 0x7);
+	switch(cur_tlcs900h->first & 7)
 	{
 	//System Call
-	case 1: push32(pc);
-		pc = loadL(0xFFFE00 + ((rCodeB(0x31) & 0x1F) << 2));
+	case 1: push32(cur_tlcs900h->pc);
+		cur_tlcs900h->pc = loadL(0xFFFE00 + ((rCodeB(0x31) & 0x1F) << 2));
 		break;
 
 	case 3: set_interrupt(0, true); break;  //SWI 3
@@ -410,7 +410,7 @@ void sngSWI()
 	case 5: set_interrupt(2, true); break;  //SWI 5
 	case 6: set_interrupt(3, true); break;  //SWI 6
 
-	default: instruction_error("SWI %d is not valid.", first & 7); break;
+	default: instruction_error("SWI %d is not valid.", cur_tlcs900h->first & 7); break;
 	}
 }
 //=============================================================================

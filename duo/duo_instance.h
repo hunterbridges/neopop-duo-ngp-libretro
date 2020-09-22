@@ -13,6 +13,7 @@
 #include "../mednafen/video.h"
 
 #include "../mednafen/hw_cpu/z80-fuse/z80_types.h"
+#include "../mednafen/ngp/TLCS-900h/TLCS900h_state.h"
 
 #include "duo_settings.h"
 
@@ -26,65 +27,6 @@ struct neopop_mem_t;
 struct neopop_rom_t;
 struct neopop_sound_t;
 struct neopop_z80i_t;
-
-struct DuoTLCS900hState
-{
-	uint32_t mem;
-	int size;
-	uint8_t first;
-	uint8_t second;
-	uint8_t R;
-	uint8_t rCode;
-	int32_t cycles;
-	bool brCode;
-
-	uint32_t pc;
-	uint16_t sr;
-	uint8_t f_dash;
-
-	uint32_t gprBank[4][4];
-	uint32_t gpr[4];
-
-	uint32_t rErr;
-
-	uint8_t statusRFP;
-
-	// TODO Are these tables needed?
-	// uint8_t* gprMapB[4][8];
-	// uint16_t* gprMapW[4][8];
-	// uint32_t* gprMapL[4][8];
-	// uint8_t* regCodeMapB[4][256];
-	// uint16_t* regCodeMapW[4][128];
-	// uint32_t* regCodeMapL[4][64];
-
-	/*! Captures the state from the global TLCS900h interpreter and
-		stores it in this struct */
-	void Capture();
-
-	/*! Restores the state stored in this struct into the global
-		TLCS900h interpreter */
-	void Restore();
-};
-
-struct DuoZ80State
-{
-	struct processor z80;
-	uint64_t last_z80_tstates;
-	uint64_t z80_tstates;
-
-	// TODO Are these tables needed?
-	// uint8_t sz53_table[0x100];
-	// uint8_t parity_table[0x100];
-	// uint8_t sz53p_table[0x100];
-
-	/*! Captures the state from the global z80 interpreter and
-		stores it in this struct */
-	void Capture();
-
-	/*! Restores the state stored in this struct into the global
-		z80 interpreter */
-	void Restore();
-};
 
 class DuoInstance
 {
@@ -113,8 +55,8 @@ public:
 	uint8_t NGPJoyLatch;
 
 	// Processor state
-	DuoTLCS900hState tlcs900hState;
-	DuoZ80State z80State;
+	struct tlcs900h_state tlcs900h_state;
+	struct z80state z80_state;
 
 	// NeoPop core
 	neopop_bios_t *bios;
@@ -149,7 +91,11 @@ public:
 	/*! WARNING: Make sure the instance is active before running this! */
 	void ProcessFrame();
 
+	void ProcessFrame_Interleaved(DuoInstance *other);
+
 private:
+	void StartFrame();
+	void FinishFrame();
 
 	// ------
 	// Static

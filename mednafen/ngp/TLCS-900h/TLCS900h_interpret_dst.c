@@ -58,244 +58,244 @@
 //===== LD (mem),#
 void DST_dstLDBi(void)
 {
-	storeB(mem, FETCH8);
-	cycles = 5;
+	storeB(cur_tlcs900h->mem, FETCH8);
+	cur_tlcs900h->cycles = 5;
 }
 
-//===== LD (mem),#
+//===== LD (cur_tlcs900h->mem),#
 void DST_dstLDWi(void)
 {
-	storeW(mem, fetch16());
-	cycles = 6;
+	storeW(cur_tlcs900h->mem, fetch16());
+	cur_tlcs900h->cycles = 6;
 }
 
-//===== POP (mem)
+//===== POP (cur_tlcs900h->mem)
 void DST_dstPOPB(void)
 {
-	storeB(mem, pop8());
-	cycles = 6;
+	storeB(cur_tlcs900h->mem, pop8());
+	cur_tlcs900h->cycles = 6;
 }
 
-//===== POP (mem)
+//===== POP (cur_tlcs900h->mem)
 void DST_dstPOPW(void)
 {
-	storeW(mem, pop16());
-	cycles = 6;
+	storeW(cur_tlcs900h->mem, pop16());
+	cur_tlcs900h->cycles = 6;
 }
 
-//===== LD (mem),(nn)
+//===== LD (cur_tlcs900h->mem),(nn)
 void DST_dstLDBm16(void)
 {
-	storeB(mem, loadB(fetch16()));
-	cycles = 8;
+	storeB(cur_tlcs900h->mem, loadB(fetch16()));
+	cur_tlcs900h->cycles = 8;
 }
 
-//===== LD (mem),(nn)
+//===== LD (cur_tlcs900h->mem),(nn)
 void DST_dstLDWm16(void)
 {
-	storeW(mem, loadW(fetch16()));
-	cycles = 8;
+	storeW(cur_tlcs900h->mem, loadW(fetch16()));
+	cur_tlcs900h->cycles = 8;
 }
 
-//===== LDA R,mem
+//===== LDA R,cur_tlcs900h->mem
 void DST_dstLDAW(void)
 {
-	regW(R) = (uint16)mem;
-	cycles = 4;
+	regW(cur_tlcs900h->R) = (uint16)cur_tlcs900h->mem;
+	cur_tlcs900h->cycles = 4;
 }
 
-//===== LDA R,mem
+//===== LDA R,cur_tlcs900h->mem
 void DST_dstLDAL(void)
 {
-	regL(R) = (uint32)mem;
-	cycles = 4;
+	regL(cur_tlcs900h->R) = (uint32)cur_tlcs900h->mem;
+	cur_tlcs900h->cycles = 4;
 }
 
-//===== ANDCF A,(mem)
+//===== ANDCF A,(cur_tlcs900h->mem)
 void DST_dstANDCFA(void)
 {
 	uint8 bit = REGA & 0xF;
-	uint8 mbit = (loadB(mem) >> bit) & 1;
+	uint8 mbit = (loadB(cur_tlcs900h->mem) >> bit) & 1;
 	if (bit < 8) SETFLAG_C(mbit & FLAG_C);
-	cycles = 8;
+	cur_tlcs900h->cycles = 8;
 }
 
-//===== ORCF A,(mem)
+//===== ORCF A,(cur_tlcs900h->mem)
 void DST_dstORCFA(void)
 {
 	uint8 bit = REGA & 0xF;
-	uint8 mbit = (loadB(mem) >> bit) & 1;
+	uint8 mbit = (loadB(cur_tlcs900h->mem) >> bit) & 1;
 	if (bit < 8) SETFLAG_C(mbit | FLAG_C);
-	cycles = 8;
+	cur_tlcs900h->cycles = 8;
 }
 
-//===== XORCF A,(mem)
+//===== XORCF A,(cur_tlcs900h->mem)
 void DST_dstXORCFA(void)
 {
 	uint8 bit = REGA & 0xF;
-	uint8 mbit = (loadB(mem) >> bit) & 1;
+	uint8 mbit = (loadB(cur_tlcs900h->mem) >> bit) & 1;
 	if (bit < 8) SETFLAG_C(mbit ^ FLAG_C);
-	cycles = 8;
+	cur_tlcs900h->cycles = 8;
 }
 
-//===== LDCF A,(mem)
+//===== LDCF A,(cur_tlcs900h->mem)
 void DST_dstLDCFA(void)
 {
 	uint8 bit = REGA & 0xF;
 	uint8 mask = (1 << bit);
-	if (bit < 8) SETFLAG_C(loadB(mem) & mask);
-	cycles = 8;
+	if (bit < 8) SETFLAG_C(loadB(cur_tlcs900h->mem) & mask);
+	cur_tlcs900h->cycles = 8;
 }
 
-//===== STCF A,(mem)
+//===== STCF A,(cur_tlcs900h->mem)
 void DST_dstSTCFA(void)
 {
 	uint8 bit = REGA & 0xF;
 	uint8 cmask = ~(1 << bit);
 	uint8 set = FLAG_C << bit;
-	if (bit < 8) storeB(mem, (loadB(mem) & cmask) | set); 
-	cycles = 8;
+	if (bit < 8) storeB(cur_tlcs900h->mem, (loadB(cur_tlcs900h->mem) & cmask) | set); 
+	cur_tlcs900h->cycles = 8;
 }
 
-//===== LD (mem),R
+//===== LD (cur_tlcs900h->mem),R
 void DST_dstLDBR(void)
 {
-	storeB(mem, regB(R));
-	cycles = 4;
+	storeB(cur_tlcs900h->mem, regB(cur_tlcs900h->R));
+	cur_tlcs900h->cycles = 4;
 }
 
-//===== LD (mem),R
+//===== LD (cur_tlcs900h->mem),R
 void DST_dstLDWR(void)
 {
-	storeW(mem, regW(R));
-	cycles = 4;
+	storeW(cur_tlcs900h->mem, regW(cur_tlcs900h->R));
+	cur_tlcs900h->cycles = 4;
 }
 
-//===== LD (mem),R
+//===== LD (cur_tlcs900h->mem),R
 void DST_dstLDLR(void)
 {
-	storeL(mem, regL(R));
-	cycles = 6;
+	storeL(cur_tlcs900h->mem, regL(cur_tlcs900h->R));
+	cur_tlcs900h->cycles = 6;
 }
 
-//===== ANDCF #3,(mem)
+//===== ANDCF #3,(cur_tlcs900h->mem)
 void DST_dstANDCF(void)
 {
-	uint8 bit = R;
-	uint8 mbit = (loadB(mem) >> bit) & 1;
+	uint8 bit = cur_tlcs900h->R;
+	uint8 mbit = (loadB(cur_tlcs900h->mem) >> bit) & 1;
 	SETFLAG_C(mbit & FLAG_C);
-	cycles = 8;
+	cur_tlcs900h->cycles = 8;
 }
 
-//===== ORCF #3,(mem)
+//===== ORCF #3,(cur_tlcs900h->mem)
 void DST_dstORCF(void)
 {
-	uint8 bit = R;
-	uint8 mbit = (loadB(mem) >> bit) & 1;
+	uint8 bit = cur_tlcs900h->R;
+	uint8 mbit = (loadB(cur_tlcs900h->mem) >> bit) & 1;
 	SETFLAG_C(mbit | FLAG_C);
-	cycles = 8;
+	cur_tlcs900h->cycles = 8;
 }
 
-//===== XORCF #3,(mem)
+//===== XORCF #3,(cur_tlcs900h->mem)
 void DST_dstXORCF(void)
 {
-	uint8 bit = R;
-	uint8 mbit = (loadB(mem) >> bit) & 1;
+	uint8 bit = cur_tlcs900h->R;
+	uint8 mbit = (loadB(cur_tlcs900h->mem) >> bit) & 1;
 	SETFLAG_C(mbit ^ FLAG_C);
-	cycles = 8;
+	cur_tlcs900h->cycles = 8;
 }
 
-//===== LDCF #3,(mem)
+//===== LDCF #3,(cur_tlcs900h->mem)
 void DST_dstLDCF(void)
 {
-	uint8 bit = R;
+	uint8 bit = cur_tlcs900h->R;
 	uint32 mask = (1 << bit);
-	SETFLAG_C(loadB(mem) & mask);
-	cycles = 8;
+	SETFLAG_C(loadB(cur_tlcs900h->mem) & mask);
+	cur_tlcs900h->cycles = 8;
 }
 
-//===== STCF #3,(mem)
+//===== STCF #3,(cur_tlcs900h->mem)
 void DST_dstSTCF(void)
 {
-	uint8 bit = R;
+	uint8 bit = cur_tlcs900h->R;
 	uint8 cmask = ~(1 << bit);
 	uint8 set = FLAG_C << bit;
-	storeB(mem, (loadB(mem) & cmask) | set); 
-	cycles = 8;
+	storeB(cur_tlcs900h->mem, (loadB(cur_tlcs900h->mem) & cmask) | set); 
+	cur_tlcs900h->cycles = 8;
 }
 
-//===== TSET #3,(mem)
+//===== TSET #3,(cur_tlcs900h->mem)
 void DST_dstTSET(void)
 {
-	SETFLAG_Z(! (loadB(mem) & (1 << R)) );
-	storeB(mem, loadB(mem) | (1 << R));
+	SETFLAG_Z(! (loadB(cur_tlcs900h->mem) & (1 << cur_tlcs900h->R)) );
+	storeB(cur_tlcs900h->mem, loadB(cur_tlcs900h->mem) | (1 << cur_tlcs900h->R));
 
 	SETFLAG_H1
 	SETFLAG_N0
-	cycles = 10;
+	cur_tlcs900h->cycles = 10;
 }
 
-//===== RES #3,(mem)
+//===== RES #3,(cur_tlcs900h->mem)
 void DST_dstRES(void)
 {
-	storeB(mem, loadB(mem) & (~(1 << R)));
-	cycles = 8;
+	storeB(cur_tlcs900h->mem, loadB(cur_tlcs900h->mem) & (~(1 << cur_tlcs900h->R)));
+	cur_tlcs900h->cycles = 8;
 }
 
-//===== SET #3,(mem)
+//===== SET #3,(cur_tlcs900h->mem)
 void DST_dstSET(void)
 {
-	storeB(mem, loadB(mem) | (1 << R));
-	cycles = 8;
+	storeB(cur_tlcs900h->mem, loadB(cur_tlcs900h->mem) | (1 << cur_tlcs900h->R));
+	cur_tlcs900h->cycles = 8;
 }
 
-//===== CHG #3,(mem)
+//===== CHG #3,(cur_tlcs900h->mem)
 void DST_dstCHG(void)
 {
-	storeB(mem, loadB(mem) ^ (1 << R));
-	cycles = 8;
+	storeB(cur_tlcs900h->mem, loadB(cur_tlcs900h->mem) ^ (1 << cur_tlcs900h->R));
+	cur_tlcs900h->cycles = 8;
 }
 
-//===== BIT #3,(mem)
+//===== BIT #3,(cur_tlcs900h->mem)
 void DST_dstBIT(void)
 {
-   SETFLAG_Z(! (loadB(mem) & (1 << R)) );
+   SETFLAG_Z(! (loadB(cur_tlcs900h->mem) & (1 << cur_tlcs900h->R)) );
    SETFLAG_H1;
    SETFLAG_N0;
-   cycles = 8;
+   cur_tlcs900h->cycles = 8;
 }
 
-//===== JP cc,mem
+//===== JP cc,cur_tlcs900h->mem
 void DST_dstJP(void)
 {
-   cycles = 6;
-   if (conditionCode(second & 0xF))
+   cur_tlcs900h->cycles = 6;
+   if (conditionCode(cur_tlcs900h->second & 0xF))
    {
-      pc = mem;
-      cycles += 3;
+      cur_tlcs900h->pc = cur_tlcs900h->mem;
+      cur_tlcs900h->cycles += 3;
    }
 }
 
-//===== CALL cc,mem
+//===== CALL cc,cur_tlcs900h->mem
 void DST_dstCALL(void)
 {
-   cycles = 6;
-   if (conditionCode(second & 0xF))
+   cur_tlcs900h->cycles = 6;
+   if (conditionCode(cur_tlcs900h->second & 0xF))
    {
-      push32(pc);
-      pc = mem;
-      cycles += 6;
+      push32(cur_tlcs900h->pc);
+      cur_tlcs900h->pc = cur_tlcs900h->mem;
+      cur_tlcs900h->cycles += 6;
    }
 }
 
 //===== RET cc
 void DST_dstRET(void)
 {
-   cycles = 6;
-   if (conditionCode(second & 0xF))
+   cur_tlcs900h->cycles = 6;
+   if (conditionCode(cur_tlcs900h->second & 0xF))
    {
-      pc = pop32();
-      cycles += 6;
+      cur_tlcs900h->pc = pop32();
+      cur_tlcs900h->cycles += 6;
    }
 }
 

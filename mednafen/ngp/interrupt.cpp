@@ -54,15 +54,15 @@ extern "C" void set_interrupt(uint8_t index, bool set)
 
 void neopop_interrupt_t::interrupt(uint8_t index, uint8_t level)
 {
-   push32(pc);
-   push16(sr);
+   push32(cur_tlcs900h->pc);
+   push16(cur_tlcs900h->sr);
 
    //Up the IFF
    if(level >= 0)
       setStatusIFF((level < 7) ? (level + 1) : 7);
 
    //Access the interrupt vector table to find the jump destination
-   pc = loadL(0x6FB8 + index * 4);
+   cur_tlcs900h->pc = loadL(0x6FB8 + index * 4);
 }
 
 void neopop_interrupt_t::set_interrupt(uint8_t index, bool set)
@@ -279,7 +279,7 @@ bool neopop_interrupt_t::updateTimers(void *data, int cputicks)
       timer_hint -= TIMER_HINT_RATE;	/* Start of next scanline */
 
       /* Comms. Read interrupt */
-      if ((duo->mem->COMMStatus & 1) == 0 && duo->comms->system_comms_poll(&_data))
+      if ((duo->mem->COMMStatus & 1) == 0 && duo->comms->system_comms_poll(&_data, cputicks))
       {
          storeB(0x50, _data);
          TestIntHDMA(12, 0x19);

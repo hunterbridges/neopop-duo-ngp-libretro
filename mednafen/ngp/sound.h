@@ -28,7 +28,7 @@ typedef Blip_Synth<blip_good_quality, 0xFF> Synth;
 
 struct neopop_sound_t
 {
-   int32_t ngpc_soundTS;
+   int32_t ngpc_soundTS = 0;
 
    T6W28_Apu apu;
 

@@ -33,65 +33,62 @@
 extern "C" {
 #endif
 
-void z80_init( void );
-void z80_reset( void );
+	void z80_init(void);
+	void z80_reset(void);
 
-void z80_nmi( void );
+	void z80_nmi(void);
 
-void z80_set_interrupt(int set);
+	void z80_set_interrupt(int set);
 
-int z80_interrupt( void );
+	int z80_interrupt(void);
 
-int z80_do_opcode(void);
+	int z80_do_opcode(void);
 
-extern struct processor z80;
-extern const uint8_t overflow_add_table[];
-extern const uint8_t overflow_sub_table[];
-extern const uint8_t halfcarry_add_table[];
-extern const uint8_t halfcarry_sub_table[];
-extern uint64_t last_z80_tstates;
-extern uint8_t sz53_table[0x100]; /* The S, Z, 5 and 3 bits of the index */
-extern uint8_t parity_table[0x100]; /* The parity of the lookup value */
-extern uint8_t sz53p_table[0x100]; /* OR the above two tables together */
-extern uint64_t z80_tstates;
-extern void (*z80_writebyte)(uint16_t a, uint8_t b);
-extern uint8_t (*z80_readbyte)(uint16_t a);
-extern void (*z80_writeport)(uint16_t a, uint8_t b);
-extern uint8_t (*z80_readport)(uint16_t a);
+	extern const uint8_t overflow_add_table[];
+	extern const uint8_t overflow_sub_table[];
+	extern const uint8_t halfcarry_add_table[];
+	extern const uint8_t halfcarry_sub_table[];
+	extern uint8_t sz53_table[0x100]; /* The S, Z, 5 and 3 bits of the index */
+	extern uint8_t parity_table[0x100]; /* The parity of the lookup value */
+	extern uint8_t sz53p_table[0x100]; /* OR the above two tables together */
+	extern void (*z80_writebyte)(uint16_t a, uint8_t b);
+	extern uint8_t(*z80_readbyte)(uint16_t a);
+	extern void (*z80_writeport)(uint16_t a, uint8_t b);
+	extern uint8_t(*z80_readport)(uint16_t a);
 
-void z80_enable_interrupts( void );
+	void z80_enable_interrupts(void);
 
-static inline uint16_t z80_getpc(void) { return z80.pc.w; }
+	static inline uint16_t z80_getpc(void) { return cur_z80->z80.pc.w; }
 
-// Ok, I lied, not a macro!
+	// Ok, I lied, not a macro!
 
-//Write mem
-static inline void Z80_WB_MACRO(uint16_t A, uint8_t V)
-{ 
- z80_tstates += 3; 
- z80_writebyte(A, V); 
-}
+	//Write mem
+	static inline void Z80_WB_MACRO(uint16_t A, uint8_t V)
+	{
+		cur_z80->z80_tstates += 3;
+		z80_writebyte(A, V);
+	}
 
-// Write port
-static inline void Z80_WP_MACRO(uint16_t A, uint8_t V)
-{ 
- z80_tstates += 4; 
- z80_writeport(A, V); 
-}
+	// Write port
+	static inline void Z80_WP_MACRO(uint16_t A, uint8_t V)
+	{
+		cur_z80->z80_tstates += 4;
+		z80_writeport(A, V);
+	}
 
-// Read mem
-static inline uint8_t Z80_RB_MACRO(uint16_t A)
-{ 
- z80_tstates += 3; 
- return(z80_readbyte(A));
-}
+	// Read mem
+	static inline uint8_t Z80_RB_MACRO(uint16_t A)
+	{
+		cur_z80->z80_tstates += 3;
+		return(z80_readbyte(A));
+	}
 
-// Read port
-static inline uint8_t Z80_RP_MACRO(uint16_t A)
-{ 
- z80_tstates += 4; 
- return(z80_readport(A));
-}
+	// Read port
+	static inline uint8_t Z80_RP_MACRO(uint16_t A)
+	{
+		cur_z80->z80_tstates += 4;
+		return(z80_readport(A));
+	}
 
 #ifdef __cplusplus
 }

@@ -28,6 +28,13 @@ DuoInstance *GetOtherInstance(DuoInstance *fromInstance)
 neopop_comms_t::neopop_comms_t()
 {
     rx_buf = ringbuf_new(64);
+    receive = false;
+
+	tx_byte = 0;
+	write_flag = false;
+
+	rx_byte = 0;
+	read_flag = false;
 }
 
 neopop_comms_t::~neopop_comms_t()
@@ -38,6 +45,21 @@ neopop_comms_t::~neopop_comms_t()
 
 bool neopop_comms_t::system_comms_read(uint8_t* buffer)
 {
+    return false;
+    /*
+    if (buffer == NULL)
+        return read_flag;
+
+    if (read_flag == false)
+        return false;
+
+    *buffer = rx_byte;
+    return true;
+   */
+
+   if (buffer == NULL)
+	  return ringbuf_bytes_used(rx_buf) > 0;
+
    if (ringbuf_bytes_used(rx_buf) == 0)
       return false;
 
@@ -45,8 +67,17 @@ bool neopop_comms_t::system_comms_read(uint8_t* buffer)
    return true;
 }
 
-bool neopop_comms_t::system_comms_poll(uint8_t* buffer)
+bool neopop_comms_t::system_comms_poll(uint8_t* buffer, int32 tlcsCycles)
 {
+    return false;
+    /*
+    if (read_flag == false)
+        return false;
+
+    *buffer = rx_byte;
+    return true;
+   */
+
    if (ringbuf_bytes_used(rx_buf) == 0)
       return false;
 
@@ -56,10 +87,26 @@ bool neopop_comms_t::system_comms_poll(uint8_t* buffer)
 
 void neopop_comms_t::system_comms_write(uint8_t data)
 {
+    return;
+
     DuoInstance *duo = DuoInstance::currentInstance;
     DuoInstance *other = GetOtherInstance(duo);
+    
+    if (write_flag == false)
+        return;
+
+    /*
+    if (other->comms->receive == false)
+        return;
+        */
+
+    /*
+	other->comms->rx_byte = data;
+	other->comms->read_flag = true;
+    */
 
     ringbuf_memcpy_into(other->comms->rx_buf, &data, 1);
+    write_flag = false;
 }
 
 // --

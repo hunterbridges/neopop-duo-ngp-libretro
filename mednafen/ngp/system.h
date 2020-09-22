@@ -21,7 +21,14 @@
 
 struct neopop_comms_t
 {
+	bool receive;
+
+	uint8_t tx_byte;
+	bool write_flag;
+
 	uint8_t rx_byte;
+	bool read_flag;
+
 	ringbuf_t rx_buf;
 
 	neopop_comms_t();
@@ -36,7 +43,7 @@ struct neopop_comms_t
 	/*! Peeks at any data from the other system. If no data is available or
 		no high-level communications have been established, then return FALSE.
 		If buffer is NULL, then no data is read, only status is returned */
-	bool system_comms_poll(uint8_t* buffer);
+	bool system_comms_poll(uint8_t* buffer, int32_t tlcsCycles);
 
 
 	/*! Writes a byte from the other system. This function should block until

@@ -24,6 +24,8 @@
 #include "z80.h"
 #include "z80_macros.h"
 
+struct z80state *cur_z80 = NULL;
+
 /* Set up the z80 emulation */
 void z80_init( void )
 {
@@ -61,10 +63,10 @@ void z80_reset( void )
   I=R=R7=0;
   SP=PC=0;
   IFF1=IFF2=IM=0;
-  z80.halted=0;
+  cur_z80->z80.halted=0;
 
-  z80.interrupts_enabled_at = 0;
-  z80_tstates = last_z80_tstates = 0;
+  cur_z80->z80.interrupts_enabled_at = 0;
+  cur_z80->z80_tstates = cur_z80->last_z80_tstates = 0;
 }
 
 /* Process a z80 maskable interrupt */
@@ -75,13 +77,13 @@ int z80_interrupt( void )
 
    /* If interrupts have just been enabled, don't accept the interrupt now,
       but check after the next instruction has been executed */
-   if(z80_tstates == z80.interrupts_enabled_at)
+   if(cur_z80->z80_tstates == cur_z80->z80.interrupts_enabled_at)
       return 0;
 
-   if(z80.halted)
+   if(cur_z80->z80.halted)
    {
       PC++;
-      z80.halted = 0;
+      cur_z80->z80.halted = 0;
    }
 
    IFF1 = IFF2 = 0;
@@ -95,17 +97,17 @@ int z80_interrupt( void )
    {
       case 0:
          PC = 0x0038;
-         z80_tstates += 7;
+         cur_z80->z80_tstates += 7;
          break;
       case 1:
          PC = 0x0038;
-         z80_tstates += 7;
+         cur_z80->z80_tstates += 7;
          break;
       case 2: 
          {
             uint16_t inttemp=(0x100*I)+0xff;
             PCL = Z80_RB_MACRO(inttemp++); PCH = Z80_RB_MACRO(inttemp);
-            z80_tstates += 7;
+            cur_z80->z80_tstates += 7;
             break;
          }
    }
@@ -116,10 +118,10 @@ int z80_interrupt( void )
 /* Process a z80 non-maskable interrupt */
 void z80_nmi(void)
 {
-  if(z80.halted)
+  if(cur_z80->z80.halted)
   {
      PC++;
-     z80.halted = 0;
+     cur_z80->z80.halted = 0;
   }
 
   IFF1 = 0;
@@ -130,6 +132,6 @@ void z80_nmi(void)
   /* FIXME: how is R affected? */
 
   /* FIXME: how does contention apply here? */
-  z80_tstates += 11;
+  cur_z80->z80_tstates += 11;
   PC = 0x0066;
 }

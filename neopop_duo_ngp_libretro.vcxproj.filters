@@ -85,9 +85,6 @@
     <ClCompile Include="mednafen\hw_cpu\z80-fuse\z80_ops.c">
       <Filter>mednafen\hw_cpu\z80-fuse</Filter>
     </ClCompile>
-    <ClCompile Include="mednafen\ngp\TLCS-900h\TLCS900h_disassemble.c">
-      <Filter>mednafen\ngp\TLCS-900h</Filter>
-    </ClCompile>
     <ClCompile Include="mednafen\ngp\TLCS-900h\TLCS900h_disassemble_dst.c">
       <Filter>mednafen\ngp\TLCS-900h</Filter>
     </ClCompile>
@@ -192,6 +189,9 @@
     </ClCompile>
     <ClCompile Include="third_party\ringbuf.c">
       <Filter>third_party</Filter>
+    </ClCompile>
+    <ClCompile Include="mednafen\ngp\TLCS-900h\TLCS900h_disassemble.c">
+      <Filter>mednafen\ngp\TLCS-900h</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -353,6 +353,9 @@
     </ClInclude>
     <ClInclude Include="third_party\ringbuf.h">
       <Filter>third_party</Filter>
+    </ClInclude>
+    <ClInclude Include="mednafen\ngp\TLCS-900h\TLCS900h_state.h">
+      <Filter>mednafen\ngp\TLCS-900h</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

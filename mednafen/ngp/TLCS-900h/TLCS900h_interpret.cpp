@@ -52,13 +52,26 @@
 //---------------------------------------------------------------------------
 */
 
+#include <string.h>
+#include <stdio.h>
+#include <stdarg.h>
 #include "TLCS900h.h"
 #include "../mem.h"
 #include "../bios.h"
 
-static void DUMMY_instruction_error(const char* vaMessage,...) { }
+static void DUMMY_instruction_error(const char* vaMessage,...)
+{
+	va_list args;
+	va_start(args, vaMessage);
+	vprintf(vaMessage, args);
+	va_end(args);
+}
 
-void (*instruction_error)(const char* vaMessage,...) = DUMMY_instruction_error;
+TLCS900h::TLCS900h()
+{
+	memset(this, 0, sizeof(TLCS900h));
+	instruction_error = DUMMY_instruction_error;
+}
 
 //=========================================================================
 

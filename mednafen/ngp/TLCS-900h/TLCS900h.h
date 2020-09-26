@@ -149,6 +149,8 @@ struct TLCS900h
 	// TLCS900h_interpret
 	// ------------------
 
+	TLCS900h();
+
 	//Interprets a single instruction from 'pc', 
 	//pc is incremented to the start of the next instruction.
 	//Returns the number of cycles taken for this instruction

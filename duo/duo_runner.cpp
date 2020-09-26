@@ -183,7 +183,7 @@ void DuoRunner::Run()
 	DuoInstance *duoB = &DuoInstance::instances[1];
 	duoA->ProcessFrame_Interleaved(duoB);
 	*/
-
+	
 	// Process frame for each instance
 	for (int i = 0; i < instance_count; i++)
 	{

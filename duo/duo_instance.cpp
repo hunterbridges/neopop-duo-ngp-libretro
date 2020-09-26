@@ -103,8 +103,8 @@ bool DuoInstance::Initialize()
 	memset(&z80_state, 0, sizeof(z80_state));
 
 	// Initialize the TLCS900h tables
-	initGPRTables(&tlcs900h_state);
-	initRegCodeTables(&tlcs900h_state);
+	//initGPRTables(&tlcs900h_state);
+	//initRegCodeTables(&tlcs900h_state);
 
 	return true;
 error:
@@ -471,7 +471,7 @@ void DuoInstance::StageInstance(DuoInstance *instance)
 		return;
 
 	currentInstance = instance;
-	cur_tlcs900h = &instance->tlcs900h_state;
+	//cur_tlcs900h = &instance->tlcs900h_state;
 	cur_z80 = &instance->z80_state;
 }
 
@@ -480,7 +480,7 @@ void DuoInstance::UnstageCurrentInstance()
 	if (currentInstance == NULL)
 		return;
 
-	cur_tlcs900h = NULL;
+	//cur_tlcs900h = NULL;
 	cur_z80 = NULL;
 	currentInstance = NULL;
 }

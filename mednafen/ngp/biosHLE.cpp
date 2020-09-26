@@ -59,13 +59,13 @@ void iBIOSHLE()
    uint8_t *CacheIntPrio = bios_ptr->CacheIntPrio;
 
    /* Only works within the bios */
-   if ((cur_tlcs900h->pc & 0xFF0000) != 0xFF0000)
+   if ((pc & 0xFF0000) != 0xFF0000)
       return;
 
-   cur_tlcs900h->pc      --;	    /* Compensate for processing this instruction. */
-   cur_tlcs900h->cycles = 8;		/* TODO: Correct cycle counts (or approx?) */
+   pc      --;	    /* Compensate for processing this instruction. */
+   cycles = 8;		/* TODO: Correct cycle counts (or approx?) */
 
-   switch (cur_tlcs900h->pc & 0xffffff)
+   switch (pc & 0xffffff)
    {	
       case VECT_SHUTDOWN:
          {
@@ -322,7 +322,7 @@ void iBIOSHLE()
          }
 
          //Restore $PC after BIOS-HLE instruction
-         cur_tlcs900h->pc = pop32();
+         pc = pop32();
 
          duo->interrupt->TestIntHDMA(11, 0x18);
 
@@ -340,7 +340,7 @@ void iBIOSHLE()
                rCodeB(0x30) = 0;	//COM_BUF_OK
                rCodeB(0x35) = data;
 
-               cur_tlcs900h->pc = pop32();
+               pc = pop32();
 
                //Comms. Read interrupt
                storeB(0x50, data);
@@ -383,7 +383,7 @@ void iBIOSHLE()
          break;
 
       case VECT_COMCREATEBUFDATA:
-         cur_tlcs900h->pc = pop32();
+         pc = pop32();
 
          while(rCodeB(0x35) > 0)
          {
@@ -401,7 +401,7 @@ void iBIOSHLE()
          return;
       case VECT_COMGETBUFDATA:
 	  {
-         cur_tlcs900h->pc = pop32();
+         pc = pop32();
 
          while(rCodeB(0x35) > 0)
          {
@@ -429,7 +429,7 @@ void iBIOSHLE()
    }
 
    //RET
-   cur_tlcs900h->pc = pop32();
+   pc = pop32();
 }
 
 #ifdef __cplusplus

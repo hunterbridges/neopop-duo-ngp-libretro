@@ -72,59 +72,59 @@
 //===== LD r,#
 void regLDi()
 {
-	switch(cur_tlcs900h->size)
+	switch(size)
 	{
-	case 0:	rCodeB(cur_tlcs900h->rCode) = FETCH8;		cur_tlcs900h->cycles = 4; break;
-	case 1:	rCodeW(cur_tlcs900h->rCode) = fetch16();	cur_tlcs900h->cycles = 4;	break;
-	case 2: rCodeL(cur_tlcs900h->rCode) = fetch32();	cur_tlcs900h->cycles = 6;	break;
+	case 0:	rCodeB(rCode) = FETCH8;		cycles = 4; break;
+	case 1:	rCodeW(rCode) = fetch16();	cycles = 4;	break;
+	case 2: rCodeL(rCode) = fetch32();	cycles = 6;	break;
 	}
 }
 
 //===== PUSH r
 void regPUSH()
 {
-	switch(cur_tlcs900h->size)
+	switch(size)
 	{
-	case 0:	push8(rCodeB(cur_tlcs900h->rCode));  cur_tlcs900h->cycles = 5;break;
-	case 1:	push16(rCodeW(cur_tlcs900h->rCode)); cur_tlcs900h->cycles = 5;break;
-	case 2: push32(rCodeL(cur_tlcs900h->rCode)); cur_tlcs900h->cycles = 7;break;
+	case 0:	push8(rCodeB(rCode));  cycles = 5;break;
+	case 1:	push16(rCodeW(rCode)); cycles = 5;break;
+	case 2: push32(rCodeL(rCode)); cycles = 7;break;
 	}
 }
 
 //===== POP r
 void regPOP()
 {
-	switch(cur_tlcs900h->size)
+	switch(size)
 	{
-	case 0:	rCodeB(cur_tlcs900h->rCode) = pop8();		cur_tlcs900h->cycles = 6;break;
-	case 1:	rCodeW(cur_tlcs900h->rCode) = pop16();	cur_tlcs900h->cycles = 6;break;
-	case 2: rCodeL(cur_tlcs900h->rCode) = pop32(); 	cur_tlcs900h->cycles = 8;break;
+	case 0:	rCodeB(rCode) = pop8();		cycles = 6;break;
+	case 1:	rCodeW(rCode) = pop16();	cycles = 6;break;
+	case 2: rCodeL(rCode) = pop32(); 	cycles = 8;break;
 	}
 }
 
 //===== CPL r
 void regCPL()
 {
-	switch(cur_tlcs900h->size)
+	switch(size)
 	{
-	case 0: rCodeB(cur_tlcs900h->rCode) = ~ rCodeB(cur_tlcs900h->rCode);	break;
-	case 1: rCodeW(cur_tlcs900h->rCode) = ~ rCodeW(cur_tlcs900h->rCode);	break;
+	case 0: rCodeB(rCode) = ~ rCodeB(rCode);	break;
+	case 1: rCodeW(rCode) = ~ rCodeW(rCode);	break;
 	}
 
 	SETFLAG_H1;
 	SETFLAG_N1;
-	cur_tlcs900h->cycles = 4;
+	cycles = 4;
 }
 
 //===== NEG r
 void regNEG()
 {
-	switch(cur_tlcs900h->size)
+	switch(size)
 	{
-	case 0: rCodeB(cur_tlcs900h->rCode) = generic_SUB_B(0, rCodeB(cur_tlcs900h->rCode)); break;
-	case 1: rCodeW(cur_tlcs900h->rCode) = generic_SUB_W(0, rCodeW(cur_tlcs900h->rCode)); break;
+	case 0: rCodeB(rCode) = generic_SUB_B(0, rCodeB(rCode)); break;
+	case 1: rCodeW(rCode) = generic_SUB_W(0, rCodeW(rCode)); break;
 	}
-	cur_tlcs900h->cycles = 5;
+	cycles = 5;
 }
 
 //===== MUL rr,#
@@ -139,12 +139,12 @@ void regMULi()
 		return;
 	}
 
-	switch(cur_tlcs900h->size)
+	switch(size)
 	{
 	case 0: rCodeW(target) = (rCodeW(target) & 0xFF) * FETCH8;
-		cur_tlcs900h->cycles = 18; break;
+		cycles = 18; break;
 	case 1: rCodeL(target) = (rCodeL(target) & 0xFFFF) * fetch16();
-		cur_tlcs900h->cycles = 26; break;
+		cycles = 26; break;
 	}
 }
 
@@ -158,12 +158,12 @@ void regMULSi()
 		return;
 	}
 
-	switch(cur_tlcs900h->size)
+	switch(size)
 	{
 	case 0: rCodeW(target) = (int8)(rCodeW(target) & 0xFF) * (int8)FETCH8;
-		cur_tlcs900h->cycles = 18; break;
+		cycles = 18; break;
 	case 1: rCodeL(target) = (int16)(rCodeL(target) & 0xFFFF) * (int16)fetch16();
-		cur_tlcs900h->cycles = 26; break;
+		cycles = 26; break;
 	}
 }
 
@@ -177,14 +177,14 @@ void regDIVi()
 		return;
 	}
 
-	switch(cur_tlcs900h->size)
+	switch(size)
 	{
 	case 0: {	rCodeW(target) =  generic_DIV_B(rCodeW(target), FETCH8);
-				cur_tlcs900h->cycles = 22;
+				cycles = 22;
 				break;	}
 
 	case 1: {	rCodeL(target) =  generic_DIV_W(rCodeL(target), fetch16());
-				cur_tlcs900h->cycles = 30;
+				cycles = 30;
 				break;	}
 	}
 }
@@ -199,14 +199,14 @@ void regDIVSi()
 		return;
 	}
 
-	switch(cur_tlcs900h->size)
+	switch(size)
 	{
 	case 0: {	rCodeW(target) =  generic_DIVS_B(rCodeW(target), FETCH8);
-				cur_tlcs900h->cycles = 24;
+				cycles = 24;
 				break;	}
 
 	case 1: {	rCodeL(target) =  generic_DIVS_W(rCodeL(target), fetch16());
-				cur_tlcs900h->cycles = 32;
+				cycles = 32;
 				break;	}
 	}
 }
@@ -215,24 +215,24 @@ void regDIVSi()
 void regLINK()
 {
 	int16 d = (int16)fetch16();
-	push32(rCodeL(cur_tlcs900h->rCode));
-	rCodeL(cur_tlcs900h->rCode) = REGXSP;
+	push32(rCodeL(rCode));
+	rCodeL(rCode) = REGXSP;
 	REGXSP += d;
-	cur_tlcs900h->cycles = 10;
+	cycles = 10;
 }
 
 //===== UNLK r
 void regUNLK()
 {
-	REGXSP = rCodeL(cur_tlcs900h->rCode);
-	rCodeL(cur_tlcs900h->rCode) = pop32();
-	cur_tlcs900h->cycles = 8;
+	REGXSP = rCodeL(rCode);
+	rCodeL(rCode) = pop32();
+	cycles = 8;
 }
 
 //===== BS1F A,r
 void regBS1F()
 {
-	uint16 data = rCodeW(cur_tlcs900h->rCode), mask = 0x0001;
+	uint16 data = rCodeW(rCode), mask = 0x0001;
 	uint8 i;
 	
 	SETFLAG_V0;
@@ -248,13 +248,13 @@ void regBS1F()
 	}
 
 	SETFLAG_V1;
-	cur_tlcs900h->cycles = 4;
+	cycles = 4;
 }
 
 //===== BS1B A,r
 void regBS1B()
 {
-	uint16 data = rCodeW(cur_tlcs900h->rCode), mask = 0x8000;
+	uint16 data = rCodeW(rCode), mask = 0x8000;
 	uint8 i;
 	
 	SETFLAG_V0;
@@ -270,14 +270,14 @@ void regBS1B()
 	}
 
 	SETFLAG_V1;
-	cur_tlcs900h->cycles = 4;
+	cycles = 4;
 }
 
 //===== DAA r
 void regDAA()
 {
 	uint16 resultC;
-	uint8 src = rCodeB(cur_tlcs900h->rCode), result, added = 0, half;
+	uint8 src = rCodeB(rCode), result, added = 0, half;
 	bool setC = false;
 
 	uint8 upper4 = (src & 0xF0);
@@ -333,56 +333,56 @@ void regDAA()
 	else			SETFLAG_C(result < src || setC)
 	
 	parityB(result);
-	rCodeB(cur_tlcs900h->rCode) = result;
-	cur_tlcs900h->cycles = 6;
+	rCodeB(rCode) = result;
+	cycles = 6;
 }
 
 //===== EXTZ r
 void regEXTZ()
 {
-	switch(cur_tlcs900h->size)
+	switch(size)
 	{
-	case 1:	rCodeW(cur_tlcs900h->rCode) &= 0xFF;	break;
-	case 2: rCodeL(cur_tlcs900h->rCode) &= 0xFFFF;	break;
+	case 1:	rCodeW(rCode) &= 0xFF;	break;
+	case 2: rCodeL(rCode) &= 0xFFFF;	break;
 	}
 
-	cur_tlcs900h->cycles = 4;
+	cycles = 4;
 }
 
 //===== EXTS r
 void regEXTS()
 {
-	switch(cur_tlcs900h->size)
+	switch(size)
 	{
-	case 1:	if (rCodeW(cur_tlcs900h->rCode) & 0x0080) 
-				{ rCodeW(cur_tlcs900h->rCode) |= 0xFF00; } else 
-				{ rCodeW(cur_tlcs900h->rCode) &= 0x00FF; }
+	case 1:	if (rCodeW(rCode) & 0x0080) 
+				{ rCodeW(rCode) |= 0xFF00; } else 
+				{ rCodeW(rCode) &= 0x00FF; }
 		break;
 		
-	case 2:	if (rCodeL(cur_tlcs900h->rCode) & 0x00008000) 
-				{ rCodeL(cur_tlcs900h->rCode) |= 0xFFFF0000; } else 
-				{ rCodeL(cur_tlcs900h->rCode) &= 0x0000FFFF; }
+	case 2:	if (rCodeL(rCode) & 0x00008000) 
+				{ rCodeL(rCode) |= 0xFFFF0000; } else 
+				{ rCodeL(rCode) &= 0x0000FFFF; }
 		break;
 	}
 
-	cur_tlcs900h->cycles = 5;
+	cycles = 5;
 }
 
 //===== PAA r
 void regPAA()
 {
-	switch(cur_tlcs900h->size)
+	switch(size)
 	{
-	case 1:	if (rCodeW(cur_tlcs900h->rCode) & 0x1) rCodeW(cur_tlcs900h->rCode)++; break;
-	case 2:	if (rCodeL(cur_tlcs900h->rCode) & 0x1) rCodeL(cur_tlcs900h->rCode)++; break;
+	case 1:	if (rCodeW(rCode) & 0x1) rCodeW(rCode)++; break;
+	case 2:	if (rCodeL(rCode) & 0x1) rCodeL(rCode)++; break;
 	}
-	cur_tlcs900h->cycles = 4;
+	cycles = 4;
 }
 
 //===== MIRR r
 void regMIRR()
 {
-	uint16 src = rCodeW(cur_tlcs900h->rCode), dst = 0, bit;
+	uint16 src = rCodeW(rCode), dst = 0, bit;
 
 	//Undocumented - see p165 of CPU .PDF
 	//Seems to mirror bits completely, ie. 1234 -> 4321
@@ -391,15 +391,15 @@ void regMIRR()
 		if (src & (1 << bit))
 			dst |= (1 << (15 - bit));
 
-	rCodeW(cur_tlcs900h->rCode) = dst;
-	cur_tlcs900h->cycles = 4;
+	rCodeW(rCode) = dst;
+	cycles = 4;
 }
 
 //===== MULA rr
 void regMULA()
 {
 	uint32 src = (int16)loadW(regL(2/*XDE*/)) * (int16)loadW(regL(3/*XHL*/));
-	uint32 dst = rCodeL(cur_tlcs900h->rCode);
+	uint32 dst = rCodeL(rCode);
 	uint32 result = dst + src;
 
 	SETFLAG_S(result & 0x80000000);
@@ -409,7 +409,7 @@ void regMULA()
 		(((int32)dst < 0)  && ((int32)src < 0) && ((int32)result >= 0)))
 	{SETFLAG_V1} else {SETFLAG_V0}
 	
-	cur_tlcs900h->cycles = 31;
+	cycles = 31;
 }
 
 //===== DJNZ r,d
@@ -417,25 +417,25 @@ void regDJNZ()
 {
 	int8 offset = FETCH8;
 
-	cur_tlcs900h->cycles = 7;
+	cycles = 7;
 
-	switch(cur_tlcs900h->size)
+	switch(size)
 	{
 	case 0: 
-		rCodeB(cur_tlcs900h->rCode) --;
-		if (rCodeB(cur_tlcs900h->rCode) != 0)
+		rCodeB(rCode) --;
+		if (rCodeB(rCode) != 0)
 		{
-			cur_tlcs900h->cycles = 11;
-			cur_tlcs900h->pc = cur_tlcs900h->pc + offset;
+			cycles = 11;
+			pc = pc + offset;
 		}
 		break;
 
 	case 1: 
-		rCodeW(cur_tlcs900h->rCode) --;
-		if (rCodeW(cur_tlcs900h->rCode) != 0)
+		rCodeW(rCode) --;
+		if (rCodeW(rCode) != 0)
 		{
-			cur_tlcs900h->cycles = 11;
-			cur_tlcs900h->pc = cur_tlcs900h->pc + offset;
+			cycles = 11;
+			pc = pc + offset;
 		}
 		break;
 	}
@@ -445,142 +445,142 @@ void regDJNZ()
 void regANDCFi()
 {
 	uint8 data, bit = FETCH8 & 0xF;
-	switch(cur_tlcs900h->size)
+	switch(size)
 	{
-	case 0: {	data = (rCodeB(cur_tlcs900h->rCode) >> bit) & 1;
+	case 0: {	data = (rCodeB(rCode) >> bit) & 1;
 				if (bit < 8) SETFLAG_C(FLAG_C & data); 
 				break; }
 
-	case 1: {	data = (rCodeW(cur_tlcs900h->rCode) >> bit) & 1;
+	case 1: {	data = (rCodeW(rCode) >> bit) & 1;
 				SETFLAG_C(FLAG_C & data); 
 				break; }
 	}
-	cur_tlcs900h->cycles = 4;
+	cycles = 4;
 }
 
 //===== ORCF #,r
 void regORCFi()
 {
 	uint8 data, bit = FETCH8 & 0xF;
-	switch(cur_tlcs900h->size)
+	switch(size)
 	{
-	case 0: {	data = (rCodeB(cur_tlcs900h->rCode) >> bit) & 1;
+	case 0: {	data = (rCodeB(rCode) >> bit) & 1;
 				if (bit < 8) SETFLAG_C(FLAG_C | data); 
 				break; }
 
-	case 1: {	data = (rCodeW(cur_tlcs900h->rCode) >> bit) & 1;
+	case 1: {	data = (rCodeW(rCode) >> bit) & 1;
 				SETFLAG_C(FLAG_C | data); 
 				break; }
 	}
-	cur_tlcs900h->cycles = 4;
+	cycles = 4;
 }
 
 //===== XORCF #,r
 void regXORCFi()
 {
 	uint8 data, bit = FETCH8 & 0xF;
-	switch(cur_tlcs900h->size)
+	switch(size)
 	{
-	case 0: {	data = (rCodeB(cur_tlcs900h->rCode) >> bit) & 1;
+	case 0: {	data = (rCodeB(rCode) >> bit) & 1;
 				if (bit < 8) SETFLAG_C(FLAG_C ^ data); 
 				break; }
 
-	case 1: {	data = (rCodeW(cur_tlcs900h->rCode) >> bit) & 1;
+	case 1: {	data = (rCodeW(rCode) >> bit) & 1;
 				SETFLAG_C(FLAG_C ^ data); 
 				break; }
 	}
-	cur_tlcs900h->cycles = 4;
+	cycles = 4;
 }
 
 //===== LDCF #,r
 void regLDCFi()
 {
 	uint8 bit = FETCH8 & 0xF;
-	switch(cur_tlcs900h->size)
+	switch(size)
 	{
 	case 0: {	uint8 mask = (1 << bit);
 				if (bit < 8)
-					SETFLAG_C(rCodeB(cur_tlcs900h->rCode) & mask);
+					SETFLAG_C(rCodeB(rCode) & mask);
 				break; }
 
 
 	case 1: {	uint16 mask = (1 << bit);
-				SETFLAG_C(rCodeW(cur_tlcs900h->rCode) & mask);
+				SETFLAG_C(rCodeW(rCode) & mask);
 				break; }
 	}
 
-	cur_tlcs900h->cycles = 4;
+	cycles = 4;
 }
 
 //===== STCF #,r
 void regSTCFi()
 {
 	uint8 bit = FETCH8 & 0xF;
-	switch(cur_tlcs900h->size)
+	switch(size)
 	{
 	case 0: {	uint8 cmask = ~(1 << bit);
 				uint8 set = FLAG_C << bit;
-				if (bit < 8) rCodeB(cur_tlcs900h->rCode) = (rCodeB(cur_tlcs900h->rCode) & cmask) | set;
+				if (bit < 8) rCodeB(rCode) = (rCodeB(rCode) & cmask) | set;
 				break;	}
 
 	case 1: {	uint16 cmask = ~(1 << bit);
 				uint16 set = FLAG_C << bit;
-				rCodeW(cur_tlcs900h->rCode) = (rCodeW(cur_tlcs900h->rCode) & cmask) | set;
+				rCodeW(rCode) = (rCodeW(rCode) & cmask) | set;
 				break;	}
 	}
 
-	cur_tlcs900h->cycles = 4;
+	cycles = 4;
 }
 
 //===== ANDCF A,r
 void regANDCFA()
 {
 	uint8 data, bit = REGA & 0xF;
-	switch(cur_tlcs900h->size)
+	switch(size)
 	{
-	case 0: {	data = (rCodeB(cur_tlcs900h->rCode) >> bit) & 1;
+	case 0: {	data = (rCodeB(rCode) >> bit) & 1;
 				if (bit < 8) SETFLAG_C(FLAG_C & data); 
 				break; }
 
-	case 1: {	data = (rCodeW(cur_tlcs900h->rCode) >> bit) & 1;
+	case 1: {	data = (rCodeW(rCode) >> bit) & 1;
 				SETFLAG_C(FLAG_C & data); 
 				break; }
 	}
-	cur_tlcs900h->cycles = 4;
+	cycles = 4;
 }
 
 //===== ORCF A,r
 void regORCFA()
 {
 	uint8 data, bit = REGA & 0xF;
-	switch(cur_tlcs900h->size)
+	switch(size)
 	{
-	case 0: {	data = (rCodeB(cur_tlcs900h->rCode) >> bit) & 1;
+	case 0: {	data = (rCodeB(rCode) >> bit) & 1;
 				if (bit < 8) SETFLAG_C(FLAG_C | data); 
 				break; }
 
-	case 1: {	data = (rCodeW(cur_tlcs900h->rCode) >> bit) & 1;
+	case 1: {	data = (rCodeW(rCode) >> bit) & 1;
 				SETFLAG_C(FLAG_C | data); 
 				break; }
 	}
-	cur_tlcs900h->cycles = 4;
+	cycles = 4;
 }
 
 //===== XORCF A,r
 void regXORCFA()
 {
 	uint8 data, bit = REGA & 0xF;
-	switch(cur_tlcs900h->size)
+	switch(size)
 	{
-	case 0: {	data = (rCodeB(cur_tlcs900h->rCode) >> bit) & 1;
+	case 0: {	data = (rCodeB(rCode) >> bit) & 1;
 				if (bit < 8) SETFLAG_C(FLAG_C ^ data); 
 				break; }
 
-	case 1: {	data = (rCodeW(cur_tlcs900h->rCode) >> bit) & 1;
+	case 1: {	data = (rCodeW(rCode) >> bit) & 1;
 				SETFLAG_C(FLAG_C ^ data); 
 				break; }
 	}
-	cur_tlcs900h->cycles = 4;
+	cycles = 4;
 }
 
 //===== LDCF A,r
@@ -589,34 +589,34 @@ void regLDCFA()
 	uint8 bit = REGA & 0xF;
 	uint32 mask = (1 << bit);
 
-	switch(cur_tlcs900h->size)
+	switch(size)
 	{
-	case 0: if (bit < 8) SETFLAG_C(rCodeB(cur_tlcs900h->rCode) & mask); break;
-	case 1: SETFLAG_C(rCodeW(cur_tlcs900h->rCode) & mask); break;
+	case 0: if (bit < 8) SETFLAG_C(rCodeB(rCode) & mask); break;
+	case 1: SETFLAG_C(rCodeW(rCode) & mask); break;
 	}
 
-	cur_tlcs900h->cycles = 4;
+	cycles = 4;
 }
 
 //===== STCF A,r
 void regSTCFA()
 {
-	switch(cur_tlcs900h->size)
+	switch(size)
 	{
 	case 0: {	uint8 bit = REGA & 0xF;
 				uint8 cmask = ~(1 << bit);
 				uint8 set = FLAG_C << bit;
-				if (bit < 8) rCodeB(cur_tlcs900h->rCode) = (rCodeB(cur_tlcs900h->rCode) & cmask) | set;
+				if (bit < 8) rCodeB(rCode) = (rCodeB(rCode) & cmask) | set;
 				break;	}
 
 	case 1: {	uint8 bit = REGA & 0xF;
 				uint16 cmask = ~(1 << bit);
 				uint16 set = FLAG_C << bit;
-				rCodeW(cur_tlcs900h->rCode) = (rCodeW(cur_tlcs900h->rCode) & cmask) | set;
+				rCodeW(rCode) = (rCodeW(rCode) & cmask) | set;
 				break;	}
 	}
 
-	cur_tlcs900h->cycles = 4;
+	cycles = 4;
 }
 
 //===== LDC cr,r
@@ -624,14 +624,14 @@ void regLDCcrr()
 {
 	uint8 cr = FETCH8;
 
-	switch(cur_tlcs900h->size)
+	switch(size)
 	{
-	case 0: dmaStoreB(cr, rCodeB(cur_tlcs900h->rCode)); break;
-	case 1: dmaStoreW(cr, rCodeW(cur_tlcs900h->rCode)); break;
-	case 2: dmaStoreL(cr, rCodeL(cur_tlcs900h->rCode)); break;
+	case 0: dmaStoreB(cr, rCodeB(rCode)); break;
+	case 1: dmaStoreW(cr, rCodeW(rCode)); break;
+	case 2: dmaStoreL(cr, rCodeL(rCode)); break;
 	}
 
-	cur_tlcs900h->cycles = 8;
+	cycles = 8;
 }
 
 //===== LDC r,cr
@@ -639,14 +639,14 @@ void regLDCrcr()
 {
 	uint8 cr = FETCH8;
 
-	switch(cur_tlcs900h->size)
+	switch(size)
 	{
-	case 0: rCodeB(cur_tlcs900h->rCode) = dmaLoadB(cr); break;
-	case 1: rCodeW(cur_tlcs900h->rCode) = dmaLoadW(cr); break;
-	case 2: rCodeL(cur_tlcs900h->rCode) = dmaLoadL(cr); break;
+	case 0: rCodeB(rCode) = dmaLoadB(cr); break;
+	case 1: rCodeW(rCode) = dmaLoadW(cr); break;
+	case 2: rCodeL(rCode) = dmaLoadL(cr); break;
 	}
 
-	cur_tlcs900h->cycles = 8;
+	cycles = 8;
 }
 
 //===== RES #,r
@@ -654,13 +654,13 @@ void regRES()
 {
 	uint8 b = FETCH8 & 0xF;
 
-	switch(cur_tlcs900h->size)
+	switch(size)
 	{
-	case 0: rCodeB(cur_tlcs900h->rCode) &= ~(uint8)(1 << b); break;
-	case 1: rCodeW(cur_tlcs900h->rCode) &= ~(uint16)(1 << b); break;
+	case 0: rCodeB(rCode) &= ~(uint8)(1 << b); break;
+	case 1: rCodeW(rCode) &= ~(uint16)(1 << b); break;
 	}
 
-	cur_tlcs900h->cycles = 4;
+	cycles = 4;
 }
 
 //===== SET #,r
@@ -668,13 +668,13 @@ void regSET()
 {
 	uint8 b = FETCH8 & 0xF;
 
-	switch(cur_tlcs900h->size)
+	switch(size)
 	{
-	case 0: rCodeB(cur_tlcs900h->rCode) |= (1 << b); break;
-	case 1: rCodeW(cur_tlcs900h->rCode) |= (1 << b); break;
+	case 0: rCodeB(rCode) |= (1 << b); break;
+	case 1: rCodeW(rCode) |= (1 << b); break;
 	}
 
-	cur_tlcs900h->cycles = 4;
+	cycles = 4;
 }
 
 //===== CHG #,r
@@ -682,13 +682,13 @@ void regCHG()
 {
 	uint8 b = FETCH8 & 0xF;
 
-	switch(cur_tlcs900h->size)
+	switch(size)
 	{
-	case 0: rCodeB(cur_tlcs900h->rCode) ^= (1 << b); break;
-	case 1: rCodeW(cur_tlcs900h->rCode) ^= (1 << b); break;
+	case 0: rCodeB(rCode) ^= (1 << b); break;
+	case 1: rCodeW(rCode) ^= (1 << b); break;
 	}
 
-	cur_tlcs900h->cycles = 4;
+	cycles = 4;
 }
 
 //===== BIT #,r
@@ -696,15 +696,15 @@ void regBIT()
 {
 	uint8 b = FETCH8 & 0xF;
 	
-	switch(cur_tlcs900h->size)
+	switch(size)
 	{
-	case 0:	SETFLAG_Z(! (rCodeB(cur_tlcs900h->rCode) & (1 << b))	);	break;
-	case 1:	SETFLAG_Z(! (rCodeW(cur_tlcs900h->rCode) & (1 << b))	);	break;
+	case 0:	SETFLAG_Z(! (rCodeB(rCode) & (1 << b))	);	break;
+	case 1:	SETFLAG_Z(! (rCodeW(rCode) & (1 << b))	);	break;
 	}
 
 	SETFLAG_H1;
 	SETFLAG_N0;
-	cur_tlcs900h->cycles = 4;
+	cycles = 4;
 }
 
 //===== TSET #,r
@@ -712,20 +712,20 @@ void regTSET()
 {
 	uint8 b = FETCH8 & 0xF;
 	
-	switch(cur_tlcs900h->size)
+	switch(size)
 	{
-	case 0:	SETFLAG_Z(! (rCodeB(cur_tlcs900h->rCode) & (1 << b))	);	
-			rCodeB(cur_tlcs900h->rCode) |= (1 << b);
+	case 0:	SETFLAG_Z(! (rCodeB(rCode) & (1 << b))	);	
+			rCodeB(rCode) |= (1 << b);
 			break;
 
-	case 1:	SETFLAG_Z(! (rCodeW(cur_tlcs900h->rCode) & (1 << b))	);
-			rCodeW(cur_tlcs900h->rCode) |= (1 << b);
+	case 1:	SETFLAG_Z(! (rCodeW(rCode) & (1 << b))	);
+			rCodeW(rCode) |= (1 << b);
 			break;
 	}
 
 	SETFLAG_H1
 	SETFLAG_N0
-	cur_tlcs900h->cycles = 6;
+	cycles = 6;
 }
 
 //===== MINC1 #,r
@@ -733,15 +733,15 @@ void regMINC1()
 {
 	uint16 num = fetch16() + 1;
 
-	if (cur_tlcs900h->size == 1 && num)
+	if (size == 1 && num)
 	{
-		if ((rCodeW(cur_tlcs900h->rCode) % num) == (num - 1))
-			rCodeW(cur_tlcs900h->rCode) -= (num - 1);
+		if ((rCodeW(rCode) % num) == (num - 1))
+			rCodeW(rCode) -= (num - 1);
 		else
-			rCodeW(cur_tlcs900h->rCode) += 1;
+			rCodeW(rCode) += 1;
 	}
 
-	cur_tlcs900h->cycles = 8;
+	cycles = 8;
 }
 
 //===== MINC2 #,r
@@ -749,15 +749,15 @@ void regMINC2()
 {
 	uint16 num = fetch16() + 2;
 
-	if (cur_tlcs900h->size == 1 && num)
+	if (size == 1 && num)
 	{
-		if ((rCodeW(cur_tlcs900h->rCode) % num) == (num - 2))
-			rCodeW(cur_tlcs900h->rCode) -= (num - 2);
+		if ((rCodeW(rCode) % num) == (num - 2))
+			rCodeW(rCode) -= (num - 2);
 		else
-			rCodeW(cur_tlcs900h->rCode) += 2;
+			rCodeW(rCode) += 2;
 	}
 
-	cur_tlcs900h->cycles = 8;
+	cycles = 8;
 }
 
 //===== MINC4 #,r
@@ -765,15 +765,15 @@ void regMINC4()
 {
 	uint16 num = fetch16() + 4;
 
-	if (cur_tlcs900h->size == 1 && num)
+	if (size == 1 && num)
 	{
-		if ((rCodeW(cur_tlcs900h->rCode) % num) == (num - 4))
-			rCodeW(cur_tlcs900h->rCode) -= (num - 4);
+		if ((rCodeW(rCode) % num) == (num - 4))
+			rCodeW(rCode) -= (num - 4);
 		else
-			rCodeW(cur_tlcs900h->rCode) += 4;
+			rCodeW(rCode) += 4;
 	}
 
-	cur_tlcs900h->cycles = 8;
+	cycles = 8;
 }
 
 //===== MDEC1 #,r
@@ -781,15 +781,15 @@ void regMDEC1()
 {
 	uint16 num = fetch16() + 1;
 
-	if (cur_tlcs900h->size == 1 && num)
+	if (size == 1 && num)
 	{
-		if ((rCodeW(cur_tlcs900h->rCode) % num) == 0)
-			rCodeW(cur_tlcs900h->rCode) += (num - 1);
+		if ((rCodeW(rCode) % num) == 0)
+			rCodeW(rCode) += (num - 1);
 		else
-			rCodeW(cur_tlcs900h->rCode) -= 1;
+			rCodeW(rCode) -= 1;
 	}
 
-	cur_tlcs900h->cycles = 7;
+	cycles = 7;
 }
 
 //===== MDEC2 #,r
@@ -797,15 +797,15 @@ void regMDEC2()
 {
 	uint16 num = fetch16() + 2;
 
-	if (cur_tlcs900h->size == 1 && num)
+	if (size == 1 && num)
 	{
-		if ((rCodeW(cur_tlcs900h->rCode) % num) == 0)
-			rCodeW(cur_tlcs900h->rCode) += (num - 2);
+		if ((rCodeW(rCode) % num) == 0)
+			rCodeW(rCode) += (num - 2);
 		else
-			rCodeW(cur_tlcs900h->rCode) -= 2;
+			rCodeW(rCode) -= 2;
 	}
 
-	cur_tlcs900h->cycles = 7;
+	cycles = 7;
 }
 
 //===== MDEC4 #,r
@@ -813,15 +813,15 @@ void regMDEC4()
 {
 	uint16 num = fetch16() + 4;
 
-	if (cur_tlcs900h->size == 1 && num)
+	if (size == 1 && num)
 	{
-		if ((rCodeW(cur_tlcs900h->rCode) % num) == 0)
-			rCodeW(cur_tlcs900h->rCode) += (num - 4);
+		if ((rCodeW(rCode) % num) == 0)
+			rCodeW(rCode) += (num - 4);
 		else
-			rCodeW(cur_tlcs900h->rCode) -= 4;
+			rCodeW(rCode) -= 4;
 	}
 
-	cur_tlcs900h->cycles = 7;
+	cycles = 7;
 }
 
 //===== MUL RR,r
@@ -834,12 +834,12 @@ void regMUL()
 		return;
 	}
 
-	switch(cur_tlcs900h->size)
+	switch(size)
 	{
-	case 0: rCodeW(target) = (rCodeW(target) & 0xFF) * rCodeB(cur_tlcs900h->rCode);
-		cur_tlcs900h->cycles = 18; break;
-	case 1: rCodeL(target) = (rCodeL(target) & 0xFFFF) * rCodeW(cur_tlcs900h->rCode);	
-		cur_tlcs900h->cycles = 26; break;
+	case 0: rCodeW(target) = (rCodeW(target) & 0xFF) * rCodeB(rCode);
+		cycles = 18; break;
+	case 1: rCodeL(target) = (rCodeL(target) & 0xFFFF) * rCodeW(rCode);	
+		cycles = 26; break;
 	}
 }
 
@@ -853,12 +853,12 @@ void regMULS()
 		return;
 	}
 
-	switch(cur_tlcs900h->size)
+	switch(size)
 	{
-	case 0: rCodeW(target) = (int8)(rCodeW(target) & 0xFF) * (int8)rCodeB(cur_tlcs900h->rCode);	
-		cur_tlcs900h->cycles = 18; break;
-	case 1: rCodeL(target) = (int16)(rCodeL(target) & 0xFFFF) * (int16)rCodeW(cur_tlcs900h->rCode);	
-		cur_tlcs900h->cycles = 26; break;
+	case 0: rCodeW(target) = (int8)(rCodeW(target) & 0xFF) * (int8)rCodeB(rCode);	
+		cycles = 18; break;
+	case 1: rCodeL(target) = (int16)(rCodeL(target) & 0xFFFF) * (int16)rCodeW(rCode);	
+		cycles = 26; break;
 	}
 }
 
@@ -872,14 +872,14 @@ void regDIV()
 		return;
 	}
 
-	switch(cur_tlcs900h->size)
+	switch(size)
 	{
-	case 0: {	rCodeW(target) =  generic_DIV_B(rCodeW(target), rCodeB(cur_tlcs900h->rCode));
-				cur_tlcs900h->cycles = 22;
+	case 0: {	rCodeW(target) =  generic_DIV_B(rCodeW(target), rCodeB(rCode));
+				cycles = 22;
 				break;	}
 
-	case 1: {	rCodeL(target) =  generic_DIV_W(rCodeL(target), rCodeW(cur_tlcs900h->rCode));
-				cur_tlcs900h->cycles = 30;
+	case 1: {	rCodeL(target) =  generic_DIV_W(rCodeL(target), rCodeW(rCode));
+				cycles = 30;
 				break;	}
 	}
 }
@@ -894,14 +894,14 @@ void regDIVS()
 		return;
 	}
 
-	switch(cur_tlcs900h->size)
+	switch(size)
 	{
-	case 0: {	rCodeW(target) = generic_DIVS_B(rCodeW(target), rCodeB(cur_tlcs900h->rCode));
-				cur_tlcs900h->cycles = 24;
+	case 0: {	rCodeW(target) = generic_DIVS_B(rCodeW(target), rCodeB(rCode));
+				cycles = 24;
 				break;	}
 
-	case 1: {	rCodeL(target) = generic_DIVS_W(rCodeL(target), rCodeW(cur_tlcs900h->rCode));
-				cur_tlcs900h->cycles = 32;
+	case 1: {	rCodeL(target) = generic_DIVS_W(rCodeL(target), rCodeW(rCode));
+				cycles = 32;
 				break;	}
 	}
 }
@@ -909,13 +909,13 @@ void regDIVS()
 //===== INC #3,r
 void regINC()
 {
-	uint8 val = cur_tlcs900h->R;
+	uint8 val = R;
 	if (val == 0)
 		val = 8;
 
-	switch(cur_tlcs900h->size)
+	switch(size)
 	{
-	case 0: {	uint8 dst = rCodeB(cur_tlcs900h->rCode);
+	case 0: {	uint8 dst = rCodeB(rCode);
 				uint8 half = (dst & 0xF) + val;
 				uint32 resultC = dst + val;
 				uint8 result = (uint8)(resultC & 0xFF);
@@ -927,27 +927,27 @@ void regINC()
 				SETFLAG_H(half > 0xF);
 				SETFLAG_Z(result == 0);
 				SETFLAG_N0;
-				rCodeB(cur_tlcs900h->rCode) = result;
+				rCodeB(rCode) = result;
 				break;	}
 
-	case 1: {	rCodeW(cur_tlcs900h->rCode) += val; break; }
+	case 1: {	rCodeW(rCode) += val; break; }
 
-	case 2: {	rCodeL(cur_tlcs900h->rCode) += val; break; }
+	case 2: {	rCodeL(rCode) += val; break; }
 	}
 
-	cur_tlcs900h->cycles = 4;
+	cycles = 4;
 }
 
 //===== DEC #3,r
 void regDEC()
 {
-	uint8 val = cur_tlcs900h->R;
+	uint8 val = R;
 	if (val == 0)
 		val = 8;
 
-	switch(cur_tlcs900h->size)
+	switch(size)
 	{
-	case 0: {	uint8 dst = rCodeB(cur_tlcs900h->rCode);
+	case 0: {	uint8 dst = rCodeB(rCode);
 				uint8 half = (dst & 0xF) - val;
 				uint32 resultC = dst - val;
 				uint8 result = (uint8)(resultC & 0xFF);
@@ -959,13 +959,13 @@ void regDEC()
 				SETFLAG_H(half > 0xF);
 				SETFLAG_Z(result == 0);
 				SETFLAG_N1;
-				rCodeB(cur_tlcs900h->rCode) = result;
-				cur_tlcs900h->cycles = 4;
+				rCodeB(rCode) = result;
+				cycles = 4;
 				break;	}
 
-	case 1: {	rCodeW(cur_tlcs900h->rCode) -= val; cur_tlcs900h->cycles = 4; break; }
+	case 1: {	rCodeW(rCode) -= val; cycles = 4; break; }
 
-	case 2: {	rCodeL(cur_tlcs900h->rCode) -= val; cur_tlcs900h->cycles = 5; break; }
+	case 2: {	rCodeL(rCode) -= val; cycles = 5; break; }
 	}
 }
 
@@ -974,197 +974,197 @@ void regSCC()
 {
 	uint32 result;
 
-	if (conditionCode(cur_tlcs900h->second & 0xF))
+	if (conditionCode(second & 0xF))
 		result = 1;
 	else
 		result = 0;
 
-	switch(cur_tlcs900h->size)
+	switch(size)
 	{
-	case 0: rCodeB(cur_tlcs900h->rCode) = (uint8)result; break;
-	case 1: rCodeW(cur_tlcs900h->rCode) = (uint16)result; break;
+	case 0: rCodeB(rCode) = (uint8)result; break;
+	case 1: rCodeW(rCode) = (uint16)result; break;
 	}
 
-	cur_tlcs900h->cycles = 6;
+	cycles = 6;
 }
 
 //===== LD R,r
 void regLDRr()
 {
-	switch(cur_tlcs900h->size)
+	switch(size)
 	{
-	case 0:	regB(cur_tlcs900h->R) = rCodeB(cur_tlcs900h->rCode);	break;
-	case 1:	regW(cur_tlcs900h->R) = rCodeW(cur_tlcs900h->rCode);	break;
-	case 2: regL(cur_tlcs900h->R) = rCodeL(cur_tlcs900h->rCode);	break;
+	case 0:	regB(R) = rCodeB(rCode);	break;
+	case 1:	regW(R) = rCodeW(rCode);	break;
+	case 2: regL(R) = rCodeL(rCode);	break;
 	}
 
-	cur_tlcs900h->cycles = 4;
+	cycles = 4;
 }
 
 //===== LD r,R
 void regLDrR()
 {
-	switch(cur_tlcs900h->size)
+	switch(size)
 	{
-	case 0:	rCodeB(cur_tlcs900h->rCode) = regB(cur_tlcs900h->R);	break;
-	case 1:	rCodeW(cur_tlcs900h->rCode) = regW(cur_tlcs900h->R);	break;
-	case 2: rCodeL(cur_tlcs900h->rCode) = regL(cur_tlcs900h->R);	break;
+	case 0:	rCodeB(rCode) = regB(R);	break;
+	case 1:	rCodeW(rCode) = regW(R);	break;
+	case 2: rCodeL(rCode) = regL(R);	break;
 	}
 
-	cur_tlcs900h->cycles = 4;
+	cycles = 4;
 }
 
 //===== ADD R,r
 void regADD()
 {
-	switch(cur_tlcs900h->size)
+	switch(size)
 	{
-	case 0: regB(cur_tlcs900h->R) = generic_ADD_B(regB(cur_tlcs900h->R), rCodeB(cur_tlcs900h->rCode)); cur_tlcs900h->cycles = 4; break;
-	case 1: regW(cur_tlcs900h->R) = generic_ADD_W(regW(cur_tlcs900h->R), rCodeW(cur_tlcs900h->rCode)); cur_tlcs900h->cycles = 4; break;
-	case 2: regL(cur_tlcs900h->R) = generic_ADD_L(regL(cur_tlcs900h->R), rCodeL(cur_tlcs900h->rCode)); cur_tlcs900h->cycles = 7; break;
+	case 0: regB(R) = generic_ADD_B(regB(R), rCodeB(rCode)); cycles = 4; break;
+	case 1: regW(R) = generic_ADD_W(regW(R), rCodeW(rCode)); cycles = 4; break;
+	case 2: regL(R) = generic_ADD_L(regL(R), rCodeL(rCode)); cycles = 7; break;
 	}
 }
 
 //===== ADC R,r
 void regADC()
 {
-	switch(cur_tlcs900h->size)
+	switch(size)
 	{
-	case 0: regB(cur_tlcs900h->R) = generic_ADC_B(regB(cur_tlcs900h->R), rCodeB(cur_tlcs900h->rCode)); cur_tlcs900h->cycles = 4; break;
-	case 1: regW(cur_tlcs900h->R) = generic_ADC_W(regW(cur_tlcs900h->R), rCodeW(cur_tlcs900h->rCode)); cur_tlcs900h->cycles = 4; break;
-	case 2: regL(cur_tlcs900h->R) = generic_ADC_L(regL(cur_tlcs900h->R), rCodeL(cur_tlcs900h->rCode)); cur_tlcs900h->cycles = 7; break;
+	case 0: regB(R) = generic_ADC_B(regB(R), rCodeB(rCode)); cycles = 4; break;
+	case 1: regW(R) = generic_ADC_W(regW(R), rCodeW(rCode)); cycles = 4; break;
+	case 2: regL(R) = generic_ADC_L(regL(R), rCodeL(rCode)); cycles = 7; break;
 	}
 }
 
 //===== SUB R,r
 void regSUB()
 {
-	switch(cur_tlcs900h->size)
+	switch(size)
 	{
-	case 0: regB(cur_tlcs900h->R) = generic_SUB_B(regB(cur_tlcs900h->R), rCodeB(cur_tlcs900h->rCode)); cur_tlcs900h->cycles = 4; break;
-	case 1: regW(cur_tlcs900h->R) = generic_SUB_W(regW(cur_tlcs900h->R), rCodeW(cur_tlcs900h->rCode)); cur_tlcs900h->cycles = 4; break;
-	case 2: regL(cur_tlcs900h->R) = generic_SUB_L(regL(cur_tlcs900h->R), rCodeL(cur_tlcs900h->rCode)); cur_tlcs900h->cycles = 7; break;
+	case 0: regB(R) = generic_SUB_B(regB(R), rCodeB(rCode)); cycles = 4; break;
+	case 1: regW(R) = generic_SUB_W(regW(R), rCodeW(rCode)); cycles = 4; break;
+	case 2: regL(R) = generic_SUB_L(regL(R), rCodeL(rCode)); cycles = 7; break;
 	}
 }
 
 //===== SBC R,r
 void regSBC()
 {
-	switch(cur_tlcs900h->size)
+	switch(size)
 	{
-	case 0: regB(cur_tlcs900h->R) = generic_SBC_B(regB(cur_tlcs900h->R), rCodeB(cur_tlcs900h->rCode)); cur_tlcs900h->cycles = 4; break;
-	case 1: regW(cur_tlcs900h->R) = generic_SBC_W(regW(cur_tlcs900h->R), rCodeW(cur_tlcs900h->rCode)); cur_tlcs900h->cycles = 4; break;
-	case 2: regL(cur_tlcs900h->R) = generic_SBC_L(regL(cur_tlcs900h->R), rCodeL(cur_tlcs900h->rCode)); cur_tlcs900h->cycles = 7; break;
+	case 0: regB(R) = generic_SBC_B(regB(R), rCodeB(rCode)); cycles = 4; break;
+	case 1: regW(R) = generic_SBC_W(regW(R), rCodeW(rCode)); cycles = 4; break;
+	case 2: regL(R) = generic_SBC_L(regL(R), rCodeL(rCode)); cycles = 7; break;
 	}
 }
 
 //===== LD r,#3
 void regLDr3()
 {
-	switch(cur_tlcs900h->size)
+	switch(size)
 	{
-	case 0:	rCodeB(cur_tlcs900h->rCode) = cur_tlcs900h->R;	break;
-	case 1:	rCodeW(cur_tlcs900h->rCode) = cur_tlcs900h->R;	break;
-	case 2:	rCodeL(cur_tlcs900h->rCode) = cur_tlcs900h->R;	break;
+	case 0:	rCodeB(rCode) = R;	break;
+	case 1:	rCodeW(rCode) = R;	break;
+	case 2:	rCodeL(rCode) = R;	break;
 	}
 
-	cur_tlcs900h->cycles = 4;
+	cycles = 4;
 }
 
 //===== EX R,r
 void regEX()
 {
-	switch(cur_tlcs900h->size)
+	switch(size)
 	{
-	case 0:	{ uint8  temp = regB(cur_tlcs900h->R); regB(cur_tlcs900h->R) = rCodeB(cur_tlcs900h->rCode); rCodeB(cur_tlcs900h->rCode) = temp; break;}
-	case 1:	{ uint16 temp = regW(cur_tlcs900h->R); regW(cur_tlcs900h->R) = rCodeW(cur_tlcs900h->rCode); rCodeW(cur_tlcs900h->rCode) = temp; break;}
-	case 2:	{ uint32 temp = regL(cur_tlcs900h->R); regL(cur_tlcs900h->R) = rCodeL(cur_tlcs900h->rCode); rCodeL(cur_tlcs900h->rCode) = temp; break;}
+	case 0:	{ uint8  temp = regB(R); regB(R) = rCodeB(rCode); rCodeB(rCode) = temp; break;}
+	case 1:	{ uint16 temp = regW(R); regW(R) = rCodeW(rCode); rCodeW(rCode) = temp; break;}
+	case 2:	{ uint32 temp = regL(R); regL(R) = rCodeL(rCode); rCodeL(rCode) = temp; break;}
 	}
 
-	cur_tlcs900h->cycles = 5;
+	cycles = 5;
 }
 
 //===== ADD r,#
 void regADDi()
 {
-	switch(cur_tlcs900h->size)
+	switch(size)
 	{
-	case 0: rCodeB(cur_tlcs900h->rCode) = generic_ADD_B(rCodeB(cur_tlcs900h->rCode), FETCH8); cur_tlcs900h->cycles = 4;break;
-	case 1: rCodeW(cur_tlcs900h->rCode) = generic_ADD_W(rCodeW(cur_tlcs900h->rCode), fetch16()); cur_tlcs900h->cycles = 4;break;
-	case 2: rCodeL(cur_tlcs900h->rCode) = generic_ADD_L(rCodeL(cur_tlcs900h->rCode), fetch32()); cur_tlcs900h->cycles = 7;break;
+	case 0: rCodeB(rCode) = generic_ADD_B(rCodeB(rCode), FETCH8); cycles = 4;break;
+	case 1: rCodeW(rCode) = generic_ADD_W(rCodeW(rCode), fetch16()); cycles = 4;break;
+	case 2: rCodeL(rCode) = generic_ADD_L(rCodeL(rCode), fetch32()); cycles = 7;break;
 	}
 }
 
 //===== ADC r,#
 void regADCi()
 {
-	switch(cur_tlcs900h->size)
+	switch(size)
 	{
-	case 0: rCodeB(cur_tlcs900h->rCode) = generic_ADC_B(rCodeB(cur_tlcs900h->rCode), FETCH8); cur_tlcs900h->cycles = 4;break;
-	case 1: rCodeW(cur_tlcs900h->rCode) = generic_ADC_W(rCodeW(cur_tlcs900h->rCode), fetch16()); cur_tlcs900h->cycles = 4;break;
-	case 2: rCodeL(cur_tlcs900h->rCode) = generic_ADC_L(rCodeL(cur_tlcs900h->rCode), fetch32()); cur_tlcs900h->cycles = 7;break;
+	case 0: rCodeB(rCode) = generic_ADC_B(rCodeB(rCode), FETCH8); cycles = 4;break;
+	case 1: rCodeW(rCode) = generic_ADC_W(rCodeW(rCode), fetch16()); cycles = 4;break;
+	case 2: rCodeL(rCode) = generic_ADC_L(rCodeL(rCode), fetch32()); cycles = 7;break;
 	}
 }
 
 //===== SUB r,#
 void regSUBi()
 {
-	switch(cur_tlcs900h->size)
+	switch(size)
 	{
-	case 0: rCodeB(cur_tlcs900h->rCode) = generic_SUB_B(rCodeB(cur_tlcs900h->rCode), FETCH8); cur_tlcs900h->cycles = 4;break;
-	case 1: rCodeW(cur_tlcs900h->rCode) = generic_SUB_W(rCodeW(cur_tlcs900h->rCode), fetch16()); cur_tlcs900h->cycles = 4;break;
-	case 2: rCodeL(cur_tlcs900h->rCode) = generic_SUB_L(rCodeL(cur_tlcs900h->rCode), fetch32()); cur_tlcs900h->cycles = 7;break;
+	case 0: rCodeB(rCode) = generic_SUB_B(rCodeB(rCode), FETCH8); cycles = 4;break;
+	case 1: rCodeW(rCode) = generic_SUB_W(rCodeW(rCode), fetch16()); cycles = 4;break;
+	case 2: rCodeL(rCode) = generic_SUB_L(rCodeL(rCode), fetch32()); cycles = 7;break;
 	}
 }
 
 //===== SBC r,#
 void regSBCi()
 {
-	switch(cur_tlcs900h->size)
+	switch(size)
 	{
-	case 0: rCodeB(cur_tlcs900h->rCode) = generic_SBC_B(rCodeB(cur_tlcs900h->rCode), FETCH8); cur_tlcs900h->cycles = 4;break;
-	case 1: rCodeW(cur_tlcs900h->rCode) = generic_SBC_W(rCodeW(cur_tlcs900h->rCode), fetch16()); cur_tlcs900h->cycles = 4;break;
-	case 2: rCodeL(cur_tlcs900h->rCode) = generic_SBC_L(rCodeL(cur_tlcs900h->rCode), fetch32()); cur_tlcs900h->cycles = 7;break;
+	case 0: rCodeB(rCode) = generic_SBC_B(rCodeB(rCode), FETCH8); cycles = 4;break;
+	case 1: rCodeW(rCode) = generic_SBC_W(rCodeW(rCode), fetch16()); cycles = 4;break;
+	case 2: rCodeL(rCode) = generic_SBC_L(rCodeL(rCode), fetch32()); cycles = 7;break;
 	}
 }
 
 //===== CP r,#
 void regCPi()
 {
-	switch(cur_tlcs900h->size)
+	switch(size)
 	{
-	case 0:	generic_SUB_B(rCodeB(cur_tlcs900h->rCode), FETCH8);	cur_tlcs900h->cycles = 4;break;
-	case 1:	generic_SUB_W(rCodeW(cur_tlcs900h->rCode), fetch16());cur_tlcs900h->cycles = 4;	break;
-	case 2:	generic_SUB_L(rCodeL(cur_tlcs900h->rCode), fetch32());cur_tlcs900h->cycles = 7;	break;
+	case 0:	generic_SUB_B(rCodeB(rCode), FETCH8);	cycles = 4;break;
+	case 1:	generic_SUB_W(rCodeW(rCode), fetch16());cycles = 4;	break;
+	case 2:	generic_SUB_L(rCodeL(rCode), fetch32());cycles = 7;	break;
 	}
 }
 
 //===== AND r,#
 void regANDi()
 {
-	switch(cur_tlcs900h->size)
+	switch(size)
 	{
-	case 0:	{	uint8 result = rCodeB(cur_tlcs900h->rCode) & FETCH8;
-				rCodeB(cur_tlcs900h->rCode) = result;
+	case 0:	{	uint8 result = rCodeB(rCode) & FETCH8;
+				rCodeB(rCode) = result;
 				SETFLAG_Z(result == 0);
 				SETFLAG_S(result & 0x80);
 				parityB(result);
-				cur_tlcs900h->cycles = 4;
+				cycles = 4;
 				break; }
 	
-	case 1: {	uint16 result = rCodeW(cur_tlcs900h->rCode) & fetch16();
-				rCodeW(cur_tlcs900h->rCode) = result;
+	case 1: {	uint16 result = rCodeW(rCode) & fetch16();
+				rCodeW(rCode) = result;
 				SETFLAG_Z(result == 0);
 				SETFLAG_S(result & 0x8000);
 				parityW(result);
-				cur_tlcs900h->cycles = 4;
+				cycles = 4;
 				break; }
 
-	case 2:	{	uint32 result = rCodeL(cur_tlcs900h->rCode) & fetch32();
-				rCodeL(cur_tlcs900h->rCode) = result;
+	case 2:	{	uint32 result = rCodeL(rCode) & fetch32();
+				rCodeL(rCode) = result;
 				SETFLAG_Z(result == 0);
 				SETFLAG_S(result & 0x80000000);
-				cur_tlcs900h->cycles = 7;
+				cycles = 7;
 				break; }
 	}
 
@@ -1176,29 +1176,29 @@ void regANDi()
 //===== OR r,#
 void regORi()
 {
-	switch(cur_tlcs900h->size)
+	switch(size)
 	{
-	case 0: {	uint8 result = rCodeB(cur_tlcs900h->rCode) | FETCH8;
+	case 0: {	uint8 result = rCodeB(rCode) | FETCH8;
 				SETFLAG_S(result & 0x80);
 				SETFLAG_Z(result == 0);
-				rCodeB(cur_tlcs900h->rCode) = result;
+				rCodeB(rCode) = result;
 				parityB(result);
-				cur_tlcs900h->cycles = 4;
+				cycles = 4;
 				break; }
 
-	case 1: {	uint16 result = rCodeW(cur_tlcs900h->rCode) | fetch16();
+	case 1: {	uint16 result = rCodeW(rCode) | fetch16();
 				SETFLAG_S(result & 0x8000);
 				SETFLAG_Z(result == 0);
-				rCodeW(cur_tlcs900h->rCode) = result;
+				rCodeW(rCode) = result;
 				parityW(result);
-				cur_tlcs900h->cycles = 4;
+				cycles = 4;
 				break; }
 
-	case 2: {	uint32 result = rCodeL(cur_tlcs900h->rCode) | fetch32();
+	case 2: {	uint32 result = rCodeL(rCode) | fetch32();
 				SETFLAG_S(result & 0x80000000);
 				SETFLAG_Z(result == 0);
-				rCodeL(cur_tlcs900h->rCode) = result;
-				cur_tlcs900h->cycles = 7;
+				rCodeL(rCode) = result;
+				cycles = 7;
 				break; }
 	}
 
@@ -1210,29 +1210,29 @@ void regORi()
 //===== XOR r,#
 void regXORi()
 {
-	switch(cur_tlcs900h->size)
+	switch(size)
 	{
-	case 0: {	uint8 result = rCodeB(cur_tlcs900h->rCode) ^ FETCH8;
+	case 0: {	uint8 result = rCodeB(rCode) ^ FETCH8;
 				SETFLAG_S(result & 0x80);
 				SETFLAG_Z(result == 0);
-				rCodeB(cur_tlcs900h->rCode) = result;
+				rCodeB(rCode) = result;
 				parityB(result);
-				cur_tlcs900h->cycles = 4;
+				cycles = 4;
 				break; }
 
-	case 1: {	uint16 result = rCodeW(cur_tlcs900h->rCode) ^ fetch16();
+	case 1: {	uint16 result = rCodeW(rCode) ^ fetch16();
 				SETFLAG_S(result & 0x8000);
 				SETFLAG_Z(result == 0);
-				rCodeW(cur_tlcs900h->rCode) = result;
+				rCodeW(rCode) = result;
 				parityW(result);
-				cur_tlcs900h->cycles = 4;
+				cycles = 4;
 				break; }
 
-	case 2: {	uint32 result = rCodeL(cur_tlcs900h->rCode) ^ fetch32();
+	case 2: {	uint32 result = rCodeL(rCode) ^ fetch32();
 				SETFLAG_S(result & 0x80000000);
 				SETFLAG_Z(result == 0);
-				rCodeL(cur_tlcs900h->rCode) = result;
-				cur_tlcs900h->cycles = 7;
+				rCodeL(rCode) = result;
+				cycles = 7;
 				break; }
 	}
 
@@ -1244,29 +1244,29 @@ void regXORi()
 //===== AND R,r
 void regAND()
 {
-	switch(cur_tlcs900h->size)
+	switch(size)
 	{
-	case 0: {	uint8 result = regB(cur_tlcs900h->R) & rCodeB(cur_tlcs900h->rCode);
+	case 0: {	uint8 result = regB(R) & rCodeB(rCode);
 				SETFLAG_S(result & 0x80);
 				SETFLAG_Z(result == 0);
-				regB(cur_tlcs900h->R) = result;
+				regB(R) = result;
 				parityB(result);
-				cur_tlcs900h->cycles = 4;
+				cycles = 4;
 				break; }
 
-	case 1: {	uint16 result = regW(cur_tlcs900h->R) & rCodeW(cur_tlcs900h->rCode);
+	case 1: {	uint16 result = regW(R) & rCodeW(rCode);
 				SETFLAG_S(result & 0x8000);
 				SETFLAG_Z(result == 0);
-				regW(cur_tlcs900h->R) = result;
+				regW(R) = result;
 				parityW(result);
-				cur_tlcs900h->cycles = 4;
+				cycles = 4;
 				break; }
 
-	case 2: {	uint32 result = regL(cur_tlcs900h->R) & rCodeL(cur_tlcs900h->rCode);
+	case 2: {	uint32 result = regL(R) & rCodeL(rCode);
 				SETFLAG_S(result & 0x80000000);
 				SETFLAG_Z(result == 0);
-				regL(cur_tlcs900h->R) = result;
-				cur_tlcs900h->cycles = 7;
+				regL(R) = result;
+				cycles = 7;
 				break; }
 	}
 
@@ -1278,29 +1278,29 @@ void regAND()
 //===== OR R,r
 void regOR()
 {
-	switch(cur_tlcs900h->size)
+	switch(size)
 	{
-	case 0: {	uint8 result = regB(cur_tlcs900h->R) | rCodeB(cur_tlcs900h->rCode);
+	case 0: {	uint8 result = regB(R) | rCodeB(rCode);
 				SETFLAG_S(result & 0x80);
 				SETFLAG_Z(result == 0);
-				regB(cur_tlcs900h->R) = result;
+				regB(R) = result;
 				parityB(result);
-				cur_tlcs900h->cycles = 4;
+				cycles = 4;
 				break; }
 
-	case 1: {	uint16 result = regW(cur_tlcs900h->R) | rCodeW(cur_tlcs900h->rCode);
+	case 1: {	uint16 result = regW(R) | rCodeW(rCode);
 				SETFLAG_S(result & 0x8000);
 				SETFLAG_Z(result == 0);
-				regW(cur_tlcs900h->R) = result;
+				regW(R) = result;
 				parityW(result);
-				cur_tlcs900h->cycles = 4;
+				cycles = 4;
 				break; }
 
-	case 2: {	uint32 result = regL(cur_tlcs900h->R) | rCodeL(cur_tlcs900h->rCode);
+	case 2: {	uint32 result = regL(R) | rCodeL(rCode);
 				SETFLAG_S(result & 0x80000000);
 				SETFLAG_Z(result == 0);
-				regL(cur_tlcs900h->R) = result;
-				cur_tlcs900h->cycles = 7;
+				regL(R) = result;
+				cycles = 7;
 				break; }
 	}
 
@@ -1312,29 +1312,29 @@ void regOR()
 //===== XOR R,r
 void regXOR()
 {
-	switch(cur_tlcs900h->size)
+	switch(size)
 	{
-	case 0: {	uint8 result = regB(cur_tlcs900h->R) ^ rCodeB(cur_tlcs900h->rCode);
+	case 0: {	uint8 result = regB(R) ^ rCodeB(rCode);
 				SETFLAG_S(result & 0x80);
 				SETFLAG_Z(result == 0);
-				regB(cur_tlcs900h->R) = result;
+				regB(R) = result;
 				parityB(result);
-				cur_tlcs900h->cycles = 4;
+				cycles = 4;
 				break; }
 
-	case 1: {	uint16 result = regW(cur_tlcs900h->R) ^ rCodeW(cur_tlcs900h->rCode);
+	case 1: {	uint16 result = regW(R) ^ rCodeW(rCode);
 				SETFLAG_S(result & 0x8000);
 				SETFLAG_Z(result == 0);
-				regW(cur_tlcs900h->R) = result;
+				regW(R) = result;
 				parityW(result);
-				cur_tlcs900h->cycles = 4;
+				cycles = 4;
 				break; }
 
-	case 2: {	uint32 result = regL(cur_tlcs900h->R) ^ rCodeL(cur_tlcs900h->rCode);
+	case 2: {	uint32 result = regL(R) ^ rCodeL(rCode);
 				SETFLAG_S(result & 0x80000000);
 				SETFLAG_Z(result == 0);
-				regL(cur_tlcs900h->R) = result;
-				cur_tlcs900h->cycles = 7;
+				regL(R) = result;
+				cycles = 7;
 				break; }
 	}
 
@@ -1346,23 +1346,23 @@ void regXOR()
 //===== CP r,#3
 void regCPr3()
 {	
-	switch(cur_tlcs900h->size)
+	switch(size)
 	{
-	case 0:	generic_SUB_B(rCodeB(cur_tlcs900h->rCode), cur_tlcs900h->R);	break;
-	case 1:	generic_SUB_W(rCodeW(cur_tlcs900h->rCode), cur_tlcs900h->R);	break;
+	case 0:	generic_SUB_B(rCodeB(rCode), R);	break;
+	case 1:	generic_SUB_W(rCodeW(rCode), R);	break;
 	}
 
-	cur_tlcs900h->cycles = 4;
+	cycles = 4;
 }
 
 //===== CP R,r
 void regCP()
 {
-	switch(cur_tlcs900h->size)
+	switch(size)
 	{
-	case 0:	generic_SUB_B(regB(cur_tlcs900h->R), rCodeB(cur_tlcs900h->rCode));cur_tlcs900h->cycles = 4;	break;
-	case 1:	generic_SUB_W(regW(cur_tlcs900h->R), rCodeW(cur_tlcs900h->rCode));cur_tlcs900h->cycles = 4;	break;
-	case 2:	generic_SUB_L(regL(cur_tlcs900h->R), rCodeL(cur_tlcs900h->rCode));cur_tlcs900h->cycles = 7;	break;
+	case 0:	generic_SUB_B(regB(R), rCodeB(rCode));cycles = 4;	break;
+	case 1:	generic_SUB_W(regW(R), rCodeW(rCode));cycles = 4;	break;
+	case 2:	generic_SUB_L(regL(R), rCodeL(rCode));cycles = 7;	break;
 	}
 }
 
@@ -1373,41 +1373,41 @@ void regRLCi()
 	uint8 sa = FETCH8 & 0xF;
 	if (sa == 0) sa = 16;
 
-	switch(cur_tlcs900h->size)
+	switch(size)
 	{
 	case 0:		for (i = 0; i < sa; i++) 
 				{
-					SETFLAG_C(rCodeB(cur_tlcs900h->rCode) & 0x80);
-					rCodeB(cur_tlcs900h->rCode) <<= 1;
-					if (FLAG_C) rCodeB(cur_tlcs900h->rCode) |= 1;
+					SETFLAG_C(rCodeB(rCode) & 0x80);
+					rCodeB(rCode) <<= 1;
+					if (FLAG_C) rCodeB(rCode) |= 1;
 				}
-				SETFLAG_S(rCodeB(cur_tlcs900h->rCode) & 0x80);
-				SETFLAG_Z(rCodeB(cur_tlcs900h->rCode) == 0);
-				parityB(rCodeB(cur_tlcs900h->rCode));
-				cur_tlcs900h->cycles = 6 + (2*sa);
+				SETFLAG_S(rCodeB(rCode) & 0x80);
+				SETFLAG_Z(rCodeB(rCode) == 0);
+				parityB(rCodeB(rCode));
+				cycles = 6 + (2*sa);
 				break;
 		
 	case 1:		for (i = 0; i < sa; i++) 
 				{	
-					SETFLAG_C(rCodeW(cur_tlcs900h->rCode) & 0x8000); 
-					rCodeW(cur_tlcs900h->rCode) <<= 1;
-					if (FLAG_C) rCodeW(cur_tlcs900h->rCode) |= 1;
+					SETFLAG_C(rCodeW(rCode) & 0x8000); 
+					rCodeW(rCode) <<= 1;
+					if (FLAG_C) rCodeW(rCode) |= 1;
 				}
-				SETFLAG_S(rCodeW(cur_tlcs900h->rCode) & 0x8000);
-				SETFLAG_Z(rCodeW(cur_tlcs900h->rCode) == 0);
-				parityW(rCodeW(cur_tlcs900h->rCode));
-				cur_tlcs900h->cycles = 6 + (2*sa);
+				SETFLAG_S(rCodeW(rCode) & 0x8000);
+				SETFLAG_Z(rCodeW(rCode) == 0);
+				parityW(rCodeW(rCode));
+				cycles = 6 + (2*sa);
 				break;
 
 	case 2:		for (i = 0; i < sa; i++) 
 				{
-					SETFLAG_C(rCodeL(cur_tlcs900h->rCode) & 0x80000000);
-					rCodeL(cur_tlcs900h->rCode) <<= 1;
-					if (FLAG_C) rCodeL(cur_tlcs900h->rCode) |= 1;
+					SETFLAG_C(rCodeL(rCode) & 0x80000000);
+					rCodeL(rCode) <<= 1;
+					if (FLAG_C) rCodeL(rCode) |= 1;
 				}
-				SETFLAG_S(rCodeL(cur_tlcs900h->rCode) & 0x80000000);
-				SETFLAG_Z(rCodeL(cur_tlcs900h->rCode) == 0);
-				cur_tlcs900h->cycles = 8 + (2*sa);
+				SETFLAG_S(rCodeL(rCode) & 0x80000000);
+				SETFLAG_Z(rCodeL(rCode) == 0);
+				cycles = 8 + (2*sa);
 				break;
 	}
 
@@ -1422,41 +1422,41 @@ void regRRCi()
 	uint8 sa = FETCH8 & 0xF;
 	if (sa == 0) sa = 16;
 
-	switch(cur_tlcs900h->size)
+	switch(size)
 	{
 	case 0:		for (i = 0; i < sa; i++) 
 				{
-					SETFLAG_C(rCodeB(cur_tlcs900h->rCode) & 1);
-					rCodeB(cur_tlcs900h->rCode) >>= 1;
-					if (FLAG_C) rCodeB(cur_tlcs900h->rCode) |= 0x80;
+					SETFLAG_C(rCodeB(rCode) & 1);
+					rCodeB(rCode) >>= 1;
+					if (FLAG_C) rCodeB(rCode) |= 0x80;
 				}
-				SETFLAG_S(rCodeB(cur_tlcs900h->rCode) & 0x80);
-				SETFLAG_Z(rCodeB(cur_tlcs900h->rCode) == 0);
-				parityB(rCodeB(cur_tlcs900h->rCode));
-				cur_tlcs900h->cycles = 6 + (2*sa);
+				SETFLAG_S(rCodeB(rCode) & 0x80);
+				SETFLAG_Z(rCodeB(rCode) == 0);
+				parityB(rCodeB(rCode));
+				cycles = 6 + (2*sa);
 				break;
 		
 	case 1:		for (i = 0; i < sa; i++) 
 				{
-					SETFLAG_C(rCodeW(cur_tlcs900h->rCode) & 1);
-					rCodeW(cur_tlcs900h->rCode) >>= 1;
-					if (FLAG_C) rCodeW(cur_tlcs900h->rCode) |= 0x8000;
+					SETFLAG_C(rCodeW(rCode) & 1);
+					rCodeW(rCode) >>= 1;
+					if (FLAG_C) rCodeW(rCode) |= 0x8000;
 				}
-				SETFLAG_S(rCodeW(cur_tlcs900h->rCode) & 0x8000);
-				SETFLAG_Z(rCodeW(cur_tlcs900h->rCode) == 0);
-				parityW(rCodeW(cur_tlcs900h->rCode));
-				cur_tlcs900h->cycles = 6 + (2*sa);
+				SETFLAG_S(rCodeW(rCode) & 0x8000);
+				SETFLAG_Z(rCodeW(rCode) == 0);
+				parityW(rCodeW(rCode));
+				cycles = 6 + (2*sa);
 				break;
 
 	case 2:		for (i = 0; i < sa; i++) 
 				{
-					SETFLAG_C(rCodeL(cur_tlcs900h->rCode) & 1);
-					rCodeL(cur_tlcs900h->rCode) >>= 1;
-					if (FLAG_C) rCodeL(cur_tlcs900h->rCode) |= 0x80000000;
+					SETFLAG_C(rCodeL(rCode) & 1);
+					rCodeL(rCode) >>= 1;
+					if (FLAG_C) rCodeL(rCode) |= 0x80000000;
 				}
-				SETFLAG_S(rCodeL(cur_tlcs900h->rCode) & 0x80000000);
-				SETFLAG_Z(rCodeL(cur_tlcs900h->rCode) == 0);
-				cur_tlcs900h->cycles = 8 + (2*sa);
+				SETFLAG_S(rCodeL(rCode) & 0x80000000);
+				SETFLAG_Z(rCodeL(rCode) == 0);
+				cycles = 8 + (2*sa);
 				break;
 	}
 
@@ -1473,24 +1473,24 @@ void regRLi(void)
 	if (sa == 0)
       sa = 16;
 
-	switch(cur_tlcs900h->size)
+	switch(size)
    {
       case 0:
          {
             uint8 result = 0;
             for (i = 0; i < sa; i++) 
             {
-               result = rCodeB(cur_tlcs900h->rCode);
+               result = rCodeB(rCode);
                tempC = FLAG_C;
                SETFLAG_C(result & 0x80);
                result <<= 1;
                if (tempC) result |= 1;
-               rCodeB(cur_tlcs900h->rCode) = result;
+               rCodeB(rCode) = result;
             }
             SETFLAG_S(result & 0x80);
             SETFLAG_Z(result == 0);
             parityB(result);
-            cur_tlcs900h->cycles = 6 + (2*sa);
+            cycles = 6 + (2*sa);
          }
          break;
 
@@ -1499,17 +1499,17 @@ void regRLi(void)
             uint16 result = 0;
             for (i = 0; i < sa; i++) 
             {
-               result = rCodeW(cur_tlcs900h->rCode);
+               result = rCodeW(rCode);
                tempC = FLAG_C;
                SETFLAG_C(result & 0x8000);
                result <<= 1;
                if (tempC) result |= 1;
-               rCodeW(cur_tlcs900h->rCode) = result;
+               rCodeW(rCode) = result;
             }
             SETFLAG_S(result & 0x8000);
             SETFLAG_Z(result == 0);
             parityW(result);
-            cur_tlcs900h->cycles = 6 + (2*sa);
+            cycles = 6 + (2*sa);
          }
          break;
 
@@ -1518,16 +1518,16 @@ void regRLi(void)
             uint32 result = 0;
             for (i = 0; i < sa; i++) 
             {
-               result = rCodeL(cur_tlcs900h->rCode);
+               result = rCodeL(rCode);
                tempC = FLAG_C;
                SETFLAG_C(result & 0x80000000);
                result <<= 1;
                if (tempC) result |= 1;
-               rCodeL(cur_tlcs900h->rCode) = result;
+               rCodeL(rCode) = result;
             }
             SETFLAG_S(result & 0x80000000);
             SETFLAG_Z(result == 0);
-            cur_tlcs900h->cycles = 8 + (2*sa);
+            cycles = 8 + (2*sa);
          }
          break;
    }
@@ -1545,23 +1545,23 @@ void regRRi(void)
 	if (sa == 0)
       sa = 16;
 
-	switch(cur_tlcs900h->size)
+	switch(size)
    {
       case 0:
          {
             uint8 result = 0;
             for (i = 0; i < sa; i++) 
             {
-               result = rCodeB(cur_tlcs900h->rCode);
+               result = rCodeB(rCode);
                tempC = FLAG_C;
                SETFLAG_C(result & 0x01);
                result >>= 1;
                if (tempC) result |= 0x80;
-               rCodeB(cur_tlcs900h->rCode) = result;
+               rCodeB(rCode) = result;
             }
             SETFLAG_S(result & 0x80);
             SETFLAG_Z(result == 0);
-            cur_tlcs900h->cycles = 6 + (2*sa);
+            cycles = 6 + (2*sa);
             parityB(result);
          }
          break;
@@ -1570,16 +1570,16 @@ void regRRi(void)
             uint16 result = 0;
             for (i = 0; i < sa; i++) 
             {
-               result = rCodeW(cur_tlcs900h->rCode);
+               result = rCodeW(rCode);
                tempC = FLAG_C;
                SETFLAG_C(result & 0x01);
                result >>= 1;
                if (tempC) result |= 0x8000;
-               rCodeW(cur_tlcs900h->rCode) = result;
+               rCodeW(rCode) = result;
             }
             SETFLAG_S(result & 0x8000);
             SETFLAG_Z(result == 0);
-            cur_tlcs900h->cycles = 6 + (2*sa);
+            cycles = 6 + (2*sa);
             parityW(result);
          }
          break;
@@ -1589,16 +1589,16 @@ void regRRi(void)
             uint32 result = 0;
             for (i = 0; i < sa; i++) 
             {
-               result = rCodeL(cur_tlcs900h->rCode);
+               result = rCodeL(rCode);
                tempC = FLAG_C;
                SETFLAG_C(result & 0x01);
                result >>= 1;
                if (tempC) result |= 0x80000000;
-               rCodeL(cur_tlcs900h->rCode) = result;
+               rCodeL(rCode) = result;
             }
             SETFLAG_S(result & 0x80000000);
             SETFLAG_Z(result == 0);
-            cur_tlcs900h->cycles = 8 + (2*sa);
+            cycles = 8 + (2*sa);
          }
          break;
    }
@@ -1614,38 +1614,38 @@ void regSLAi()
 	if (sa == 0) sa = 16;
 	sa--;
 
-	switch(cur_tlcs900h->size)
+	switch(size)
 	{
-	case 0:	{	int8 result, data = (int8)rCodeB(cur_tlcs900h->rCode);
+	case 0:	{	int8 result, data = (int8)rCodeB(rCode);
 				result = (data << sa);
 				SETFLAG_C(result & 0x80);
 				result <<= 1;
 				SETFLAG_S(result & 0x80);
-				rCodeB(cur_tlcs900h->rCode) = result;
+				rCodeB(rCode) = result;
 				SETFLAG_Z(result == 0);
 				parityB(result);
-				cur_tlcs900h->cycles = 6 + 2 + (2*sa);
+				cycles = 6 + 2 + (2*sa);
 				break;	}
 	
-	case 1:	{	int16 result, data = (int16)rCodeW(cur_tlcs900h->rCode);
+	case 1:	{	int16 result, data = (int16)rCodeW(rCode);
 				result = (data << sa);
 				SETFLAG_C(result & 0x8000);
 				result <<= 1;
 				SETFLAG_S(result & 0x8000);
-				rCodeW(cur_tlcs900h->rCode) = result;
+				rCodeW(rCode) = result;
 				SETFLAG_Z(result == 0);
 				parityW(result);
-				cur_tlcs900h->cycles = 6 + 2 + (2*sa);
+				cycles = 6 + 2 + (2*sa);
 				break;	}
 
-	case 2:	{	int32 result, data = (int32)rCodeL(cur_tlcs900h->rCode);
+	case 2:	{	int32 result, data = (int32)rCodeL(rCode);
 				result = (data << sa);
 				SETFLAG_C(result & 0x80000000);
 				result <<= 1;
 				SETFLAG_S(result & 0x80000000);
-				rCodeL(cur_tlcs900h->rCode) = result;
+				rCodeL(rCode) = result;
 				SETFLAG_Z(result == 0);
-				cur_tlcs900h->cycles = 8 + 2 + (2*sa);
+				cycles = 8 + 2 + (2*sa);
 				break;	}
 	}
 
@@ -1660,38 +1660,38 @@ void regSRAi()
 	if (sa == 0) sa = 16;
 	sa--;
 
-	switch(cur_tlcs900h->size)
+	switch(size)
 	{
-	case 0:	{	int8 data = (int8)rCodeB(cur_tlcs900h->rCode), result;
+	case 0:	{	int8 data = (int8)rCodeB(rCode), result;
 				result = (data >> sa);
 				SETFLAG_C(result & 1);
 				result >>= 1;
 				SETFLAG_S(result & 0x80);
-				rCodeB(cur_tlcs900h->rCode) = result;
+				rCodeB(rCode) = result;
 				SETFLAG_Z(result == 0);
 				parityB(result);
-				cur_tlcs900h->cycles = 6 + 2 + (2*sa);
+				cycles = 6 + 2 + (2*sa);
 				break; }
 
-	case 1:	{	int16 data = (int16)rCodeW(cur_tlcs900h->rCode), result;
+	case 1:	{	int16 data = (int16)rCodeW(rCode), result;
 				result = (data >> sa);
 				SETFLAG_C(result & 1);
 				result >>= 1;
 				SETFLAG_S(result & 0x8000);
-				rCodeW(cur_tlcs900h->rCode) = result;
+				rCodeW(rCode) = result;
 				SETFLAG_Z(result == 0);
 				parityW(result);
-				cur_tlcs900h->cycles = 6 + 2 + (2*sa);
+				cycles = 6 + 2 + (2*sa);
 				break; }
 
-	case 2:	{	int32 data = (int32)rCodeL(cur_tlcs900h->rCode), result;
+	case 2:	{	int32 data = (int32)rCodeL(rCode), result;
 				result = (data >> sa);
 				SETFLAG_C(result & 1);
 				result >>= 1;
 				SETFLAG_S(result & 0x80000000);
-				rCodeL(cur_tlcs900h->rCode) = result;
+				rCodeL(rCode) = result;
 				SETFLAG_Z(result == 0);
-				cur_tlcs900h->cycles = 8 + 2 + (2*sa);
+				cycles = 8 + 2 + (2*sa);
 				break; }
 	}
 
@@ -1706,38 +1706,38 @@ void regSLLi()
 	if (sa == 0) sa = 16;
 	sa--;
 
-	switch(cur_tlcs900h->size)
+	switch(size)
 	{
-	case 0:	{	uint8 result, data = rCodeB(cur_tlcs900h->rCode);
+	case 0:	{	uint8 result, data = rCodeB(rCode);
 				result = (data << sa);
 				SETFLAG_C(result & 0x80);
 				result <<= 1;
 				SETFLAG_S(result & 0x80);
-				rCodeB(cur_tlcs900h->rCode) = result;
+				rCodeB(rCode) = result;
 				SETFLAG_Z(result == 0);
 				parityB(result);
-				cur_tlcs900h->cycles = 6 + 2 + (2*sa);
+				cycles = 6 + 2 + (2*sa);
 				break;	}
 	
-	case 1:	{	uint16 result, data = rCodeW(cur_tlcs900h->rCode);
+	case 1:	{	uint16 result, data = rCodeW(rCode);
 				result = (data << sa);
 				SETFLAG_C(result & 0x8000);
 				result <<= 1;
 				SETFLAG_S(result & 0x8000);
-				rCodeW(cur_tlcs900h->rCode) = result;
+				rCodeW(rCode) = result;
 				SETFLAG_Z(result == 0);
 				parityW(result);
-				cur_tlcs900h->cycles = 6 + 2 + (2*sa);
+				cycles = 6 + 2 + (2*sa);
 				break;	}
 
-	case 2:	{	uint32 result, data = rCodeL(cur_tlcs900h->rCode);
+	case 2:	{	uint32 result, data = rCodeL(rCode);
 				result = (data << sa);
 				SETFLAG_C(result & 0x80000000);
 				result <<= 1;
 				SETFLAG_S(result & 0x80000000);
-				rCodeL(cur_tlcs900h->rCode) = result;
+				rCodeL(rCode) = result;
 				SETFLAG_Z(result == 0);
-				cur_tlcs900h->cycles = 8 + 2 + (2*sa);
+				cycles = 8 + 2 + (2*sa);
 				break;	}
 	}
 
@@ -1752,38 +1752,38 @@ void regSRLi()
 	if (sa == 0) sa = 16;
 	sa--;
 
-	switch(cur_tlcs900h->size)
+	switch(size)
 	{
-	case 0:	{	uint8 data = rCodeB(cur_tlcs900h->rCode), result;
+	case 0:	{	uint8 data = rCodeB(rCode), result;
 				result = (data >> sa);
 				SETFLAG_C(result & 1);
 				result >>= 1;
 				SETFLAG_S(result & 0x80);
-				rCodeB(cur_tlcs900h->rCode) = result;
+				rCodeB(rCode) = result;
 				SETFLAG_Z(result == 0);
 				parityB(result);
-				cur_tlcs900h->cycles = 6 + 2 + (2*sa);
+				cycles = 6 + 2 + (2*sa);
 				break; }
 
-	case 1:	{	uint16 data = rCodeW(cur_tlcs900h->rCode), result;
+	case 1:	{	uint16 data = rCodeW(rCode), result;
 				result = (data >> sa);
 				SETFLAG_C(result & 1);
 				result >>= 1;
 				SETFLAG_S(result & 0x8000);
-				rCodeW(cur_tlcs900h->rCode) = result;
+				rCodeW(rCode) = result;
 				SETFLAG_Z(result == 0);
 				parityW(result);
-				cur_tlcs900h->cycles = 6 + 2 + (2*sa);
+				cycles = 6 + 2 + (2*sa);
 				break; }
 
-	case 2:	{	uint32 data = rCodeL(cur_tlcs900h->rCode), result;
+	case 2:	{	uint32 data = rCodeL(rCode), result;
 				result = (data >> sa);
 				SETFLAG_C(result & 1);
 				result >>= 1;
 				SETFLAG_S(result & 0x80000000);
-				rCodeL(cur_tlcs900h->rCode) = result;
+				rCodeL(rCode) = result;
 				SETFLAG_Z(result == 0);
-				cur_tlcs900h->cycles = 8 + 2 + (2*sa);
+				cycles = 8 + 2 + (2*sa);
 				break; }
 	}
 
@@ -1798,41 +1798,41 @@ void regRLCA()
 	uint8 sa = REGA & 0xF;
 	if (sa == 0) sa = 16;
 
-	switch(cur_tlcs900h->size)
+	switch(size)
 	{
 	case 0:	for (i = 0; i < sa; i++) 
 			{
-				SETFLAG_C(rCodeB(cur_tlcs900h->rCode) & 0x80); 
-				rCodeB(cur_tlcs900h->rCode) <<= 1;
-				if (FLAG_C) rCodeB(cur_tlcs900h->rCode) |= 1;	
+				SETFLAG_C(rCodeB(rCode) & 0x80); 
+				rCodeB(rCode) <<= 1;
+				if (FLAG_C) rCodeB(rCode) |= 1;	
 			}
-			SETFLAG_S(rCodeB(cur_tlcs900h->rCode) & 0x80);
-			SETFLAG_Z(rCodeB(cur_tlcs900h->rCode) == 0);
-			cur_tlcs900h->cycles = 6 + (2*sa);
-			parityB(rCodeB(cur_tlcs900h->rCode));
+			SETFLAG_S(rCodeB(rCode) & 0x80);
+			SETFLAG_Z(rCodeB(rCode) == 0);
+			cycles = 6 + (2*sa);
+			parityB(rCodeB(rCode));
 			break;
 		
 	case 1:	for (i = 0; i < sa; i++) 
 			{
-				SETFLAG_C(rCodeW(cur_tlcs900h->rCode) & 0x8000);
-				rCodeW(cur_tlcs900h->rCode) <<= 1;
-				if (FLAG_C) rCodeW(cur_tlcs900h->rCode) |= 1;
+				SETFLAG_C(rCodeW(rCode) & 0x8000);
+				rCodeW(rCode) <<= 1;
+				if (FLAG_C) rCodeW(rCode) |= 1;
 			}
-			SETFLAG_S(rCodeW(cur_tlcs900h->rCode) & 0x8000);
-			SETFLAG_Z(rCodeW(cur_tlcs900h->rCode) == 0);
-			cur_tlcs900h->cycles = 6 + (2*sa);
-			parityW(rCodeW(cur_tlcs900h->rCode));
+			SETFLAG_S(rCodeW(rCode) & 0x8000);
+			SETFLAG_Z(rCodeW(rCode) == 0);
+			cycles = 6 + (2*sa);
+			parityW(rCodeW(rCode));
 			break;
 
 	case 2:	for (i = 0; i < sa; i++) 
 			{
-				SETFLAG_C(rCodeL(cur_tlcs900h->rCode) & 0x80000000);
-				rCodeL(cur_tlcs900h->rCode) <<= 1;
-				if (FLAG_C) rCodeL(cur_tlcs900h->rCode) |= 1;
+				SETFLAG_C(rCodeL(rCode) & 0x80000000);
+				rCodeL(rCode) <<= 1;
+				if (FLAG_C) rCodeL(rCode) |= 1;
 			}
-			SETFLAG_S(rCodeL(cur_tlcs900h->rCode) & 0x80000000);
-			SETFLAG_Z(rCodeL(cur_tlcs900h->rCode) == 0);
-			cur_tlcs900h->cycles = 8 + (2*sa);
+			SETFLAG_S(rCodeL(rCode) & 0x80000000);
+			SETFLAG_Z(rCodeL(rCode) == 0);
+			cycles = 8 + (2*sa);
 			break;
 	}
 
@@ -1847,41 +1847,41 @@ void regRRCA()
 	uint8 sa = REGA & 0xF;
 	if (sa == 0) sa = 16;
 
-	switch(cur_tlcs900h->size)
+	switch(size)
 	{
 	case 0:	for (i = 0; i < sa; i++) 
 			{
-				SETFLAG_C(rCodeB(cur_tlcs900h->rCode) & 1);
-				rCodeB(cur_tlcs900h->rCode) >>= 1;
-				if (FLAG_C) rCodeB(cur_tlcs900h->rCode) |= 0x80;	
+				SETFLAG_C(rCodeB(rCode) & 1);
+				rCodeB(rCode) >>= 1;
+				if (FLAG_C) rCodeB(rCode) |= 0x80;	
 			}
-			SETFLAG_S(rCodeB(cur_tlcs900h->rCode) & 0x80);
-			SETFLAG_Z(rCodeB(cur_tlcs900h->rCode) == 0);
-			parityB(rCodeB(cur_tlcs900h->rCode));
-			cur_tlcs900h->cycles = 6 + (2*sa);
+			SETFLAG_S(rCodeB(rCode) & 0x80);
+			SETFLAG_Z(rCodeB(rCode) == 0);
+			parityB(rCodeB(rCode));
+			cycles = 6 + (2*sa);
 			break;
 		
 	case 1:	for (i = 0; i < sa; i++) 
 			{
-				SETFLAG_C(rCodeW(cur_tlcs900h->rCode) & 1); 
-				rCodeW(cur_tlcs900h->rCode) >>= 1;
-				if (FLAG_C) rCodeW(cur_tlcs900h->rCode) |= 0x8000;
+				SETFLAG_C(rCodeW(rCode) & 1); 
+				rCodeW(rCode) >>= 1;
+				if (FLAG_C) rCodeW(rCode) |= 0x8000;
 			}
-			SETFLAG_S(rCodeW(cur_tlcs900h->rCode) & 0x8000);
-			SETFLAG_Z(rCodeW(cur_tlcs900h->rCode) == 0);
-			parityW(rCodeW(cur_tlcs900h->rCode));
-			cur_tlcs900h->cycles = 6 + (2*sa);
+			SETFLAG_S(rCodeW(rCode) & 0x8000);
+			SETFLAG_Z(rCodeW(rCode) == 0);
+			parityW(rCodeW(rCode));
+			cycles = 6 + (2*sa);
 			break;
 
 	case 2:	for (i = 0; i < sa; i++) 
 			{
-				SETFLAG_C(rCodeL(cur_tlcs900h->rCode) & 1);
-				rCodeL(cur_tlcs900h->rCode) >>= 1;
-				if (FLAG_C) rCodeL(cur_tlcs900h->rCode) |= 0x80000000;
+				SETFLAG_C(rCodeL(rCode) & 1);
+				rCodeL(rCode) >>= 1;
+				if (FLAG_C) rCodeL(rCode) |= 0x80000000;
 			}
-			SETFLAG_S(rCodeL(cur_tlcs900h->rCode) & 0x80000000);
-			SETFLAG_Z(rCodeL(cur_tlcs900h->rCode) == 0);
-			cur_tlcs900h->cycles = 8 + (2*sa);
+			SETFLAG_S(rCodeL(rCode) & 0x80000000);
+			SETFLAG_Z(rCodeL(rCode) == 0);
+			cycles = 8 + (2*sa);
 			break;
 	}
 
@@ -1898,23 +1898,23 @@ void regRLA(void)
    if (sa == 0)
       sa = 16;
 
-   switch(cur_tlcs900h->size)
+   switch(size)
    {
       case 0:
          {
             uint8 result = 0;
             for (i = 0; i < sa; i++) 
             {
-               result = rCodeB(cur_tlcs900h->rCode);
+               result = rCodeB(rCode);
                tempC = FLAG_C;
                SETFLAG_C(result & 0x80);
                result <<= 1;
                if (tempC) result |= 1;
-               rCodeB(cur_tlcs900h->rCode) = result;
+               rCodeB(rCode) = result;
             }
             SETFLAG_S(result & 0x80);
             SETFLAG_Z(result == 0);
-            cur_tlcs900h->cycles = 6 + (2*sa);
+            cycles = 6 + (2*sa);
             parityB(result);
          }
          break;
@@ -1924,16 +1924,16 @@ void regRLA(void)
             uint16 result = 0;
             for (i = 0; i < sa; i++) 
             {
-               result = rCodeW(cur_tlcs900h->rCode);
+               result = rCodeW(rCode);
                tempC = FLAG_C;
                SETFLAG_C(result & 0x8000);
                result <<= 1;
                if (tempC) result |= 1;
-               rCodeW(cur_tlcs900h->rCode) = result;
+               rCodeW(rCode) = result;
             }
             SETFLAG_S(result & 0x8000);
             SETFLAG_Z(result == 0);
-            cur_tlcs900h->cycles = 6 + (2*sa);
+            cycles = 6 + (2*sa);
             parityW(result);
          }
          break;
@@ -1943,16 +1943,16 @@ void regRLA(void)
             uint32 result = 0;
             for (i = 0; i < sa; i++) 
             {
-               result = rCodeL(cur_tlcs900h->rCode);
+               result = rCodeL(rCode);
                tempC = FLAG_C;
                SETFLAG_C(result & 0x80000000);
                result <<= 1;
                if (tempC) result |= 1;
-               rCodeL(cur_tlcs900h->rCode) = result;
+               rCodeL(rCode) = result;
             }
             SETFLAG_S(result & 0x80000000);
             SETFLAG_Z(result == 0);
-            cur_tlcs900h->cycles = 8 + (2*sa);
+            cycles = 8 + (2*sa);
          }
          break;
    }
@@ -1970,22 +1970,22 @@ void regRRA(void)
    if (sa == 0)
       sa = 16;
 
-   switch(cur_tlcs900h->size)
+   switch(size)
    {
       case 0:
          {	uint8 result = 0;
             for (i = 0; i < sa; i++) 
             {
-               result = rCodeB(cur_tlcs900h->rCode);
+               result = rCodeB(rCode);
                tempC = FLAG_C;
                SETFLAG_C(result & 0x01);
                result >>= 1;
                if (tempC) result |= 0x80;
-               rCodeB(cur_tlcs900h->rCode) = result;
+               rCodeB(rCode) = result;
             }
             SETFLAG_S(result & 0x80);
             SETFLAG_Z(result == 0);
-            cur_tlcs900h->cycles = 6 + (2*sa);
+            cycles = 6 + (2*sa);
             parityB(result);
          }
          break;
@@ -1994,16 +1994,16 @@ void regRRA(void)
             uint16 result = 0;
             for (i = 0; i < sa; i++) 
             {
-               result = rCodeW(cur_tlcs900h->rCode);
+               result = rCodeW(rCode);
                tempC = FLAG_C;
                SETFLAG_C(result & 0x01);
                result >>= 1;
                if (tempC) result |= 0x8000;
-               rCodeW(cur_tlcs900h->rCode) = result;
+               rCodeW(rCode) = result;
             }
             SETFLAG_S(result & 0x8000);
             SETFLAG_Z(result == 0);
-            cur_tlcs900h->cycles = 6 + (2*sa);
+            cycles = 6 + (2*sa);
             parityW(result);
          }
          break;
@@ -2011,16 +2011,16 @@ void regRRA(void)
          {	uint32 result = 0;
             for (i = 0; i < sa; i++) 
             {
-               result = rCodeL(cur_tlcs900h->rCode);
+               result = rCodeL(rCode);
                tempC = FLAG_C;
                SETFLAG_C(result & 0x01);
                result >>= 1;
                if (tempC) result |= 0x80000000;
-               rCodeL(cur_tlcs900h->rCode) = result;
+               rCodeL(rCode) = result;
             }
             SETFLAG_S(result & 0x80000000);
             SETFLAG_Z(result == 0);
-            cur_tlcs900h->cycles = 8 + (2*sa);
+            cycles = 8 + (2*sa);
          }
          break;
    }
@@ -2036,38 +2036,38 @@ void regSLAA()
 	if (sa == 0) sa = 16;
 	sa--;
 
-	switch(cur_tlcs900h->size)
+	switch(size)
 	{
-	case 0:	{	int8 result, data = (int8)rCodeB(cur_tlcs900h->rCode);
+	case 0:	{	int8 result, data = (int8)rCodeB(rCode);
 				result = (data << sa);
 				SETFLAG_C(result & 0x80);
 				result <<= 1;
 				SETFLAG_S(result & 0x80);
-				rCodeB(cur_tlcs900h->rCode) = result;
+				rCodeB(rCode) = result;
 				SETFLAG_Z(result == 0);
 				parityB(result);
-				cur_tlcs900h->cycles = 6 + 2 + (2*sa);
+				cycles = 6 + 2 + (2*sa);
 				break;	}
 	
-	case 1:	{	int16 result, data = (int16)rCodeW(cur_tlcs900h->rCode);
+	case 1:	{	int16 result, data = (int16)rCodeW(rCode);
 				result = (data << sa);
 				SETFLAG_C(result & 0x8000);
 				result <<= 1;
 				SETFLAG_S(result & 0x8000);
-				rCodeW(cur_tlcs900h->rCode) = result;
+				rCodeW(rCode) = result;
 				SETFLAG_Z(result == 0);
 				parityW(result);
-				cur_tlcs900h->cycles = 6 + 2 + (2*sa);
+				cycles = 6 + 2 + (2*sa);
 				break;	}
 
-	case 2:	{	int32 result, data = (int32)rCodeL(cur_tlcs900h->rCode);
+	case 2:	{	int32 result, data = (int32)rCodeL(rCode);
 				result = (data << sa);
 				SETFLAG_C(result & 0x80000000);
 				result <<= 1;
 				SETFLAG_S(result & 0x80000000);
-				rCodeL(cur_tlcs900h->rCode) = result;
+				rCodeL(rCode) = result;
 				SETFLAG_Z(result == 0);
-				cur_tlcs900h->cycles = 8 + 2 + (2*sa);
+				cycles = 8 + 2 + (2*sa);
 				break;	}
 	}
 
@@ -2082,38 +2082,38 @@ void regSRAA()
 	if (sa == 0) sa = 16;
 	sa--;
 
-	switch(cur_tlcs900h->size)
+	switch(size)
 	{
-	case 0:	{	int8 data = (int8)rCodeB(cur_tlcs900h->rCode), result;
+	case 0:	{	int8 data = (int8)rCodeB(rCode), result;
 				result = (data >> sa);
 				SETFLAG_C(result & 1);
 				result >>= 1;
 				SETFLAG_S(result & 0x80);
-				rCodeB(cur_tlcs900h->rCode) = result;
+				rCodeB(rCode) = result;
 				SETFLAG_Z(result == 0);
 				parityB(result);
-				cur_tlcs900h->cycles = 6 + 2 + (2*sa);
+				cycles = 6 + 2 + (2*sa);
 				break; }
 
-	case 1:	{	int16 data = (int16)rCodeW(cur_tlcs900h->rCode), result;
+	case 1:	{	int16 data = (int16)rCodeW(rCode), result;
 				result = (data >> sa);
 				SETFLAG_C(result & 1);
 				result >>= 1;
 				SETFLAG_S(result & 0x8000);
-				rCodeW(cur_tlcs900h->rCode) = result;
+				rCodeW(rCode) = result;
 				SETFLAG_Z(result == 0);
 				parityW(result);
-				cur_tlcs900h->cycles = 6 + 2 + (2*sa);
+				cycles = 6 + 2 + (2*sa);
 				break; }
 
-	case 2:	{	int32 data = (int32)rCodeL(cur_tlcs900h->rCode), result;
+	case 2:	{	int32 data = (int32)rCodeL(rCode), result;
 				result = (data >> sa);
 				SETFLAG_C(result & 1);
 				result >>= 1;
 				SETFLAG_S(result & 0x80000000);
-				rCodeL(cur_tlcs900h->rCode) = result;
+				rCodeL(rCode) = result;
 				SETFLAG_Z(result == 0);
-				cur_tlcs900h->cycles = 8 + 2 + (2*sa);
+				cycles = 8 + 2 + (2*sa);
 				break; }
 	}
 
@@ -2128,38 +2128,38 @@ void regSLLA()
 	if (sa == 0) sa = 16;
 	sa--;
 
-	switch(cur_tlcs900h->size)
+	switch(size)
 	{
-	case 0:	{	uint8 result, data = rCodeB(cur_tlcs900h->rCode);
+	case 0:	{	uint8 result, data = rCodeB(rCode);
 				result = (data << sa);
 				SETFLAG_C(result & 0x80);
 				result <<= 1;
 				SETFLAG_S(result & 0x80);
-				rCodeB(cur_tlcs900h->rCode) = result;
+				rCodeB(rCode) = result;
 				SETFLAG_Z(result == 0);
 				parityB(result);
-				cur_tlcs900h->cycles = 6 + 2 + (2*sa);
+				cycles = 6 + 2 + (2*sa);
 				break;	}
 	
-	case 1:	{	uint16 result, data = rCodeW(cur_tlcs900h->rCode);
+	case 1:	{	uint16 result, data = rCodeW(rCode);
 				result = (data << sa);
 				SETFLAG_C(result & 0x8000);
 				result <<= 1;
 				SETFLAG_S(result & 0x8000);
-				rCodeW(cur_tlcs900h->rCode) = result;
+				rCodeW(rCode) = result;
 				SETFLAG_Z(result == 0);
 				parityW(result);
-				cur_tlcs900h->cycles = 6 + 2 + (2*sa);
+				cycles = 6 + 2 + (2*sa);
 				break;	}
 
-	case 2:	{	uint32 result, data = rCodeL(cur_tlcs900h->rCode);
+	case 2:	{	uint32 result, data = rCodeL(rCode);
 				result = (data << sa);
 				SETFLAG_C(result & 0x80000000);
 				result <<= 1;
 				SETFLAG_S(result & 0x80000000);
-				rCodeL(cur_tlcs900h->rCode) = result;
+				rCodeL(rCode) = result;
 				SETFLAG_Z(result == 0);
-				cur_tlcs900h->cycles = 8 + 2 + (2*sa);
+				cycles = 8 + 2 + (2*sa);
 				break;	}
 	}
 
@@ -2174,38 +2174,38 @@ void regSRLA()
 	if (sa == 0) sa = 16;
 	sa--;
 
-	switch(cur_tlcs900h->size)
+	switch(size)
 	{
-	case 0:	{	uint8 data = rCodeB(cur_tlcs900h->rCode), result;
+	case 0:	{	uint8 data = rCodeB(rCode), result;
 				result = (data >> sa);
 				SETFLAG_C(result & 1);
 				result >>= 1;
 				SETFLAG_S(result & 0x80);
-				rCodeB(cur_tlcs900h->rCode) = result;
+				rCodeB(rCode) = result;
 				SETFLAG_Z(result == 0);
 				parityB(result);
-				cur_tlcs900h->cycles = 6 + 2 + (2*sa);
+				cycles = 6 + 2 + (2*sa);
 				break; }
 
-	case 1:	{	uint16 data = rCodeW(cur_tlcs900h->rCode), result;
+	case 1:	{	uint16 data = rCodeW(rCode), result;
 				result = (data >> sa);
 				SETFLAG_C(result & 1);
 				result >>= 1;
 				SETFLAG_S(result & 0x8000);
-				rCodeW(cur_tlcs900h->rCode) = result;
+				rCodeW(rCode) = result;
 				SETFLAG_Z(result == 0);
 				parityW(result);
-				cur_tlcs900h->cycles = 6 + 2 + (2*sa);
+				cycles = 6 + 2 + (2*sa);
 				break; }
 
-	case 2:	{	uint32 data = rCodeL(cur_tlcs900h->rCode), result;
+	case 2:	{	uint32 data = rCodeL(rCode), result;
 				result = (data >> sa);
 				SETFLAG_C(result & 1);
 				result >>= 1;
 				SETFLAG_S(result & 0x80000000);
-				rCodeL(cur_tlcs900h->rCode) = result;
+				rCodeL(rCode) = result;
 				SETFLAG_Z(result == 0);
-				cur_tlcs900h->cycles = 8 + 2 + (2*sa);
+				cycles = 8 + 2 + (2*sa);
 				break; }
 	}
 

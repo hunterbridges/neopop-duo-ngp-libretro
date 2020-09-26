@@ -71,32 +71,32 @@
 
 //=========================================================================
 
-//===== PUSH (cur_tlcs900h->mem)
+//===== PUSH (mem)
 void srcPUSH(void)
 {
-   switch(cur_tlcs900h->size)
+   switch(size)
    {
       case 0:
-         push8(loadB(cur_tlcs900h->mem));
+         push8(loadB(mem));
          break;
       case 1:
-         push16(loadW(cur_tlcs900h->mem));
+         push16(loadW(mem));
          break;
    }
-   cur_tlcs900h->cycles = 7;
+   cycles = 7;
 }
 
-//===== RLD A,(cur_tlcs900h->mem)
+//===== RLD A,(mem)
 void srcRLD(void)
 {
 	uint8 al = REGA & 0xF, m, mh, ml;
 
-	m = loadB(cur_tlcs900h->mem);
+	m = loadB(mem);
 	mh = (m & 0xF0) >> 4;
 	ml = (m & 0x0F) << 4;
 	
 	REGA = (REGA & 0xF0) | mh;
-	storeB(cur_tlcs900h->mem, ml | al);
+	storeB(mem, ml | al);
 
 	SETFLAG_S(REGA & 0x80);
 	SETFLAG_Z(REGA == 0);
@@ -104,20 +104,20 @@ void srcRLD(void)
 	SETFLAG_N0
 	parityB(REGA);
 
-	cur_tlcs900h->cycles = 12;
+	cycles = 12;
 }
 
-//===== RRD A,(cur_tlcs900h->mem)
+//===== RRD A,(mem)
 void srcRRD()
 {
 	uint8 al = (REGA & 0xF) << 4, m, mh, ml;
 
-	m = loadB(cur_tlcs900h->mem);
+	m = loadB(mem);
 	mh = (m & 0xF0) >> 4;
 	ml = m & 0x0F;
 	
 	REGA = (REGA & 0xF0) | ml;
-	storeB(cur_tlcs900h->mem, al | mh);
+	storeB(mem, al | mh);
 
 	SETFLAG_S(REGA & 0x80);
 	SETFLAG_Z(REGA == 0);
@@ -125,20 +125,20 @@ void srcRRD()
 	SETFLAG_N0
 	parityB(REGA);
 
-	cur_tlcs900h->cycles = 12;
+	cycles = 12;
 }
 
 //===== LDI
 void srcLDI()
 {
    uint8 dst = 2/*XDE*/, src = 3/*XHL*/;
-   if ((cur_tlcs900h->first & 0xF) == 5)
+   if ((first & 0xF) == 5)
    {
       dst = 4/*XIX*/;
       src = 5/*XIY*/;
    }
 
-   switch(cur_tlcs900h->size)
+   switch(size)
    {
       case 0:
          storeB(regL(dst), loadB(regL(src)));
@@ -158,24 +158,24 @@ void srcLDI()
 
    SETFLAG_H0;
    SETFLAG_N0;
-   cur_tlcs900h->cycles = 10;
+   cycles = 10;
 }
 
 //===== LDIR
 void srcLDIR()
 {
    uint8 dst = 2/*XDE*/, src = 3/*XHL*/;
-   if ((cur_tlcs900h->first & 0xF) == 5)
+   if ((first & 0xF) == 5)
    {
       dst = 4/*XIX*/;
       src = 5/*XIY*/;
    }
 
-   cur_tlcs900h->cycles = 10;
+   cycles = 10;
 
    do
    {
-      switch(cur_tlcs900h->size)
+      switch(size)
       {
          case 0:
             if (debug_abort_memory == false)
@@ -194,7 +194,7 @@ void srcLDIR()
       REGBC --;
       SETFLAG_V(REGBC);
 
-      cur_tlcs900h->cycles += 14;
+      cycles += 14;
    }
    while (FLAG_V);
 
@@ -206,9 +206,9 @@ void srcLDIR()
 void srcLDD()
 {
 	uint8 dst = 2/*XDE*/, src = 3/*XHL*/;
-	if ((cur_tlcs900h->first & 0xF) == 5) { dst = 4/*XIX*/; src = 5/*XIY*/; }
+	if ((first & 0xF) == 5) { dst = 4/*XIX*/; src = 5/*XIY*/; }
 
-	switch(cur_tlcs900h->size)
+	switch(size)
 	{
 	case 0:
 		storeB(regL(dst), loadB(regL(src)));
@@ -228,20 +228,20 @@ void srcLDD()
 
 	SETFLAG_H0;
 	SETFLAG_N0;
-	cur_tlcs900h->cycles = 10;
+	cycles = 10;
 }
 
 //===== LDDR
 void srcLDDR()
 {
 	uint8 dst = 2/*XDE*/, src = 3/*XHL*/;
-	if ((cur_tlcs900h->first & 0xF) == 5)	{ dst = 4/*XIX*/; src = 5/*XIY*/; }
+	if ((first & 0xF) == 5)	{ dst = 4/*XIX*/; src = 5/*XIY*/; }
 
-	cur_tlcs900h->cycles = 10;
+	cycles = 10;
 
 	do
 	{
-		switch(cur_tlcs900h->size)
+		switch(size)
 		{
 		case 0:
 			if (debug_abort_memory == false)
@@ -261,7 +261,7 @@ void srcLDDR()
 		REGBC --;
 		SETFLAG_V(REGBC);
 
-		cur_tlcs900h->cycles += 14;
+		cycles += 14;
 	}
 	while (FLAG_V);
 
@@ -272,47 +272,47 @@ void srcLDDR()
 //===== CPI
 void srcCPI()
 {
-	uint8 R = cur_tlcs900h->first & 7;
+	uint8 R = first & 7;
 
-	switch(cur_tlcs900h->size)
+	switch(size)
 	{
-	case 0: generic_SUB_B(REGA, loadB(regL(cur_tlcs900h->R)));
-			regL(cur_tlcs900h->R) ++; break;
+	case 0: generic_SUB_B(REGA, loadB(regL(R)));
+			regL(R) ++; break;
 
-	case 1:	generic_SUB_W(REGWA, loadW(regL(cur_tlcs900h->R)));
-			regL(cur_tlcs900h->R) += 2; break;
+	case 1:	generic_SUB_W(REGWA, loadW(regL(R)));
+			regL(R) += 2; break;
 	}
 
 	REGBC --;
 	SETFLAG_V(REGBC);
 
-	cur_tlcs900h->cycles = 8;
+	cycles = 8;
 }
 
 //===== CPIR
 void srcCPIR()
 {
-	uint8 R = cur_tlcs900h->first & 7;
+	uint8 R = first & 7;
 
-	cur_tlcs900h->cycles = 10;
+	cycles = 10;
 
 	do
 	{
-		switch(cur_tlcs900h->size)
+		switch(size)
 		{
 		case 0:	if (debug_abort_memory == false)
-					generic_SUB_B(REGA, loadB(regL(cur_tlcs900h->R)));
-				regL(cur_tlcs900h->R) ++; break;
+					generic_SUB_B(REGA, loadB(regL(R)));
+				regL(R) ++; break;
 
 		case 1:	if (debug_abort_memory == false)
-					generic_SUB_W(REGWA, loadW(regL(cur_tlcs900h->R)));
-				regL(cur_tlcs900h->R) += 2; break;
+					generic_SUB_W(REGWA, loadW(regL(R)));
+				regL(R) += 2; break;
 		}
 
 		REGBC --;
 		SETFLAG_V(REGBC);
 
-		cur_tlcs900h->cycles += 14;
+		cycles += 14;
 	}
 	while (FLAG_V && (FLAG_Z == false));
 }
@@ -320,150 +320,150 @@ void srcCPIR()
 //===== CPD
 void srcCPD()
 {
-	uint8 R = cur_tlcs900h->first & 7;
+	uint8 R = first & 7;
 
-	switch(cur_tlcs900h->size)
+	switch(size)
 	{
-	case 0:	generic_SUB_B(REGA, loadB(regL(cur_tlcs900h->R)));
-			regL(cur_tlcs900h->R) --;	break;
+	case 0:	generic_SUB_B(REGA, loadB(regL(R)));
+			regL(R) --;	break;
 
-	case 1:	generic_SUB_W(REGWA, loadW(regL(cur_tlcs900h->R)));
-			regL(cur_tlcs900h->R) -= 2; break;
+	case 1:	generic_SUB_W(REGWA, loadW(regL(R)));
+			regL(R) -= 2; break;
 	}
 
 	REGBC --;
 	SETFLAG_V(REGBC);
 
-	cur_tlcs900h->cycles = 8;
+	cycles = 8;
 }
 
 //===== CPDR
 void srcCPDR()
 {
-	uint8 R = cur_tlcs900h->first & 7;
+	uint8 R = first & 7;
 
-	cur_tlcs900h->cycles = 10;
+	cycles = 10;
 
 	do
 	{
-		switch(cur_tlcs900h->size)
+		switch(size)
 		{
 		case 0:	if (debug_abort_memory == false)
-					generic_SUB_B(REGA, loadB(regL(cur_tlcs900h->R)));
-				regL(cur_tlcs900h->R) -= 1; break;
+					generic_SUB_B(REGA, loadB(regL(R)));
+				regL(R) -= 1; break;
 
 		case 1: if (debug_abort_memory == false)
-					generic_SUB_W(REGWA, loadW(regL(cur_tlcs900h->R)));
-				regL(cur_tlcs900h->R) -= 2; break;
+					generic_SUB_W(REGWA, loadW(regL(R)));
+				regL(R) -= 2; break;
 		}
 
 		REGBC --;
 		SETFLAG_V(REGBC);
 
-		cur_tlcs900h->cycles += 14;
+		cycles += 14;
 	}
 	while (FLAG_V && (FLAG_Z == false));
 }
 
-//===== LD (nn),(cur_tlcs900h->mem)
+//===== LD (nn),(mem)
 void srcLD16m()
 {
-	switch(cur_tlcs900h->size)
+	switch(size)
 	{
-	case 0:	storeB(fetch16(), loadB(cur_tlcs900h->mem)); break;
-	case 1: storeW(fetch16(), loadW(cur_tlcs900h->mem)); break;
+	case 0:	storeB(fetch16(), loadB(mem)); break;
+	case 1: storeW(fetch16(), loadW(mem)); break;
 	}
 
-	cur_tlcs900h->cycles = 8;
+	cycles = 8;
 }
 
-//===== LD R,(cur_tlcs900h->mem)
+//===== LD R,(mem)
 void srcLD()
 {
-	switch(cur_tlcs900h->size)
+	switch(size)
 	{
-	case 0: regB(cur_tlcs900h->R) = loadB(cur_tlcs900h->mem); cur_tlcs900h->cycles = 4; break;
-	case 1: regW(cur_tlcs900h->R) = loadW(cur_tlcs900h->mem); cur_tlcs900h->cycles = 4; break;
-	case 2: regL(cur_tlcs900h->R) = loadL(cur_tlcs900h->mem); cur_tlcs900h->cycles = 6; break;
+	case 0: regB(R) = loadB(mem); cycles = 4; break;
+	case 1: regW(R) = loadW(mem); cycles = 4; break;
+	case 2: regL(R) = loadL(mem); cycles = 6; break;
 	}
 }
 
-//===== EX (cur_tlcs900h->mem),R
+//===== EX (mem),R
 void srcEX()
 {
-	switch(cur_tlcs900h->size)
+	switch(size)
 	{
-	case 0:	{	uint8 temp = regB(cur_tlcs900h->R); 
-				regB(cur_tlcs900h->R) = loadB(cur_tlcs900h->mem); 
-				storeB(cur_tlcs900h->mem, temp); break;		}
+	case 0:	{	uint8 temp = regB(R); 
+				regB(R) = loadB(mem); 
+				storeB(mem, temp); break;		}
 
-	case 1:	{	uint16 temp = regW(cur_tlcs900h->R); 
-				regW(cur_tlcs900h->R) = loadW(cur_tlcs900h->mem); 
-				storeW(cur_tlcs900h->mem, temp); break;		}
+	case 1:	{	uint16 temp = regW(R); 
+				regW(R) = loadW(mem); 
+				storeW(mem, temp); break;		}
 	}
 
-	cur_tlcs900h->cycles = 6;
+	cycles = 6;
 }
 
-//===== ADD (cur_tlcs900h->mem),#
+//===== ADD (mem),#
 void srcADDi()
 {
-	switch(cur_tlcs900h->size)
+	switch(size)
 	{
-	case 0:	storeB(cur_tlcs900h->mem, generic_ADD_B(loadB(cur_tlcs900h->mem), FETCH8)); cur_tlcs900h->cycles = 7;break;
-	case 1:	storeW(cur_tlcs900h->mem, generic_ADD_W(loadW(cur_tlcs900h->mem), fetch16())); cur_tlcs900h->cycles = 8;break;
+	case 0:	storeB(mem, generic_ADD_B(loadB(mem), FETCH8)); cycles = 7;break;
+	case 1:	storeW(mem, generic_ADD_W(loadW(mem), fetch16())); cycles = 8;break;
 	}
 }
 
-//===== ADC (cur_tlcs900h->mem),#
+//===== ADC (mem),#
 void srcADCi()
 {
-	switch(cur_tlcs900h->size)
+	switch(size)
 	{
-	case 0:	storeB(cur_tlcs900h->mem, generic_ADC_B(loadB(cur_tlcs900h->mem), FETCH8)); cur_tlcs900h->cycles = 7;break;
-	case 1:	storeW(cur_tlcs900h->mem, generic_ADC_W(loadW(cur_tlcs900h->mem), fetch16())); cur_tlcs900h->cycles = 8;break;
+	case 0:	storeB(mem, generic_ADC_B(loadB(mem), FETCH8)); cycles = 7;break;
+	case 1:	storeW(mem, generic_ADC_W(loadW(mem), fetch16())); cycles = 8;break;
 	}
 }
 
-//===== SUB (cur_tlcs900h->mem),#
+//===== SUB (mem),#
 void srcSUBi()
 {
-	switch(cur_tlcs900h->size)
+	switch(size)
 	{
-	case 0:	storeB(cur_tlcs900h->mem, generic_SUB_B(loadB(cur_tlcs900h->mem), FETCH8)); cur_tlcs900h->cycles = 7;break;
-	case 1:	storeW(cur_tlcs900h->mem, generic_SUB_W(loadW(cur_tlcs900h->mem), fetch16())); cur_tlcs900h->cycles = 8;break;
+	case 0:	storeB(mem, generic_SUB_B(loadB(mem), FETCH8)); cycles = 7;break;
+	case 1:	storeW(mem, generic_SUB_W(loadW(mem), fetch16())); cycles = 8;break;
 	}
 }
 
-//===== SBC (cur_tlcs900h->mem),#
+//===== SBC (mem),#
 void srcSBCi()
 {
-	switch(cur_tlcs900h->size)
+	switch(size)
 	{
-	case 0:	storeB(cur_tlcs900h->mem, generic_SBC_B(loadB(cur_tlcs900h->mem), FETCH8)); cur_tlcs900h->cycles = 7;break;
-	case 1:	storeW(cur_tlcs900h->mem, generic_SBC_W(loadW(cur_tlcs900h->mem), fetch16())); cur_tlcs900h->cycles = 8;break;
+	case 0:	storeB(mem, generic_SBC_B(loadB(mem), FETCH8)); cycles = 7;break;
+	case 1:	storeW(mem, generic_SBC_W(loadW(mem), fetch16())); cycles = 8;break;
 	}
 }
 
-//===== AND (cur_tlcs900h->mem),#
+//===== AND (mem),#
 void srcANDi()
 {
-	switch(cur_tlcs900h->size)
+	switch(size)
 	{
-	case 0: {	uint8 result = loadB(cur_tlcs900h->mem) & FETCH8;
-				storeB(cur_tlcs900h->mem, result);
+	case 0: {	uint8 result = loadB(mem) & FETCH8;
+				storeB(mem, result);
 				SETFLAG_S(result & 0x80);
 				SETFLAG_Z(result == 0);
 				parityB(result);
-				cur_tlcs900h->cycles = 7;
+				cycles = 7;
 				break; }
 
-	case 1: {	uint16 result = loadW(cur_tlcs900h->mem) & fetch16();
-				storeW(cur_tlcs900h->mem, result);
+	case 1: {	uint16 result = loadW(mem) & fetch16();
+				storeW(mem, result);
 				SETFLAG_S(result & 0x8000);
 				SETFLAG_Z(result == 0);
 				parityW(result);
-				cur_tlcs900h->cycles = 8;
+				cycles = 8;
 				break; }
 	}
 
@@ -472,25 +472,25 @@ void srcANDi()
 	SETFLAG_C0;
 }
 
-//===== OR (cur_tlcs900h->mem),#
+//===== OR (mem),#
 void srcORi()
 {
-	switch(cur_tlcs900h->size)
+	switch(size)
 	{
-	case 0: {	uint8 result = loadB(cur_tlcs900h->mem) | FETCH8;
-				storeB(cur_tlcs900h->mem, result);
+	case 0: {	uint8 result = loadB(mem) | FETCH8;
+				storeB(mem, result);
 				SETFLAG_S(result & 0x80);
 				SETFLAG_Z(result == 0);
 				parityB(result);
-				cur_tlcs900h->cycles = 7;
+				cycles = 7;
 				break; }
 
-	case 1: {	uint16 result = loadW(cur_tlcs900h->mem) | fetch16();
-				storeW(cur_tlcs900h->mem, result);
+	case 1: {	uint16 result = loadW(mem) | fetch16();
+				storeW(mem, result);
 				SETFLAG_S(result & 0x8000);
 				SETFLAG_Z(result == 0);
 				parityW(result);
-				cur_tlcs900h->cycles = 8;
+				cycles = 8;
 				break; }
 	}
 
@@ -499,25 +499,25 @@ void srcORi()
 	SETFLAG_C0;
 }
 
-//===== XOR (cur_tlcs900h->mem),#
+//===== XOR (mem),#
 void srcXORi()
 {
-	switch(cur_tlcs900h->size)
+	switch(size)
 	{
-	case 0: {	uint8 result = loadB(cur_tlcs900h->mem) ^ FETCH8;
-				storeB(cur_tlcs900h->mem, result);
+	case 0: {	uint8 result = loadB(mem) ^ FETCH8;
+				storeB(mem, result);
 				SETFLAG_S(result & 0x80);
 				SETFLAG_Z(result == 0);
 				parityB(result);
-				cur_tlcs900h->cycles = 7;
+				cycles = 7;
 				break; }
 
-	case 1: {	uint16 result = loadW(cur_tlcs900h->mem) ^ fetch16();
-				storeW(cur_tlcs900h->mem, result);
+	case 1: {	uint16 result = loadW(mem) ^ fetch16();
+				storeW(mem, result);
 				SETFLAG_S(result & 0x8000);
 				SETFLAG_Z(result == 0);
 				parityW(result);
-				cur_tlcs900h->cycles = 8;
+				cycles = 8;
 				break; }
 	}
 
@@ -526,19 +526,19 @@ void srcXORi()
 	SETFLAG_C0;
 }
 
-//===== CP (cur_tlcs900h->mem),#
+//===== CP (mem),#
 void srcCPi()
 {
-	switch(cur_tlcs900h->size)
+	switch(size)
 	{
-	case 0:	generic_SUB_B(loadB(cur_tlcs900h->mem), FETCH8);	break;
-	case 1:	generic_SUB_W(loadW(cur_tlcs900h->mem), fetch16());	break;
+	case 0:	generic_SUB_B(loadB(mem), FETCH8);	break;
+	case 1:	generic_SUB_W(loadW(mem), fetch16());	break;
 	}
 	
-	cur_tlcs900h->cycles = 6;
+	cycles = 6;
 }
 
-//===== MUL RR,(cur_tlcs900h->mem)
+//===== MUL RR,(mem)
 void srcMUL()
 {
 	uint8 target = get_RR_Target();
@@ -548,16 +548,16 @@ void srcMUL()
 		return;
 	}
 
-	switch(cur_tlcs900h->size)
+	switch(size)
 	{
-	case 0: rCodeW(target) = (rCodeW(target) & 0xFF) * loadB(cur_tlcs900h->mem);
-		cur_tlcs900h->cycles = 18; break;
-	case 1: rCodeL(target) = (rCodeL(target) & 0xFFFF) * loadW(cur_tlcs900h->mem);
-		cur_tlcs900h->cycles = 26; break;
+	case 0: rCodeW(target) = (rCodeW(target) & 0xFF) * loadB(mem);
+		cycles = 18; break;
+	case 1: rCodeL(target) = (rCodeL(target) & 0xFFFF) * loadW(mem);
+		cycles = 26; break;
 	}
 }
 
-//===== MULS RR,(cur_tlcs900h->mem)
+//===== MULS RR,(mem)
 void srcMULS()
 {
 	uint8 target = get_RR_Target();
@@ -567,16 +567,16 @@ void srcMULS()
 		return;
 	}
 
-	switch(cur_tlcs900h->size)
+	switch(size)
 	{
-	case 0: rCodeW(target) = (int8)(rCodeW(target) & 0xFF) * (int8)loadB(cur_tlcs900h->mem);
-		cur_tlcs900h->cycles = 18; break;
-	case 1: rCodeL(target) = (int16)(rCodeL(target) & 0xFFFF) * (int16)loadW(cur_tlcs900h->mem);
-		cur_tlcs900h->cycles = 26; break;
+	case 0: rCodeW(target) = (int8)(rCodeW(target) & 0xFF) * (int8)loadB(mem);
+		cycles = 18; break;
+	case 1: rCodeL(target) = (int16)(rCodeL(target) & 0xFFFF) * (int16)loadW(mem);
+		cycles = 26; break;
 	}
 }
 
-//===== DIV RR,(cur_tlcs900h->mem)
+//===== DIV RR,(mem)
 void srcDIV()
 {
 	uint8 target = get_RR_Target();
@@ -586,19 +586,19 @@ void srcDIV()
 		return;
 	}
 
-	switch(cur_tlcs900h->size)
+	switch(size)
 	{
-	case 0: {	rCodeW(target) = generic_DIV_B(rCodeW(target), loadB(cur_tlcs900h->mem));
-				cur_tlcs900h->cycles = 22;
+	case 0: {	rCodeW(target) = generic_DIV_B(rCodeW(target), loadB(mem));
+				cycles = 22;
 				break;	}
 				
-	case 1: {	rCodeL(target) = generic_DIV_W(rCodeL(target), loadW(cur_tlcs900h->mem));
-				cur_tlcs900h->cycles = 30;
+	case 1: {	rCodeL(target) = generic_DIV_W(rCodeL(target), loadW(mem));
+				cycles = 30;
 				break;	}
 	}
 }
 
-//===== DIVS RR,(cur_tlcs900h->mem)
+//===== DIVS RR,(mem)
 void srcDIVS()
 {
 	uint8 target = get_RR_Target();
@@ -608,28 +608,28 @@ void srcDIVS()
 		return;
 	}
 
-	switch(cur_tlcs900h->size)
+	switch(size)
 	{
-	case 0: {	rCodeW(target) = generic_DIVS_B(rCodeW(target), loadB(cur_tlcs900h->mem));
-				cur_tlcs900h->cycles = 24;
+	case 0: {	rCodeW(target) = generic_DIVS_B(rCodeW(target), loadB(mem));
+				cycles = 24;
 				break;	}
 
-	case 1: {	rCodeL(target) = generic_DIVS_W(rCodeL(target), loadW(cur_tlcs900h->mem));
-				cur_tlcs900h->cycles = 32;
+	case 1: {	rCodeL(target) = generic_DIVS_W(rCodeL(target), loadW(mem));
+				cycles = 32;
 				break;	}
 	}
 }
 
-//===== INC #3,(cur_tlcs900h->mem)
+//===== INC #3,(mem)
 void srcINC()
 {
-	uint8 val = cur_tlcs900h->R;
+	uint8 val = R;
 	if (val == 0)
 		val = 8;
 
-	switch(cur_tlcs900h->size)
+	switch(size)
 	{
-	case 0: {	uint8 dst = loadB(cur_tlcs900h->mem);
+	case 0: {	uint8 dst = loadB(mem);
 				uint32 resultC = dst + val;
 				uint8 half = (dst & 0xF) + val;
 				uint8 result = (uint8)(resultC & 0xFF);
@@ -641,10 +641,10 @@ void srcINC()
 				if (((int8)dst >= 0) && ((int8)result < 0))
 				{SETFLAG_V1} else {SETFLAG_V0}
 
-				storeB(cur_tlcs900h->mem, result);
+				storeB(mem, result);
 				break; }
 
-	case 1: {	uint16 dst = loadW(cur_tlcs900h->mem);
+	case 1: {	uint16 dst = loadW(mem);
 				uint32 resultC = dst + val;
 				uint8 half = (dst & 0xF) + val;
 				uint16 result = (uint16)(resultC & 0xFFFF);
@@ -656,23 +656,23 @@ void srcINC()
 				if (((int16)dst >= 0) && ((int16)result < 0))
 				{SETFLAG_V1} else {SETFLAG_V0}
 
-				storeW(cur_tlcs900h->mem, result);
+				storeW(mem, result);
 				break; }
 	}
 
-	cur_tlcs900h->cycles = 6;
+	cycles = 6;
 }
 
-//===== DEC #3,(cur_tlcs900h->mem)
+//===== DEC #3,(mem)
 void srcDEC()
 {
-	uint8 val = cur_tlcs900h->R;
+	uint8 val = R;
 	if (val == 0)
 		val = 8;
 
-	switch(cur_tlcs900h->size)
+	switch(size)
 	{
-	case 0: {	uint8 dst = loadB(cur_tlcs900h->mem);
+	case 0: {	uint8 dst = loadB(mem);
 				uint32 resultC = dst - val;
 				uint8 half = (dst & 0xF) - val;
 				uint8 result = (uint8)(resultC & 0xFF);
@@ -684,10 +684,10 @@ void srcDEC()
 				if (((int8)dst < 0) && ((int8)result >= 0))
 				{SETFLAG_V1} else {SETFLAG_V0}
 
-				storeB(cur_tlcs900h->mem, result);
+				storeB(mem, result);
 				break; }
 
-	case 1: {	uint16 dst = loadW(cur_tlcs900h->mem);
+	case 1: {	uint16 dst = loadW(mem);
 				uint32 resultC = dst - val;
 				uint8 half = (dst & 0xF) - val;
 				uint16 result = (uint16)(resultC & 0xFFFF);
@@ -699,33 +699,33 @@ void srcDEC()
 				if (((int16)dst < 0) && ((int16)result >= 0))
 				{SETFLAG_V1} else {SETFLAG_V0}
 
-				storeW(cur_tlcs900h->mem, result);
+				storeW(mem, result);
 				break; }
 	}
 
-	cur_tlcs900h->cycles = 6;
+	cycles = 6;
 }
 
-//===== RLC (cur_tlcs900h->mem)
+//===== RLC (mem)
 void srcRLC()
 {
-	switch(cur_tlcs900h->size)
+	switch(size)
 	{
-	case 0:	{	uint8 result = loadB(cur_tlcs900h->mem);
+	case 0:	{	uint8 result = loadB(mem);
 				SETFLAG_C(result & 0x80);
 				result <<= 1;
 				if (FLAG_C) result |= 1;
-				storeB(cur_tlcs900h->mem, result);
+				storeB(mem, result);
 				SETFLAG_S(result & 0x80);
 				SETFLAG_Z(result == 0);
 				parityB(result);
 				break; }
 		
-	case 1:	{	uint16 result = loadW(cur_tlcs900h->mem);
+	case 1:	{	uint16 result = loadW(mem);
 				SETFLAG_C(result & 0x8000);
 				result <<= 1;
 				if (FLAG_C) result |= 1;
-				storeW(cur_tlcs900h->mem, result);
+				storeW(mem, result);
 				SETFLAG_S(result & 0x8000);
 				SETFLAG_Z(result == 0);
 				parityW(result);
@@ -735,29 +735,29 @@ void srcRLC()
 	SETFLAG_H0;
 	SETFLAG_N0;
 
-	cur_tlcs900h->cycles = 8;
+	cycles = 8;
 }
 
-//===== RRC (cur_tlcs900h->mem)
+//===== RRC (mem)
 void srcRRC()
 {
-	switch(cur_tlcs900h->size)
+	switch(size)
 	{
-	case 0:	{	uint8 data = loadB(cur_tlcs900h->mem), result;
+	case 0:	{	uint8 data = loadB(mem), result;
 				SETFLAG_C(data & 1);
 				result = data >> 1;
 				if (FLAG_C) result |= 0x80;
-				storeB(cur_tlcs900h->mem, result);
+				storeB(mem, result);
 				SETFLAG_S(result & 0x80);
 				SETFLAG_Z(result == 0);
 				parityB(result);
 				break; }
 		
-	case 1:	{	uint16 data = loadW(cur_tlcs900h->mem), result;
+	case 1:	{	uint16 data = loadW(mem), result;
 				SETFLAG_C(data & 1);
 				result = data >> 1;
 				if (FLAG_C) result |= 0x8000;
-				storeW(cur_tlcs900h->mem, result);
+				storeW(mem, result);
 				SETFLAG_S(result & 0x8000);
 				SETFLAG_Z(result == 0);
 				parityW(result);
@@ -767,94 +767,94 @@ void srcRRC()
 	SETFLAG_H0;
 	SETFLAG_N0;
 
-	cur_tlcs900h->cycles = 8;
+	cycles = 8;
 }
 
-//===== RL (cur_tlcs900h->mem)
+//===== RL (mem)
 void srcRL()
 {
 	bool tempC;
 
-	switch(cur_tlcs900h->size)
+	switch(size)
 	{
-	case 0:	{	uint8 result = loadB(cur_tlcs900h->mem);
+	case 0:	{	uint8 result = loadB(mem);
 				tempC = FLAG_C;
 				SETFLAG_C(result & 0x80);
 				result <<= 1;
 				if (tempC) result |= 1;
-				storeB(cur_tlcs900h->mem, result);
+				storeB(mem, result);
 				SETFLAG_S(result & 0x80);
 				SETFLAG_Z(result == 0);
 				parityB(result);
 				break; }
 		
-	case 1:	{	uint16 result = loadW(cur_tlcs900h->mem);
+	case 1:	{	uint16 result = loadW(mem);
 				tempC = FLAG_C;
 				SETFLAG_C(result & 0x8000);
 				result <<= 1;
 				if (tempC) result |= 1;
-				storeW(cur_tlcs900h->mem, result);
+				storeW(mem, result);
 				SETFLAG_S(result & 0x8000);
 				SETFLAG_Z(result == 0);
 				parityW(result);
 				break; }
 	}
 
-	cur_tlcs900h->cycles = 8;
+	cycles = 8;
 }
 
-//===== RR (cur_tlcs900h->mem)
+//===== RR (mem)
 void srcRR()
 {
 	bool tempC;
 
-	switch(cur_tlcs900h->size)
+	switch(size)
 	{
-	case 0:	{	uint8 result = loadB(cur_tlcs900h->mem);
+	case 0:	{	uint8 result = loadB(mem);
 				tempC = FLAG_C;
 				SETFLAG_C(result & 1);
 				result >>= 1;
 				if (tempC) result |= 0x80;
-				storeB(cur_tlcs900h->mem, result);
+				storeB(mem, result);
 				SETFLAG_S(result & 0x80);
 				SETFLAG_Z(result == 0);
 				parityB(result);
 				break; }
 		
-	case 1:	{	uint16 result = loadW(cur_tlcs900h->mem);
+	case 1:	{	uint16 result = loadW(mem);
 				tempC = FLAG_C;
 				SETFLAG_C(result & 1);
 				result >>= 1;
 				if (tempC) result |= 0x8000;
-				storeW(cur_tlcs900h->mem, result);
+				storeW(mem, result);
 				SETFLAG_S(result & 0x8000);
 				SETFLAG_Z(result == 0);
 				parityW(result);
 				break; }
 	}
 
-	cur_tlcs900h->cycles = 8;
+	cycles = 8;
 }
 
-//===== SLA (cur_tlcs900h->mem)
+//===== SLA (mem)
 void srcSLA()
 {
-	switch(cur_tlcs900h->size)
+	switch(size)
 	{
-	case 0:	{	uint8 result, data = loadB(cur_tlcs900h->mem);
+	case 0:	{	uint8 result, data = loadB(mem);
 				SETFLAG_C(data & 0x80);
 				result = ((int8)data << 1);
 				SETFLAG_S(result & 0x80);
-				storeB(cur_tlcs900h->mem, result);
+				storeB(mem, result);
 				SETFLAG_Z(result == 0);
 				parityB(result);
 				break;	}
 
-	case 1:	{	uint16 result, data = loadW(cur_tlcs900h->mem);
+	case 1:	{	uint16 result, data = loadW(mem);
 				SETFLAG_C(data & 0x8000);
 				result = ((int16)data << 1);
 				SETFLAG_S(result & 0x8000);
-				storeW(cur_tlcs900h->mem, result);
+				storeW(mem, result);
 				SETFLAG_Z(result == 0);
 				parityW(result);
 				break;	}
@@ -863,28 +863,28 @@ void srcSLA()
 	SETFLAG_H0;
 	SETFLAG_N0;
 
-	cur_tlcs900h->cycles = 8;
+	cycles = 8;
 }
 
-//===== SRA (cur_tlcs900h->mem)
+//===== SRA (mem)
 void srcSRA()
 {
-	switch(cur_tlcs900h->size)
+	switch(size)
 	{
-	case 0:	{	uint8 result, data = loadB(cur_tlcs900h->mem);
+	case 0:	{	uint8 result, data = loadB(mem);
 				SETFLAG_C(data & 0x1);
 				result = ((int8)data >> 1);
 				SETFLAG_S(result & 0x80);
-				storeB(cur_tlcs900h->mem, result);
+				storeB(mem, result);
 				SETFLAG_Z(result == 0);
 				parityB(result);
 				break;	}
 	
-	case 1:	{	uint16 result, data = loadW(cur_tlcs900h->mem);
+	case 1:	{	uint16 result, data = loadW(mem);
 				SETFLAG_C(data & 0x1);
 				result = ((int16)data >> 1);
 				SETFLAG_S(result & 0x8000);
-				storeW(cur_tlcs900h->mem, result);
+				storeW(mem, result);
 				SETFLAG_Z(result == 0);
 				parityW(result);
 				break;	}
@@ -893,28 +893,28 @@ void srcSRA()
 	SETFLAG_H0;
 	SETFLAG_N0;
 
-	cur_tlcs900h->cycles = 8;
+	cycles = 8;
 }
 
-//===== SLL (cur_tlcs900h->mem)
+//===== SLL (mem)
 void srcSLL()
 {
-	switch(cur_tlcs900h->size)
+	switch(size)
 	{
-	case 0:	{	uint8 result, data = loadB(cur_tlcs900h->mem);
+	case 0:	{	uint8 result, data = loadB(mem);
 				SETFLAG_C(data & 0x80);
 				result = (data << 1);
 				SETFLAG_S(result & 0x80);
-				storeB(cur_tlcs900h->mem, result);
+				storeB(mem, result);
 				SETFLAG_Z(result == 0);
 				parityB(result);
 				break;	}
 	
-	case 1:	{	uint16 result, data = loadW(cur_tlcs900h->mem);
+	case 1:	{	uint16 result, data = loadW(mem);
 				SETFLAG_C(data & 0x8000);
 				result = (data << 1);
 				SETFLAG_S(result & 0x8000);
-				storeW(cur_tlcs900h->mem, result);
+				storeW(mem, result);
 				SETFLAG_Z(result == 0);
 				parityW(result);
 				break;	}
@@ -923,28 +923,28 @@ void srcSLL()
 	SETFLAG_H0;
 	SETFLAG_N0;
 
-	cur_tlcs900h->cycles = 8;
+	cycles = 8;
 }
 
-//===== SRL (cur_tlcs900h->mem)
+//===== SRL (mem)
 void srcSRL()
 {
-	switch(cur_tlcs900h->size)
+	switch(size)
 	{
-	case 0:	{	uint8 result, data = loadB(cur_tlcs900h->mem);
+	case 0:	{	uint8 result, data = loadB(mem);
 				SETFLAG_C(data & 0x01);
 				result = (data >> 1);
 				SETFLAG_S(result & 0x80);
-				storeB(cur_tlcs900h->mem, result);
+				storeB(mem, result);
 				SETFLAG_Z(result == 0);
 				parityB(result);
 				break;	}
 
-	case 1:	{	uint16 result, data = loadW(cur_tlcs900h->mem);
+	case 1:	{	uint16 result, data = loadW(mem);
 				SETFLAG_C(data & 0x0001);
 				result = (data >> 1);
 				SETFLAG_S(result & 0x8000);
-				storeW(cur_tlcs900h->mem, result);
+				storeW(mem, result);
 				SETFLAG_Z(result == 0);
 				parityW(result);
 				break;	}
@@ -953,123 +953,123 @@ void srcSRL()
 	SETFLAG_H0;
 	SETFLAG_N0;
 
-	cur_tlcs900h->cycles = 8;
+	cycles = 8;
 }
 
-//===== ADD R,(cur_tlcs900h->mem)
+//===== ADD R,(mem)
 void srcADDRm()
 {
-	switch(cur_tlcs900h->size)
+	switch(size)
 	{
-	case 0: regB(cur_tlcs900h->R) = generic_ADD_B(regB(cur_tlcs900h->R), loadB(cur_tlcs900h->mem)); cur_tlcs900h->cycles = 4;break;
-	case 1: regW(cur_tlcs900h->R) = generic_ADD_W(regW(cur_tlcs900h->R), loadW(cur_tlcs900h->mem)); cur_tlcs900h->cycles = 4;break;
-	case 2: regL(cur_tlcs900h->R) = generic_ADD_L(regL(cur_tlcs900h->R), loadL(cur_tlcs900h->mem)); cur_tlcs900h->cycles = 6;break;
+	case 0: regB(R) = generic_ADD_B(regB(R), loadB(mem)); cycles = 4;break;
+	case 1: regW(R) = generic_ADD_W(regW(R), loadW(mem)); cycles = 4;break;
+	case 2: regL(R) = generic_ADD_L(regL(R), loadL(mem)); cycles = 6;break;
 	}
 }
 
-//===== ADD (cur_tlcs900h->mem),R
+//===== ADD (mem),R
 void srcADDmR()
 {
-	switch(cur_tlcs900h->size)
+	switch(size)
 	{
-	case 0:	storeB(cur_tlcs900h->mem, generic_ADD_B(loadB(cur_tlcs900h->mem), regB(cur_tlcs900h->R))); cur_tlcs900h->cycles = 6;break;
-	case 1:	storeW(cur_tlcs900h->mem, generic_ADD_W(loadW(cur_tlcs900h->mem), regW(cur_tlcs900h->R))); cur_tlcs900h->cycles = 6;break;
-	case 2:	storeL(cur_tlcs900h->mem, generic_ADD_L(loadL(cur_tlcs900h->mem), regL(cur_tlcs900h->R))); cur_tlcs900h->cycles = 10;break;
+	case 0:	storeB(mem, generic_ADD_B(loadB(mem), regB(R))); cycles = 6;break;
+	case 1:	storeW(mem, generic_ADD_W(loadW(mem), regW(R))); cycles = 6;break;
+	case 2:	storeL(mem, generic_ADD_L(loadL(mem), regL(R))); cycles = 10;break;
 	}
 }
 
-//===== ADC R,(cur_tlcs900h->mem)
+//===== ADC R,(mem)
 void srcADCRm()
 {
-	switch(cur_tlcs900h->size)
+	switch(size)
 	{
-	case 0: regB(cur_tlcs900h->R) = generic_ADC_B(regB(cur_tlcs900h->R), loadB(cur_tlcs900h->mem)); cur_tlcs900h->cycles = 4;break;
-	case 1: regW(cur_tlcs900h->R) = generic_ADC_W(regW(cur_tlcs900h->R), loadW(cur_tlcs900h->mem)); cur_tlcs900h->cycles = 4;break;
-	case 2: regL(cur_tlcs900h->R) = generic_ADC_L(regL(cur_tlcs900h->R), loadL(cur_tlcs900h->mem)); cur_tlcs900h->cycles = 6;break;
+	case 0: regB(R) = generic_ADC_B(regB(R), loadB(mem)); cycles = 4;break;
+	case 1: regW(R) = generic_ADC_W(regW(R), loadW(mem)); cycles = 4;break;
+	case 2: regL(R) = generic_ADC_L(regL(R), loadL(mem)); cycles = 6;break;
 	}
 }
 
-//===== ADC (cur_tlcs900h->mem),R
+//===== ADC (mem),R
 void srcADCmR()
 {
-	switch(cur_tlcs900h->size)
+	switch(size)
 	{
-	case 0:	storeB(cur_tlcs900h->mem, generic_ADC_B(loadB(cur_tlcs900h->mem), regB(cur_tlcs900h->R))); cur_tlcs900h->cycles = 6;break;
-	case 1:	storeW(cur_tlcs900h->mem, generic_ADC_W(loadW(cur_tlcs900h->mem), regW(cur_tlcs900h->R))); cur_tlcs900h->cycles = 6;break;
-	case 2:	storeL(cur_tlcs900h->mem, generic_ADC_L(loadL(cur_tlcs900h->mem), regL(cur_tlcs900h->R))); cur_tlcs900h->cycles = 10;break;
+	case 0:	storeB(mem, generic_ADC_B(loadB(mem), regB(R))); cycles = 6;break;
+	case 1:	storeW(mem, generic_ADC_W(loadW(mem), regW(R))); cycles = 6;break;
+	case 2:	storeL(mem, generic_ADC_L(loadL(mem), regL(R))); cycles = 10;break;
 	}
 }
 
-//===== SUB R,(cur_tlcs900h->mem)
+//===== SUB R,(mem)
 void srcSUBRm()
 {
-	switch(cur_tlcs900h->size)
+	switch(size)
 	{
-	case 0: regB(cur_tlcs900h->R) = generic_SUB_B(regB(cur_tlcs900h->R), loadB(cur_tlcs900h->mem)); cur_tlcs900h->cycles = 4;break;
-	case 1: regW(cur_tlcs900h->R) = generic_SUB_W(regW(cur_tlcs900h->R), loadW(cur_tlcs900h->mem)); cur_tlcs900h->cycles = 4;break;
-	case 2: regL(cur_tlcs900h->R) = generic_SUB_L(regL(cur_tlcs900h->R), loadL(cur_tlcs900h->mem)); cur_tlcs900h->cycles = 6;break;
+	case 0: regB(R) = generic_SUB_B(regB(R), loadB(mem)); cycles = 4;break;
+	case 1: regW(R) = generic_SUB_W(regW(R), loadW(mem)); cycles = 4;break;
+	case 2: regL(R) = generic_SUB_L(regL(R), loadL(mem)); cycles = 6;break;
 	}
 }
 
-//===== SUB (cur_tlcs900h->mem),R
+//===== SUB (mem),R
 void srcSUBmR()
 {
-	switch(cur_tlcs900h->size)
+	switch(size)
 	{
-	case 0:	storeB(cur_tlcs900h->mem, generic_SUB_B(loadB(cur_tlcs900h->mem), regB(cur_tlcs900h->R))); cur_tlcs900h->cycles = 6;break;
-	case 1:	storeW(cur_tlcs900h->mem, generic_SUB_W(loadW(cur_tlcs900h->mem), regW(cur_tlcs900h->R))); cur_tlcs900h->cycles = 6;break;
-	case 2:	storeL(cur_tlcs900h->mem, generic_SUB_L(loadL(cur_tlcs900h->mem), regL(cur_tlcs900h->R))); cur_tlcs900h->cycles = 10;break;
+	case 0:	storeB(mem, generic_SUB_B(loadB(mem), regB(R))); cycles = 6;break;
+	case 1:	storeW(mem, generic_SUB_W(loadW(mem), regW(R))); cycles = 6;break;
+	case 2:	storeL(mem, generic_SUB_L(loadL(mem), regL(R))); cycles = 10;break;
 	}
 }
 
-//===== SBC R,(cur_tlcs900h->mem)
+//===== SBC R,(mem)
 void srcSBCRm()
 {
-	switch(cur_tlcs900h->size)
+	switch(size)
 	{
-	case 0: regB(cur_tlcs900h->R) = generic_SBC_B(regB(cur_tlcs900h->R), loadB(cur_tlcs900h->mem)); cur_tlcs900h->cycles = 4;break;
-	case 1: regW(cur_tlcs900h->R) = generic_SBC_W(regW(cur_tlcs900h->R), loadW(cur_tlcs900h->mem)); cur_tlcs900h->cycles = 4;break;
-	case 2: regL(cur_tlcs900h->R) = generic_SBC_L(regL(cur_tlcs900h->R), loadL(cur_tlcs900h->mem)); cur_tlcs900h->cycles = 6;break;
+	case 0: regB(R) = generic_SBC_B(regB(R), loadB(mem)); cycles = 4;break;
+	case 1: regW(R) = generic_SBC_W(regW(R), loadW(mem)); cycles = 4;break;
+	case 2: regL(R) = generic_SBC_L(regL(R), loadL(mem)); cycles = 6;break;
 	}
 }
 
-//===== SBC (cur_tlcs900h->mem),R
+//===== SBC (mem),R
 void srcSBCmR()
 {
-	switch(cur_tlcs900h->size)
+	switch(size)
 	{
-	case 0:	storeB(cur_tlcs900h->mem, generic_SBC_B(loadB(cur_tlcs900h->mem), regB(cur_tlcs900h->R))); cur_tlcs900h->cycles = 6;break;
-	case 1:	storeW(cur_tlcs900h->mem, generic_SBC_W(loadW(cur_tlcs900h->mem), regW(cur_tlcs900h->R))); cur_tlcs900h->cycles = 6;break;
-	case 2:	storeL(cur_tlcs900h->mem, generic_SBC_L(loadL(cur_tlcs900h->mem), regL(cur_tlcs900h->R))); cur_tlcs900h->cycles = 10;break;
+	case 0:	storeB(mem, generic_SBC_B(loadB(mem), regB(R))); cycles = 6;break;
+	case 1:	storeW(mem, generic_SBC_W(loadW(mem), regW(R))); cycles = 6;break;
+	case 2:	storeL(mem, generic_SBC_L(loadL(mem), regL(R))); cycles = 10;break;
 	}
 }
 
-//===== AND R,(cur_tlcs900h->mem)
+//===== AND R,(mem)
 void srcANDRm()
 {
-	switch(cur_tlcs900h->size)
+	switch(size)
 	{
-	case 0:	{	uint8 result = regB(cur_tlcs900h->R) & loadB(cur_tlcs900h->mem);
-				regB(cur_tlcs900h->R) = result;
+	case 0:	{	uint8 result = regB(R) & loadB(mem);
+				regB(R) = result;
 				SETFLAG_Z(result == 0);
 				SETFLAG_S(result & 0x80);
 				parityB(result);
-				cur_tlcs900h->cycles = 4;
+				cycles = 4;
 				break; }
 	
-	case 1: {	uint16 result = regW(cur_tlcs900h->R) & loadW(cur_tlcs900h->mem);
-				regW(cur_tlcs900h->R) = result;
+	case 1: {	uint16 result = regW(R) & loadW(mem);
+				regW(R) = result;
 				SETFLAG_Z(result == 0);
 				SETFLAG_S(result & 0x8000);
 				parityW(result);
-				cur_tlcs900h->cycles = 4;
+				cycles = 4;
 				break; }
 
-	case 2:	{	uint32 result = regL(cur_tlcs900h->R) & loadL(cur_tlcs900h->mem);
-				regL(cur_tlcs900h->R) = result;
+	case 2:	{	uint32 result = regL(R) & loadL(mem);
+				regL(R) = result;
 				SETFLAG_Z(result == 0);
 				SETFLAG_S(result & 0x80000000);
-				cur_tlcs900h->cycles = 6;
+				cycles = 6;
 				break; }
 	}
 
@@ -1078,32 +1078,32 @@ void srcANDRm()
 	SETFLAG_C0;
 }
 
-//===== AND (cur_tlcs900h->mem),R
+//===== AND (mem),R
 void srcANDmR()
 {
-	switch(cur_tlcs900h->size)
+	switch(size)
 	{
-	case 0:	{	uint8 result = regB(cur_tlcs900h->R) & loadB(cur_tlcs900h->mem);
-				storeB(cur_tlcs900h->mem, result);
+	case 0:	{	uint8 result = regB(R) & loadB(mem);
+				storeB(mem, result);
 				SETFLAG_Z(result == 0);
 				SETFLAG_S(result & 0x80);
 				parityB(result);
-				cur_tlcs900h->cycles = 6;
+				cycles = 6;
 				break; }
 	
-	case 1: {	uint16 result = regW(cur_tlcs900h->R) & loadW(cur_tlcs900h->mem);
-				storeW(cur_tlcs900h->mem, result);
+	case 1: {	uint16 result = regW(R) & loadW(mem);
+				storeW(mem, result);
 				SETFLAG_Z(result == 0);
 				SETFLAG_S(result & 0x8000);
 				parityW(result);
-				cur_tlcs900h->cycles = 6;
+				cycles = 6;
 				break; }
 
-	case 2:	{	uint32 result = regL(cur_tlcs900h->R) & loadL(cur_tlcs900h->mem);
-				storeL(cur_tlcs900h->mem, result);
+	case 2:	{	uint32 result = regL(R) & loadL(mem);
+				storeL(mem, result);
 				SETFLAG_Z(result == 0);
 				SETFLAG_S(result & 0x80000000);
-				cur_tlcs900h->cycles = 10;
+				cycles = 10;
 				break; }
 	}
 
@@ -1112,32 +1112,32 @@ void srcANDmR()
 	SETFLAG_C0;
 }
 
-//===== XOR R,(cur_tlcs900h->mem)
+//===== XOR R,(mem)
 void srcXORRm()
 {
-	switch(cur_tlcs900h->size)
+	switch(size)
 	{
-	case 0:	{	uint8 result = regB(cur_tlcs900h->R) ^ loadB(cur_tlcs900h->mem);
-				regB(cur_tlcs900h->R) = result;
+	case 0:	{	uint8 result = regB(R) ^ loadB(mem);
+				regB(R) = result;
 				SETFLAG_Z(result == 0);
 				SETFLAG_S(result & 0x80);
 				parityB(result);
-				cur_tlcs900h->cycles = 4;
+				cycles = 4;
 				break; }
 	
-	case 1: {	uint16 result = regW(cur_tlcs900h->R) ^ loadW(cur_tlcs900h->mem);
-				regW(cur_tlcs900h->R) = result;
+	case 1: {	uint16 result = regW(R) ^ loadW(mem);
+				regW(R) = result;
 				SETFLAG_Z(result == 0);
 				SETFLAG_S(result & 0x8000);
 				parityW(result);
-				cur_tlcs900h->cycles = 4;
+				cycles = 4;
 				break; }
 
-	case 2:	{	uint32 result = regL(cur_tlcs900h->R) ^ loadL(cur_tlcs900h->mem);
-				regL(cur_tlcs900h->R) = result;
+	case 2:	{	uint32 result = regL(R) ^ loadL(mem);
+				regL(R) = result;
 				SETFLAG_Z(result == 0);
 				SETFLAG_S(result & 0x80000000);
-				cur_tlcs900h->cycles = 6;
+				cycles = 6;
 				break; }
 	}
 
@@ -1146,32 +1146,32 @@ void srcXORRm()
 	SETFLAG_C0;
 }
 
-//===== XOR (cur_tlcs900h->mem),R
+//===== XOR (mem),R
 void srcXORmR()
 {
-	switch(cur_tlcs900h->size)
+	switch(size)
 	{
-	case 0:	{	uint8 result = regB(cur_tlcs900h->R) ^ loadB(cur_tlcs900h->mem);
-				storeB(cur_tlcs900h->mem, result);
+	case 0:	{	uint8 result = regB(R) ^ loadB(mem);
+				storeB(mem, result);
 				SETFLAG_Z(result == 0);
 				SETFLAG_S(result & 0x80);
 				parityB(result);
-				cur_tlcs900h->cycles = 6;
+				cycles = 6;
 				break; }
 	
-	case 1: {	uint16 result = regW(cur_tlcs900h->R) ^ loadW(cur_tlcs900h->mem);
-				storeW(cur_tlcs900h->mem, result);
+	case 1: {	uint16 result = regW(R) ^ loadW(mem);
+				storeW(mem, result);
 				SETFLAG_Z(result == 0);
 				SETFLAG_S(result & 0x8000);
 				parityW(result);
-				cur_tlcs900h->cycles = 6;
+				cycles = 6;
 				break; }
 
-	case 2:	{	uint32 result = regL(cur_tlcs900h->R) ^ loadL(cur_tlcs900h->mem);
-				storeL(cur_tlcs900h->mem, result);
+	case 2:	{	uint32 result = regL(R) ^ loadL(mem);
+				storeL(mem, result);
 				SETFLAG_Z(result == 0);
 				SETFLAG_S(result & 0x80000000);
-				cur_tlcs900h->cycles = 10;
+				cycles = 10;
 				break; }
 	}
 
@@ -1180,32 +1180,32 @@ void srcXORmR()
 	SETFLAG_C0;
 }
 
-//===== OR R,(cur_tlcs900h->mem)
+//===== OR R,(mem)
 void srcORRm()
 {
-	switch(cur_tlcs900h->size)
+	switch(size)
 	{
-	case 0:	{	uint8 result = regB(cur_tlcs900h->R) | loadB(cur_tlcs900h->mem);
-				regB(cur_tlcs900h->R) = result;
+	case 0:	{	uint8 result = regB(R) | loadB(mem);
+				regB(R) = result;
 				SETFLAG_Z(result == 0);
 				SETFLAG_S(result & 0x80);
 				parityB(result);
-				cur_tlcs900h->cycles = 4;
+				cycles = 4;
 				break; }
 	
-	case 1: {	uint16 result = regW(cur_tlcs900h->R) | loadW(cur_tlcs900h->mem);
-				regW(cur_tlcs900h->R) = result;
+	case 1: {	uint16 result = regW(R) | loadW(mem);
+				regW(R) = result;
 				SETFLAG_Z(result == 0);
 				SETFLAG_S(result & 0x8000);
 				parityW(result);
-				cur_tlcs900h->cycles = 4;
+				cycles = 4;
 				break; }
 
-	case 2:	{	uint32 result = regL(cur_tlcs900h->R) | loadL(cur_tlcs900h->mem);
-				regL(cur_tlcs900h->R) = result;
+	case 2:	{	uint32 result = regL(R) | loadL(mem);
+				regL(R) = result;
 				SETFLAG_Z(result == 0);
 				SETFLAG_S(result & 0x80000000);
-				cur_tlcs900h->cycles = 6;
+				cycles = 6;
 				break; }
 	}
 
@@ -1214,32 +1214,32 @@ void srcORRm()
 	SETFLAG_C0;
 }
 
-//===== OR (cur_tlcs900h->mem),R
+//===== OR (mem),R
 void srcORmR()
 {
-	switch(cur_tlcs900h->size)
+	switch(size)
 	{
-	case 0:	{	uint8 result = regB(cur_tlcs900h->R) | loadB(cur_tlcs900h->mem);
-				storeB(cur_tlcs900h->mem, result);
+	case 0:	{	uint8 result = regB(R) | loadB(mem);
+				storeB(mem, result);
 				SETFLAG_Z(result == 0);
 				SETFLAG_S(result & 0x80);
 				parityB(result);
-				cur_tlcs900h->cycles = 6;
+				cycles = 6;
 				break; }
 	
-	case 1: {	uint16 result = regW(cur_tlcs900h->R) | loadW(cur_tlcs900h->mem);
-				storeW(cur_tlcs900h->mem, result);
+	case 1: {	uint16 result = regW(R) | loadW(mem);
+				storeW(mem, result);
 				SETFLAG_Z(result == 0);
 				SETFLAG_S(result & 0x8000);
 				parityW(result);
-				cur_tlcs900h->cycles = 6;
+				cycles = 6;
 				break; }
 
-	case 2:	{	uint32 result = regL(cur_tlcs900h->R) | loadL(cur_tlcs900h->mem);
-				storeL(cur_tlcs900h->mem, result);
+	case 2:	{	uint32 result = regL(R) | loadL(mem);
+				storeL(mem, result);
 				SETFLAG_Z(result == 0);
 				SETFLAG_S(result & 0x80000000);
-				cur_tlcs900h->cycles = 10;
+				cycles = 10;
 				break; }
 	}
 
@@ -1248,43 +1248,43 @@ void srcORmR()
 	SETFLAG_C0;
 }
 
-//===== CP R,(cur_tlcs900h->mem)
+//===== CP R,(mem)
 void srcCPRm(void)
 {
-   switch(cur_tlcs900h->size)
+   switch(size)
    {
       case 0:
-         generic_SUB_B(regB(cur_tlcs900h->R), loadB(cur_tlcs900h->mem));
-         cur_tlcs900h->cycles = 4;
+         generic_SUB_B(regB(R), loadB(mem));
+         cycles = 4;
          break;
       case 1:
-         generic_SUB_W(regW(cur_tlcs900h->R), loadW(cur_tlcs900h->mem));
-         cur_tlcs900h->cycles = 4;
+         generic_SUB_W(regW(R), loadW(mem));
+         cycles = 4;
          break;
       case 2:
-         generic_SUB_L(regL(cur_tlcs900h->R), loadL(cur_tlcs900h->mem));
-         cur_tlcs900h->cycles = 6;
+         generic_SUB_L(regL(R), loadL(mem));
+         cycles = 6;
          break;
    }
 }
 
-//===== CP (cur_tlcs900h->mem),R
+//===== CP (mem),R
 void srcCPmR(void)
 {
-   switch(cur_tlcs900h->size)
+   switch(size)
    {
       case 0:
-         generic_SUB_B(loadB(cur_tlcs900h->mem), regB(cur_tlcs900h->R));
+         generic_SUB_B(loadB(mem), regB(R));
          break;
       case 1:
-         generic_SUB_W(loadW(cur_tlcs900h->mem), regW(cur_tlcs900h->R));
+         generic_SUB_W(loadW(mem), regW(R));
          break;
       case 2:
-         generic_SUB_L(loadL(cur_tlcs900h->mem), regL(cur_tlcs900h->R));
+         generic_SUB_L(loadL(mem), regL(R));
          break;
    }
 
-   cur_tlcs900h->cycles = 6;
+   cycles = 6;
 }
 
 //=============================================================================

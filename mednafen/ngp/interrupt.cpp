@@ -54,15 +54,15 @@ extern "C" void set_interrupt(uint8_t index, bool set)
 
 void neopop_interrupt_t::interrupt(uint8_t index, uint8_t level)
 {
-   push32(cur_tlcs900h->pc);
-   push16(cur_tlcs900h->sr);
+   push32(pc);
+   push16(sr);
 
    //Up the IFF
    if(level >= 0)
       setStatusIFF((level < 7) ? (level + 1) : 7);
 
    //Access the interrupt vector table to find the jump destination
-   cur_tlcs900h->pc = loadL(0x6FB8 + index * 4);
+   pc = loadL(0x6FB8 + index * 4);
 }
 
 void neopop_interrupt_t::set_interrupt(uint8_t index, bool set)

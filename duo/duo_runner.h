@@ -41,7 +41,7 @@ public:
 
 	MDFNGI game_info;
 
-	int instance_count = 2;
+	int instance_count = 1;
 
 	uint32_t setting_ngp_language = 0;
 
@@ -50,7 +50,7 @@ public:
 	uint64_t video_frames;
 	uint64_t audio_frames;
 
-	AVMode videoMixMode = AV_BOTH_PLAYERS;
+	AVMode videoMixMode = AV_P1_ONLY;
 	AVLayout videoLayout = AV_LAYOUT_H;
 	AVMode audioMixMode = AV_P1_ONLY;
 

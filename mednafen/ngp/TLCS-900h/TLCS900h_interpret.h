@@ -45,7 +45,6 @@
 
 #include <boolean.h>
 #include "../../mednafen-types.h"
-#include "TLCS900h_state.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -60,13 +59,22 @@ int32 TLCS900h_interpret(void);
 
 //=============================================================================
 
+extern uint32 mem;	
+extern int size;
+extern uint8 first;			//First byte
+extern uint8 second;			//Second byte
+extern uint8 R;				//(second & 7)
+extern uint8 rCode;
+extern int32 cycles;
+extern bool brCode;
+
 //=============================================================================
 
 extern void (*instruction_error)(const char* vaMessage,...);
 
 //=============================================================================
 
-#define FETCH8		loadB(cur_tlcs900h->pc++)
+#define FETCH8		loadB(pc++)
 
 uint16 fetch16(void);
 uint32 fetch24(void);

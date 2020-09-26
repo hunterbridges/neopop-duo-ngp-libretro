@@ -35,10 +35,6 @@
 #define __TLCS900H_REG__
 //=========================================================================
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
 //===== LD r,#
 void regLDi(void);
 
@@ -299,10 +295,6 @@ void regSLLA(void);
 
 //===== SRL A,r
 void regSRLA(void);
-
-#ifdef __cplusplus
-}
-#endif
 
 //=========================================================================
 #endif

@@ -46,10 +46,6 @@
 #include <boolean.h>
 #include "../../mednafen-types.h"
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
 //=============================================================================
 
 //Interprets a single instruction from 'pc', 
@@ -135,10 +131,6 @@ bool conditionCode(int cc);
 //Translate an rr or RR value for MUL/MULS/DIV/DIVS
 uint8 get_rr_Target(void);
 uint8 get_RR_Target(void);
-
-#ifdef __cplusplus
-}
-#endif
 
 //=============================================================================
 #endif

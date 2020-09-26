@@ -41,10 +41,6 @@
 
 #include "../../mednafen-types.h"
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
 void reset_registers(void);
 void dump_registers_TLCS900h(void);
 
@@ -122,10 +118,6 @@ void changedSP(void);
 #define SETFLAG_V1		{ sr |= 0x0004; }
 #define SETFLAG_N1		{ sr |= 0x0002; }
 #define SETFLAG_C1		{ sr |= 0x0001; }
-
-#ifdef __cplusplus
-}
-#endif
 
 //=============================================================================
 #endif

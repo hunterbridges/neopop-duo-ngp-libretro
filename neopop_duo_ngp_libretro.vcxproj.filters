@@ -85,24 +85,6 @@
     <ClCompile Include="mednafen\hw_cpu\z80-fuse\z80_ops.c">
       <Filter>mednafen\hw_cpu\z80-fuse</Filter>
     </ClCompile>
-    <ClCompile Include="mednafen\ngp\TLCS-900h\TLCS900h_interpret.c">
-      <Filter>mednafen\ngp\TLCS-900h</Filter>
-    </ClCompile>
-    <ClCompile Include="mednafen\ngp\TLCS-900h\TLCS900h_interpret_dst.c">
-      <Filter>mednafen\ngp\TLCS-900h</Filter>
-    </ClCompile>
-    <ClCompile Include="mednafen\ngp\TLCS-900h\TLCS900h_interpret_reg.c">
-      <Filter>mednafen\ngp\TLCS-900h</Filter>
-    </ClCompile>
-    <ClCompile Include="mednafen\ngp\TLCS-900h\TLCS900h_interpret_single.c">
-      <Filter>mednafen\ngp\TLCS-900h</Filter>
-    </ClCompile>
-    <ClCompile Include="mednafen\ngp\TLCS-900h\TLCS900h_interpret_src.c">
-      <Filter>mednafen\ngp\TLCS-900h</Filter>
-    </ClCompile>
-    <ClCompile Include="mednafen\ngp\TLCS-900h\TLCS900h_registers.c">
-      <Filter>mednafen\ngp\TLCS-900h</Filter>
-    </ClCompile>
     <ClCompile Include="mednafen\ngp\bios.c">
       <Filter>mednafen\ngp</Filter>
     </ClCompile>
@@ -177,6 +159,24 @@
     </ClCompile>
     <ClCompile Include="third_party\ringbuf.c">
       <Filter>third_party</Filter>
+    </ClCompile>
+    <ClCompile Include="mednafen\ngp\TLCS-900h\TLCS900h_interpret.cpp">
+      <Filter>mednafen\ngp\TLCS-900h</Filter>
+    </ClCompile>
+    <ClCompile Include="mednafen\ngp\TLCS-900h\TLCS900h_interpret_dst.cpp">
+      <Filter>mednafen\ngp\TLCS-900h</Filter>
+    </ClCompile>
+    <ClCompile Include="mednafen\ngp\TLCS-900h\TLCS900h_interpret_reg.cpp">
+      <Filter>mednafen\ngp\TLCS-900h</Filter>
+    </ClCompile>
+    <ClCompile Include="mednafen\ngp\TLCS-900h\TLCS900h_interpret_single.cpp">
+      <Filter>mednafen\ngp\TLCS-900h</Filter>
+    </ClCompile>
+    <ClCompile Include="mednafen\ngp\TLCS-900h\TLCS900h_interpret_src.cpp">
+      <Filter>mednafen\ngp\TLCS-900h</Filter>
+    </ClCompile>
+    <ClCompile Include="mednafen\ngp\TLCS-900h\TLCS900h_registers.cpp">
+      <Filter>mednafen\ngp\TLCS-900h</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

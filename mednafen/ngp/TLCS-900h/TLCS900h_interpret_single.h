@@ -35,10 +35,6 @@
 #define __TLCS900H_SINGLE__
 //=========================================================================
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
 //===== NOP
 void sngNOP(void);
 
@@ -164,10 +160,6 @@ void sngLDX(void);
 
 //===== SWI num
 void sngSWI(void);
-
-#ifdef __cplusplus
-}
-#endif
 
 //=============================================================================
 #endif

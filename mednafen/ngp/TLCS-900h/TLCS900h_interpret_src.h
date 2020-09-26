@@ -35,10 +35,6 @@
 #define __TLCS900H_SRC__
 //=========================================================================
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
 //===== PUSH (mem)
 void srcPUSH(void);
 
@@ -194,10 +190,6 @@ void srcCPRm(void);
 
 //===== CP (mem),R
 void srcCPmR(void);
-
-#ifdef __cplusplus
-}
-#endif
 
 //=============================================================================
 #endif

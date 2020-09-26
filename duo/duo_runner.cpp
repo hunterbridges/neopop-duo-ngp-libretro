@@ -178,13 +178,12 @@ void DuoRunner::Run()
 		update_audio = false;
 	}
 
-	/*
 	DuoInstance *duoA = &DuoInstance::instances[0];
 	DuoInstance *duoB = &DuoInstance::instances[1];
 	DuoInstance::ProcessFrame_Interleaved(duoA, duoB);
-	*/
 	
 	// Process frame for each instance
+	/*
 	for (int i = 0; i < instance_count; i++)
 	{
 		DuoInstance *duo = &DuoInstance::instances[i];
@@ -192,6 +191,7 @@ void DuoRunner::Run()
 		duo->ProcessFrame();
 		DuoInstance::UnstageCurrentInstance();
 	}
+	*/ 
 
 	// Mix AV
 	MixFrameAV();

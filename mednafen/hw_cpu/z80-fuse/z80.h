@@ -61,9 +61,6 @@ extern const uint8_t overflow_add_table[];
 extern const uint8_t overflow_sub_table[];
 extern const uint8_t halfcarry_add_table[];
 extern const uint8_t halfcarry_sub_table[];
-extern uint8_t sz53_table[0x100]; /* The S, Z, 5 and 3 bits of the index */
-extern uint8_t parity_table[0x100]; /* The parity of the lookup value */
-extern uint8_t sz53p_table[0x100]; /* OR the above two tables together */
 extern void (*z80_writebyte)(uint16_t a, uint8_t b);
 extern uint8_t (*z80_readbyte)(uint16_t a);
 extern void (*z80_writeport)(uint16_t a, uint8_t b);
@@ -77,6 +74,10 @@ struct Z80
 	uint64_t last_z80_tstates;
 	uint64_t z80_tstates;
 	int iline;
+
+	uint8_t sz53_table[0x100]; /* The S, Z, 5 and 3 bits of the index */
+	uint8_t parity_table[0x100]; /* The parity of the lookup value */
+	uint8_t sz53p_table[0x100]; /* OR the above two tables together */
 
 	void z80_init( void );
 	void z80_reset( void );

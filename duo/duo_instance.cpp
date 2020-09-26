@@ -421,9 +421,6 @@ void DuoInstance::ProcessFrame_Interleaved(DuoInstance *duoA, DuoInstance *duoB)
 	{
 		for (int i = 0; i < 2; i++)
 		{
-			if (drewFrame[i] == true)
-				return;
-
 			DuoInstance::StageInstance(instances[i]);
 
 			int32 tlcsCycles = instances[i]->tlcs900h_state.TLCS900h_interpret();

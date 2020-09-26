@@ -52,14 +52,9 @@
 //---------------------------------------------------------------------------
 */
 
-#include "TLCS900h_registers.h"
+#include "TLCS900h.h"
 #include "../mem.h"
 #include "../bios.h"
-#include "TLCS900h_interpret.h"
-#include "TLCS900h_interpret_single.h"
-#include "TLCS900h_interpret_src.h"
-#include "TLCS900h_interpret_dst.h"
-#include "TLCS900h_interpret_reg.h"
 
 static void DUMMY_instruction_error(const char* vaMessage,...) { }
 
@@ -67,29 +62,14 @@ void (*instruction_error)(const char* vaMessage,...) = DUMMY_instruction_error;
 
 //=========================================================================
 
-uint32	mem;		//Result of addressing mode
-int		size;		//operand size, 0 = Byte, 1 = Word, 2 = Long
-
-uint8		first;		//The first byte
-uint8		R;			//big R
-uint8		second;		//The second opcode
-
-bool	brCode;		//Register code used?
-uint8		rCode;		//The code
-
-int32		cycles;		//How many state changes?
-int32		cycles_extra;	//How many extra state changes?
-
-//=========================================================================
-
-uint16 fetch16(void)
+uint16 TLCS900h::fetch16(void)
 {
 	uint16 a = loadW(pc);
 	pc += 2;
 	return a;
 }
 
-uint32 fetch24(void)
+uint32 TLCS900h::fetch24(void)
 {
 	uint32 b, a = loadW(pc);
 	pc += 2;
@@ -97,7 +77,7 @@ uint32 fetch24(void)
 	return (b << 16) | a;
 }
 
-uint32 fetch32(void)
+uint32 TLCS900h::fetch32(void)
 {
 	uint32 a = loadL(pc);
 	pc += 4;
@@ -106,7 +86,7 @@ uint32 fetch32(void)
 
 //=============================================================================
 
-void parityB(uint8 value)
+void TLCS900h::parityB(uint8 value)
 {
 	uint8 count = 0, i;
 
@@ -120,7 +100,7 @@ void parityB(uint8 value)
 	SETFLAG_V((count & 1) == 0);
 }
 
-void parityW(uint16 value)
+void TLCS900h::parityW(uint16 value)
 {
 	uint8 count = 0, i;
 
@@ -136,39 +116,39 @@ void parityW(uint16 value)
 
 //=========================================================================
 
-void push8(uint8 data)
+void TLCS900h::push8(uint8 data)
 {
    REGXSP -= 1;
    storeB(REGXSP, data);
 }
 
-void push16(uint16 data)
+void TLCS900h::push16(uint16 data)
 {
    REGXSP -= 2;
    storeW(REGXSP, data);
 }
 
-void push32(uint32 data)
+void TLCS900h::push32(uint32 data)
 {
    REGXSP -= 4;
    storeL(REGXSP, data);
 }
 
-uint8 pop8(void)
+uint8 TLCS900h::pop8(void)
 {
    uint8 temp = loadB(REGXSP);
    REGXSP += 1;
    return temp;
 }
 
-uint16 pop16(void)
+uint16 TLCS900h::pop16(void)
 {
    uint16 temp = loadW(REGXSP);
    REGXSP += 2;
    return temp;
 }
 
-uint32 pop32(void)
+uint32 TLCS900h::pop32(void)
 {
    uint32 temp = loadL(REGXSP);
    REGXSP += 4;
@@ -177,7 +157,7 @@ uint32 pop32(void)
 
 //=============================================================================
 
-uint16 generic_DIV_B(uint16 val, uint8 div)
+uint16 TLCS900h::generic_DIV_B(uint16 val, uint8 div)
 {
 	if (div == 0)
 	{ 
@@ -193,7 +173,7 @@ uint16 generic_DIV_B(uint16 val, uint8 div)
 	}
 }
 
-uint32 generic_DIV_W(uint32 val, uint16 div)
+uint32 TLCS900h::generic_DIV_W(uint32 val, uint16 div)
 {
 	if (div == 0)
 	{ 
@@ -211,7 +191,7 @@ uint32 generic_DIV_W(uint32 val, uint16 div)
 
 //=============================================================================
 
-uint16 generic_DIVS_B(int16 val, int8 div)
+uint16 TLCS900h::generic_DIVS_B(int16 val, int8 div)
 {
 	if (div == 0)
 	{
@@ -227,7 +207,7 @@ uint16 generic_DIVS_B(int16 val, int8 div)
 	}
 }
 
-uint32 generic_DIVS_W(int32 val, int16 div)
+uint32 TLCS900h::generic_DIVS_W(int32 val, int16 div)
 {
 	if (div == 0)
 	{
@@ -245,7 +225,7 @@ uint32 generic_DIVS_W(int32 val, int16 div)
 
 //=============================================================================
 
-uint8 generic_ADD_B(uint8 dst, uint8 src)
+uint8 TLCS900h::generic_ADD_B(uint8 dst, uint8 src)
 {
 	uint8 half = (dst & 0xF) + (src & 0xF);
 	uint32 resultC = (uint32)dst + (uint32)src;
@@ -265,7 +245,7 @@ uint8 generic_ADD_B(uint8 dst, uint8 src)
 	return result;
 }
 
-uint16 generic_ADD_W(uint16 dst, uint16 src)
+uint16 TLCS900h::generic_ADD_W(uint16 dst, uint16 src)
 {
 	uint16 half = (dst & 0xF) + (src & 0xF);
 	uint32 resultC = (uint32)dst + (uint32)src;
@@ -285,7 +265,7 @@ uint16 generic_ADD_W(uint16 dst, uint16 src)
 	return result;
 }
 
-uint32 generic_ADD_L(uint32 dst, uint32 src)
+uint32 TLCS900h::generic_ADD_L(uint32 dst, uint32 src)
 {
 	uint64 resultC = (uint64)dst + (uint64)src;
 	uint32 result = (uint32)(resultC & 0xFFFFFFFF);
@@ -305,7 +285,7 @@ uint32 generic_ADD_L(uint32 dst, uint32 src)
 
 //=============================================================================
 
-uint8 generic_ADC_B(uint8 dst, uint8 src)
+uint8 TLCS900h::generic_ADC_B(uint8 dst, uint8 src)
 {
 	uint8 half = (dst & 0xF) + (src & 0xF) + FLAG_C;
 	uint32 resultC = (uint32)dst + (uint32)src + (uint32)FLAG_C;
@@ -325,7 +305,7 @@ uint8 generic_ADC_B(uint8 dst, uint8 src)
 	return result;
 }
 
-uint16 generic_ADC_W(uint16 dst, uint16 src)
+uint16 TLCS900h::generic_ADC_W(uint16 dst, uint16 src)
 {
 	uint16 half = (dst & 0xF) + (src & 0xF) + FLAG_C;
 	uint32 resultC = (uint32)dst + (uint32)src + (uint32)FLAG_C;
@@ -345,7 +325,7 @@ uint16 generic_ADC_W(uint16 dst, uint16 src)
 	return result;
 }
 
-uint32 generic_ADC_L(uint32 dst, uint32 src)
+uint32 TLCS900h::generic_ADC_L(uint32 dst, uint32 src)
 {
 	uint64 resultC = (uint64)dst + (uint64)src + (uint64)FLAG_C;
 	uint32 result = (uint32)(resultC & 0xFFFFFFFF);
@@ -365,7 +345,7 @@ uint32 generic_ADC_L(uint32 dst, uint32 src)
 
 //=============================================================================
 
-uint8 generic_SUB_B(uint8 dst, uint8 src)
+uint8 TLCS900h::generic_SUB_B(uint8 dst, uint8 src)
 {
 	uint8 half = (dst & 0xF) - (src & 0xF);
 	uint32 resultC = (uint32)dst - (uint32)src;
@@ -391,7 +371,7 @@ uint8 generic_SUB_B(uint8 dst, uint8 src)
 	return result;
 }
 
-uint16 generic_SUB_W(uint16 dst, uint16 src)
+uint16 TLCS900h::generic_SUB_W(uint16 dst, uint16 src)
 {
 	uint16 half = (dst & 0xF) - (src & 0xF);
 	uint32 resultC = (uint32)dst - (uint32)src;
@@ -411,7 +391,7 @@ uint16 generic_SUB_W(uint16 dst, uint16 src)
 	return result;
 }
 
-uint32 generic_SUB_L(uint32 dst, uint32 src)
+uint32 TLCS900h::generic_SUB_L(uint32 dst, uint32 src)
 {
 	uint64 resultC = (uint64)dst - (uint64)src;
 	uint32 result = (uint32)(resultC & 0xFFFFFFFF);
@@ -431,7 +411,7 @@ uint32 generic_SUB_L(uint32 dst, uint32 src)
 
 //=============================================================================
 
-uint8 generic_SBC_B(uint8 dst, uint8 src)
+uint8 TLCS900h::generic_SBC_B(uint8 dst, uint8 src)
 {
 	uint8 half = (dst & 0xF) - (src & 0xF) - FLAG_C;
 	uint32 resultC = (uint32)dst - (uint32)src - (uint32)FLAG_C;
@@ -451,7 +431,7 @@ uint8 generic_SBC_B(uint8 dst, uint8 src)
 	return result;
 }
 
-uint16 generic_SBC_W(uint16 dst, uint16 src)
+uint16 TLCS900h::generic_SBC_W(uint16 dst, uint16 src)
 {
 	uint16 half = (dst & 0xF) - (src & 0xF) - FLAG_C;
 	uint32 resultC = (uint32)dst - (uint32)src - (uint32)FLAG_C;
@@ -471,7 +451,7 @@ uint16 generic_SBC_W(uint16 dst, uint16 src)
 	return result;
 }
 
-uint32 generic_SBC_L(uint32 dst, uint32 src)
+uint32 TLCS900h::generic_SBC_L(uint32 dst, uint32 src)
 {
 	uint64 resultC = (uint64)dst - (uint64)src - (uint64)FLAG_C;
 	uint32 result = (uint32)(resultC & 0xFFFFFFFF);
@@ -491,7 +471,7 @@ uint32 generic_SBC_L(uint32 dst, uint32 src)
 
 //=============================================================================
 
-bool conditionCode(int cc)
+bool TLCS900h::conditionCode(int cc)
 {
    switch(cc)
    {
@@ -565,7 +545,7 @@ bool conditionCode(int cc)
 
 //=============================================================================
 
-uint8 get_rr_Target(void)
+uint8 TLCS900h::get_rr_Target(void)
 {
 	uint8 target = 0x80;
 
@@ -600,7 +580,7 @@ uint8 get_rr_Target(void)
 	return target;
 }
 
-uint8 get_RR_Target(void)
+uint8 TLCS900h::get_RR_Target(void)
 {
    uint8 target = 0x80;
 
@@ -654,43 +634,43 @@ uint8 get_RR_Target(void)
 
 //=========================================================================
 
-static void ExXWA()		{mem = regL(0);}
-static void ExXBC()		{mem = regL(1);}
-static void ExXDE()		{mem = regL(2);}
-static void ExXHL()		{mem = regL(3);}
-static void ExXIX()		{mem = regL(4);}
-static void ExXIY()		{mem = regL(5);}
-static void ExXIZ()		{mem = regL(6);}
-static void ExXSP()		{mem = regL(7);}
+void TLCS900h::ExXWA()		{mem = regL(0);}
+void TLCS900h::ExXBC()		{mem = regL(1);}
+void TLCS900h::ExXDE()		{mem = regL(2);}
+void TLCS900h::ExXHL()		{mem = regL(3);}
+void TLCS900h::ExXIX()		{mem = regL(4);}
+void TLCS900h::ExXIY()		{mem = regL(5);}
+void TLCS900h::ExXIZ()		{mem = regL(6);}
+void TLCS900h::ExXSP()		{mem = regL(7);}
 
-static void ExXWAd()	{mem = regL(0) + (int8)FETCH8; cycles_extra = 2;}
-static void ExXBCd()	{mem = regL(1) + (int8)FETCH8; cycles_extra = 2;}
-static void ExXDEd()	{mem = regL(2) + (int8)FETCH8; cycles_extra = 2;}
-static void ExXHLd()	{mem = regL(3) + (int8)FETCH8; cycles_extra = 2;}
-static void ExXIXd()	{mem = regL(4) + (int8)FETCH8; cycles_extra = 2;}
-static void ExXIYd()	{mem = regL(5) + (int8)FETCH8; cycles_extra = 2;}
-static void ExXIZd()	{mem = regL(6) + (int8)FETCH8; cycles_extra = 2;}
-static void ExXSPd()	{mem = regL(7) + (int8)FETCH8; cycles_extra = 2;}
+void TLCS900h::ExXWAd()	{mem = regL(0) + (int8)FETCH8; cycles_extra = 2;}
+void TLCS900h::ExXBCd()	{mem = regL(1) + (int8)FETCH8; cycles_extra = 2;}
+void TLCS900h::ExXDEd()	{mem = regL(2) + (int8)FETCH8; cycles_extra = 2;}
+void TLCS900h::ExXHLd()	{mem = regL(3) + (int8)FETCH8; cycles_extra = 2;}
+void TLCS900h::ExXIXd()	{mem = regL(4) + (int8)FETCH8; cycles_extra = 2;}
+void TLCS900h::ExXIYd()	{mem = regL(5) + (int8)FETCH8; cycles_extra = 2;}
+void TLCS900h::ExXIZd()	{mem = regL(6) + (int8)FETCH8; cycles_extra = 2;}
+void TLCS900h::ExXSPd()	{mem = regL(7) + (int8)FETCH8; cycles_extra = 2;}
 
-static void Ex8(void)
+void TLCS900h::Ex8(void)
 {
    mem = FETCH8;
    cycles_extra = 2;
 }
 
-static void Ex16(void)
+void TLCS900h::Ex16(void)
 {
    mem = fetch16();
    cycles_extra = 2;
 }
 
-static void Ex24(void)
+void TLCS900h::Ex24(void)
 {
    mem = fetch24();
    cycles_extra = 3;
 }
 
-static void ExR32(void)
+void TLCS900h::ExR32(void)
 {
 	uint8 data = FETCH8;
 
@@ -730,7 +710,7 @@ static void ExR32(void)
 		mem += (int16)fetch16();
 }
 
-static void ExDec()
+void TLCS900h::ExDec()
 {
 	uint8 data = FETCH8;
 	uint8 r32 = data & 0xFC;
@@ -745,7 +725,7 @@ static void ExDec()
 	}
 }
 
-static void ExInc()
+void TLCS900h::ExInc()
 {
    uint8 data = FETCH8;
    uint8 r32 = data & 0xFC;
@@ -769,7 +749,7 @@ static void ExInc()
    }
 }
 
-static void ExRC()
+void TLCS900h::ExRC()
 {
 	brCode = true;
 	rCode = FETCH8;
@@ -779,7 +759,7 @@ static void ExRC()
 //=========================================================================
 
 //Address Mode & Register Code
-static void (*decodeExtra[256])() = 
+TLCS900h::RegMemberFn TLCS900h::decodeExtra[256] = 
 {
 /*0*/	0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
 /*1*/	0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
@@ -789,42 +769,42 @@ static void (*decodeExtra[256])() =
 /*5*/	0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
 /*6*/	0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
 /*7*/	0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-/*8*/	ExXWA,	ExXBC,	ExXDE,	ExXHL,	ExXIX,	ExXIY,	ExXIZ,	ExXSP,
-		ExXWAd,	ExXBCd,	ExXDEd,	ExXHLd,	ExXIXd,	ExXIYd,	ExXIZd,	ExXSPd,
-/*9*/	ExXWA,	ExXBC,	ExXDE,	ExXHL,	ExXIX,	ExXIY,	ExXIZ,	ExXSP,
-		ExXWAd,	ExXBCd,	ExXDEd,	ExXHLd,	ExXIXd,	ExXIYd,	ExXIZd,	ExXSPd,
-/*A*/	ExXWA,	ExXBC,	ExXDE,	ExXHL,	ExXIX,	ExXIY,	ExXIZ,	ExXSP,
-		ExXWAd,	ExXBCd,	ExXDEd,	ExXHLd,	ExXIXd,	ExXIYd,	ExXIZd,	ExXSPd,
-/*B*/	ExXWA,	ExXBC,	ExXDE,	ExXHL,	ExXIX,	ExXIY,	ExXIZ,	ExXSP,
-		ExXWAd,	ExXBCd,	ExXDEd,	ExXHLd,	ExXIXd,	ExXIYd,	ExXIZd,	ExXSPd,
-/*C*/	Ex8,	Ex16,	Ex24,	ExR32,	ExDec,	ExInc,	0,		ExRC,
+/*8*/	&TLCS900h::ExXWA,	&TLCS900h::ExXBC,	&TLCS900h::ExXDE,	&TLCS900h::ExXHL,	&TLCS900h::ExXIX,	&TLCS900h::ExXIY,	&TLCS900h::ExXIZ,	&TLCS900h::ExXSP,
+		&TLCS900h::ExXWAd,	&TLCS900h::ExXBCd,	&TLCS900h::ExXDEd,	&TLCS900h::ExXHLd,	&TLCS900h::ExXIXd,	&TLCS900h::ExXIYd,	&TLCS900h::ExXIZd,	&TLCS900h::ExXSPd,
+/*9*/	&TLCS900h::ExXWA,	&TLCS900h::ExXBC,	&TLCS900h::ExXDE,	&TLCS900h::ExXHL,	&TLCS900h::ExXIX,	&TLCS900h::ExXIY,	&TLCS900h::ExXIZ,	&TLCS900h::ExXSP,
+		&TLCS900h::ExXWAd,	&TLCS900h::ExXBCd,	&TLCS900h::ExXDEd,	&TLCS900h::ExXHLd,	&TLCS900h::ExXIXd,	&TLCS900h::ExXIYd,	&TLCS900h::ExXIZd,	&TLCS900h::ExXSPd,
+/*A*/	&TLCS900h::ExXWA,	&TLCS900h::ExXBC,	&TLCS900h::ExXDE,	&TLCS900h::ExXHL,	&TLCS900h::ExXIX,	&TLCS900h::ExXIY,	&TLCS900h::ExXIZ,	&TLCS900h::ExXSP,
+		&TLCS900h::ExXWAd,	&TLCS900h::ExXBCd,	&TLCS900h::ExXDEd,	&TLCS900h::ExXHLd,	&TLCS900h::ExXIXd,	&TLCS900h::ExXIYd,	&TLCS900h::ExXIZd,	&TLCS900h::ExXSPd,
+/*B*/	&TLCS900h::ExXWA,	&TLCS900h::ExXBC,	&TLCS900h::ExXDE,	&TLCS900h::ExXHL,	&TLCS900h::ExXIX,	&TLCS900h::ExXIY,	&TLCS900h::ExXIZ,	&TLCS900h::ExXSP,
+		&TLCS900h::ExXWAd,	&TLCS900h::ExXBCd,	&TLCS900h::ExXDEd,	&TLCS900h::ExXHLd,	&TLCS900h::ExXIXd,	&TLCS900h::ExXIYd,	&TLCS900h::ExXIZd,	&TLCS900h::ExXSPd,
+/*C*/	&TLCS900h::Ex8,	&TLCS900h::Ex16,	&TLCS900h::Ex24,	&TLCS900h::ExR32,	&TLCS900h::ExDec,	&TLCS900h::ExInc,	0,		&TLCS900h::ExRC,
 		0,		0,		0,		0,		0,		0,		0,		0,
-/*D*/	Ex8,	Ex16,	Ex24,	ExR32,	ExDec,	ExInc,	0,		ExRC,
+/*D*/	&TLCS900h::Ex8,	&TLCS900h::Ex16,	&TLCS900h::Ex24,	&TLCS900h::ExR32,	&TLCS900h::ExDec,	&TLCS900h::ExInc,	0,		&TLCS900h::ExRC,
 		0,		0,		0,		0,		0,		0,		0,		0,
-/*E*/	Ex8,	Ex16,	Ex24,	ExR32,	ExDec,	ExInc,	0,		ExRC,
+/*E*/	&TLCS900h::Ex8,	&TLCS900h::Ex16,	&TLCS900h::Ex24,	&TLCS900h::ExR32,	&TLCS900h::ExDec,	&TLCS900h::ExInc,	0,		&TLCS900h::ExRC,
 		0,		0,		0,		0,		0,		0,		0,		0,
-/*F*/	Ex8,	Ex16,	Ex24,	ExR32,	ExDec,	ExInc,	0,		0,
+/*F*/	&TLCS900h::Ex8,	&TLCS900h::Ex16,	&TLCS900h::Ex24,	&TLCS900h::ExR32,	&TLCS900h::ExDec,	&TLCS900h::ExInc,	0,		0,
 		0,		0,		0,		0,		0,		0,		0,		0
 };
 
 //=========================================================================
 
-static void e(void)
+void TLCS900h::e(void)
 {
 	instruction_error("Unknown instruction %02X", first);
 }
 
-static void es(void)
+void TLCS900h::es(void)
 {
 	//instruction_error("Unknown [src] instruction %02X", second);
 }
 
-static void ed(void)
+void TLCS900h::ed(void)
 {
 	//instruction_error("Unknown [dst] instruction %02X", second);
 }
 
-static void er(void)
+void TLCS900h::er(void)
 {
 	//instruction_error("Unknown [reg] instruction %02X", second);
 }
@@ -832,158 +812,158 @@ static void er(void)
 //=========================================================================
 
 //Secondary (SRC) Instruction decode
-static void (*srcDecode[256])() = 
+TLCS900h::RegMemberFn TLCS900h::srcDecode[256] = 
 {
-/*0*/	es,			es,			es,			es,			srcPUSH,	es,			srcRLD,		srcRRD,
-		es,			es,			es,			es,			es,			es,			es,			es,
-/*1*/	srcLDI,		srcLDIR,	srcLDD,		srcLDDR,	srcCPI,		srcCPIR,	srcCPD,		srcCPDR,
-		es,			srcLD16m,	es,			es,			es,			es,			es,			es,
-/*2*/	srcLD,		srcLD,		srcLD,		srcLD,		srcLD,		srcLD,		srcLD,		srcLD,
-		es,			es,			es,			es,			es,			es,			es,			es,
-/*3*/	srcEX,		srcEX,		srcEX,		srcEX,		srcEX,		srcEX,		srcEX,		srcEX,
-		srcADDi,	srcADCi,	srcSUBi,	srcSBCi,	srcANDi,	srcXORi,	srcORi,		srcCPi,
-/*4*/	srcMUL,		srcMUL,		srcMUL,		srcMUL,		srcMUL,		srcMUL,		srcMUL,		srcMUL,
-		srcMULS,	srcMULS,	srcMULS,	srcMULS,	srcMULS,	srcMULS,	srcMULS,	srcMULS,
-/*5*/	srcDIV,		srcDIV,		srcDIV,		srcDIV,		srcDIV,		srcDIV,		srcDIV,		srcDIV,
-		srcDIVS,	srcDIVS,	srcDIVS,	srcDIVS,	srcDIVS,	srcDIVS,	srcDIVS,	srcDIVS,
-/*6*/	srcINC,		srcINC,		srcINC,		srcINC,		srcINC,		srcINC,		srcINC,		srcINC,
-		srcDEC,		srcDEC,		srcDEC,		srcDEC,		srcDEC,		srcDEC,		srcDEC,		srcDEC,
-/*7*/	es,			es,			es,			es,			es,			es,			es,			es,
-		srcRLC,		srcRRC,		srcRL,		srcRR,		srcSLA,		srcSRA,		srcSLL,		srcSRL,
-/*8*/	srcADDRm,	srcADDRm,	srcADDRm,	srcADDRm,	srcADDRm,	srcADDRm,	srcADDRm,	srcADDRm,
-		srcADDmR,	srcADDmR,	srcADDmR,	srcADDmR,	srcADDmR,	srcADDmR,	srcADDmR,	srcADDmR,
-/*9*/	srcADCRm,	srcADCRm,	srcADCRm,	srcADCRm,	srcADCRm,	srcADCRm,	srcADCRm,	srcADCRm,
-		srcADCmR,	srcADCmR,	srcADCmR,	srcADCmR,	srcADCmR,	srcADCmR,	srcADCmR,	srcADCmR,
-/*A*/	srcSUBRm,	srcSUBRm,	srcSUBRm,	srcSUBRm,	srcSUBRm,	srcSUBRm,	srcSUBRm,	srcSUBRm,
-		srcSUBmR,	srcSUBmR,	srcSUBmR,	srcSUBmR,	srcSUBmR,	srcSUBmR,	srcSUBmR,	srcSUBmR,
-/*B*/	srcSBCRm,	srcSBCRm,	srcSBCRm,	srcSBCRm,	srcSBCRm,	srcSBCRm,	srcSBCRm,	srcSBCRm,
-		srcSBCmR,	srcSBCmR,	srcSBCmR,	srcSBCmR,	srcSBCmR,	srcSBCmR,	srcSBCmR,	srcSBCmR,
-/*C*/	srcANDRm,	srcANDRm,	srcANDRm,	srcANDRm,	srcANDRm,	srcANDRm,	srcANDRm,	srcANDRm,
-		srcANDmR,	srcANDmR,	srcANDmR,	srcANDmR,	srcANDmR,	srcANDmR,	srcANDmR,	srcANDmR,
-/*D*/	srcXORRm,	srcXORRm,	srcXORRm,	srcXORRm,	srcXORRm,	srcXORRm,	srcXORRm,	srcXORRm,
-		srcXORmR,	srcXORmR,	srcXORmR,	srcXORmR,	srcXORmR,	srcXORmR,	srcXORmR,	srcXORmR,
-/*E*/	srcORRm,	srcORRm,	srcORRm,	srcORRm,	srcORRm,	srcORRm,	srcORRm,	srcORRm,
-		srcORmR,	srcORmR,	srcORmR,	srcORmR,	srcORmR,	srcORmR,	srcORmR,	srcORmR,
-/*F*/	srcCPRm,	srcCPRm,	srcCPRm,	srcCPRm,	srcCPRm,	srcCPRm,	srcCPRm,	srcCPRm,
-		srcCPmR,	srcCPmR,	srcCPmR,	srcCPmR,	srcCPmR,	srcCPmR,	srcCPmR,	srcCPmR
+/*0*/	&TLCS900h::es,			&TLCS900h::es,			&TLCS900h::es,			&TLCS900h::es,			&TLCS900h::srcPUSH,	&TLCS900h::es,			&TLCS900h::srcRLD,		&TLCS900h::srcRRD,
+		&TLCS900h::es,			&TLCS900h::es,			&TLCS900h::es,			&TLCS900h::es,			&TLCS900h::es,			&TLCS900h::es,			&TLCS900h::es,			&TLCS900h::es,
+/*1*/	&TLCS900h::srcLDI,		&TLCS900h::srcLDIR,	&TLCS900h::srcLDD,		&TLCS900h::srcLDDR,	&TLCS900h::srcCPI,		&TLCS900h::srcCPIR,	&TLCS900h::srcCPD,		&TLCS900h::srcCPDR,
+		&TLCS900h::es,			&TLCS900h::srcLD16m,	&TLCS900h::es,			&TLCS900h::es,			&TLCS900h::es,			&TLCS900h::es,			&TLCS900h::es,			&TLCS900h::es,
+/*2*/	&TLCS900h::srcLD,		&TLCS900h::srcLD,		&TLCS900h::srcLD,		&TLCS900h::srcLD,		&TLCS900h::srcLD,		&TLCS900h::srcLD,		&TLCS900h::srcLD,		&TLCS900h::srcLD,
+		&TLCS900h::es,			&TLCS900h::es,			&TLCS900h::es,			&TLCS900h::es,			&TLCS900h::es,			&TLCS900h::es,			&TLCS900h::es,			&TLCS900h::es,
+/*3*/	&TLCS900h::srcEX,		&TLCS900h::srcEX,		&TLCS900h::srcEX,		&TLCS900h::srcEX,		&TLCS900h::srcEX,		&TLCS900h::srcEX,		&TLCS900h::srcEX,		&TLCS900h::srcEX,
+		&TLCS900h::srcADDi,	&TLCS900h::srcADCi,	&TLCS900h::srcSUBi,	&TLCS900h::srcSBCi,	&TLCS900h::srcANDi,	&TLCS900h::srcXORi,	&TLCS900h::srcORi,		&TLCS900h::srcCPi,
+/*4*/	&TLCS900h::srcMUL,		&TLCS900h::srcMUL,		&TLCS900h::srcMUL,		&TLCS900h::srcMUL,		&TLCS900h::srcMUL,		&TLCS900h::srcMUL,		&TLCS900h::srcMUL,		&TLCS900h::srcMUL,
+		&TLCS900h::srcMULS,	&TLCS900h::srcMULS,	&TLCS900h::srcMULS,	&TLCS900h::srcMULS,	&TLCS900h::srcMULS,	&TLCS900h::srcMULS,	&TLCS900h::srcMULS,	&TLCS900h::srcMULS,
+/*5*/	&TLCS900h::srcDIV,		&TLCS900h::srcDIV,		&TLCS900h::srcDIV,		&TLCS900h::srcDIV,		&TLCS900h::srcDIV,		&TLCS900h::srcDIV,		&TLCS900h::srcDIV,		&TLCS900h::srcDIV,
+		&TLCS900h::srcDIVS,	&TLCS900h::srcDIVS,	&TLCS900h::srcDIVS,	&TLCS900h::srcDIVS,	&TLCS900h::srcDIVS,	&TLCS900h::srcDIVS,	&TLCS900h::srcDIVS,	&TLCS900h::srcDIVS,
+/*6*/	&TLCS900h::srcINC,		&TLCS900h::srcINC,		&TLCS900h::srcINC,		&TLCS900h::srcINC,		&TLCS900h::srcINC,		&TLCS900h::srcINC,		&TLCS900h::srcINC,		&TLCS900h::srcINC,
+		&TLCS900h::srcDEC,		&TLCS900h::srcDEC,		&TLCS900h::srcDEC,		&TLCS900h::srcDEC,		&TLCS900h::srcDEC,		&TLCS900h::srcDEC,		&TLCS900h::srcDEC,		&TLCS900h::srcDEC,
+/*7*/	&TLCS900h::es,			&TLCS900h::es,			&TLCS900h::es,			&TLCS900h::es,			&TLCS900h::es,			&TLCS900h::es,			&TLCS900h::es,			&TLCS900h::es,
+		&TLCS900h::srcRLC,		&TLCS900h::srcRRC,		&TLCS900h::srcRL,		&TLCS900h::srcRR,		&TLCS900h::srcSLA,		&TLCS900h::srcSRA,		&TLCS900h::srcSLL,		&TLCS900h::srcSRL,
+/*8*/	&TLCS900h::srcADDRm,	&TLCS900h::srcADDRm,	&TLCS900h::srcADDRm,	&TLCS900h::srcADDRm,	&TLCS900h::srcADDRm,	&TLCS900h::srcADDRm,	&TLCS900h::srcADDRm,	&TLCS900h::srcADDRm,
+		&TLCS900h::srcADDmR,	&TLCS900h::srcADDmR,	&TLCS900h::srcADDmR,	&TLCS900h::srcADDmR,	&TLCS900h::srcADDmR,	&TLCS900h::srcADDmR,	&TLCS900h::srcADDmR,	&TLCS900h::srcADDmR,
+/*9*/	&TLCS900h::srcADCRm,	&TLCS900h::srcADCRm,	&TLCS900h::srcADCRm,	&TLCS900h::srcADCRm,	&TLCS900h::srcADCRm,	&TLCS900h::srcADCRm,	&TLCS900h::srcADCRm,	&TLCS900h::srcADCRm,
+		&TLCS900h::srcADCmR,	&TLCS900h::srcADCmR,	&TLCS900h::srcADCmR,	&TLCS900h::srcADCmR,	&TLCS900h::srcADCmR,	&TLCS900h::srcADCmR,	&TLCS900h::srcADCmR,	&TLCS900h::srcADCmR,
+/*A*/	&TLCS900h::srcSUBRm,	&TLCS900h::srcSUBRm,	&TLCS900h::srcSUBRm,	&TLCS900h::srcSUBRm,	&TLCS900h::srcSUBRm,	&TLCS900h::srcSUBRm,	&TLCS900h::srcSUBRm,	&TLCS900h::srcSUBRm,
+		&TLCS900h::srcSUBmR,	&TLCS900h::srcSUBmR,	&TLCS900h::srcSUBmR,	&TLCS900h::srcSUBmR,	&TLCS900h::srcSUBmR,	&TLCS900h::srcSUBmR,	&TLCS900h::srcSUBmR,	&TLCS900h::srcSUBmR,
+/*B*/	&TLCS900h::srcSBCRm,	&TLCS900h::srcSBCRm,	&TLCS900h::srcSBCRm,	&TLCS900h::srcSBCRm,	&TLCS900h::srcSBCRm,	&TLCS900h::srcSBCRm,	&TLCS900h::srcSBCRm,	&TLCS900h::srcSBCRm,
+		&TLCS900h::srcSBCmR,	&TLCS900h::srcSBCmR,	&TLCS900h::srcSBCmR,	&TLCS900h::srcSBCmR,	&TLCS900h::srcSBCmR,	&TLCS900h::srcSBCmR,	&TLCS900h::srcSBCmR,	&TLCS900h::srcSBCmR,
+/*C*/	&TLCS900h::srcANDRm,	&TLCS900h::srcANDRm,	&TLCS900h::srcANDRm,	&TLCS900h::srcANDRm,	&TLCS900h::srcANDRm,	&TLCS900h::srcANDRm,	&TLCS900h::srcANDRm,	&TLCS900h::srcANDRm,
+		&TLCS900h::srcANDmR,	&TLCS900h::srcANDmR,	&TLCS900h::srcANDmR,	&TLCS900h::srcANDmR,	&TLCS900h::srcANDmR,	&TLCS900h::srcANDmR,	&TLCS900h::srcANDmR,	&TLCS900h::srcANDmR,
+/*D*/	&TLCS900h::srcXORRm,	&TLCS900h::srcXORRm,	&TLCS900h::srcXORRm,	&TLCS900h::srcXORRm,	&TLCS900h::srcXORRm,	&TLCS900h::srcXORRm,	&TLCS900h::srcXORRm,	&TLCS900h::srcXORRm,
+		&TLCS900h::srcXORmR,	&TLCS900h::srcXORmR,	&TLCS900h::srcXORmR,	&TLCS900h::srcXORmR,	&TLCS900h::srcXORmR,	&TLCS900h::srcXORmR,	&TLCS900h::srcXORmR,	&TLCS900h::srcXORmR,
+/*E*/	&TLCS900h::srcORRm,	&TLCS900h::srcORRm,	&TLCS900h::srcORRm,	&TLCS900h::srcORRm,	&TLCS900h::srcORRm,	&TLCS900h::srcORRm,	&TLCS900h::srcORRm,	&TLCS900h::srcORRm,
+		&TLCS900h::srcORmR,	&TLCS900h::srcORmR,	&TLCS900h::srcORmR,	&TLCS900h::srcORmR,	&TLCS900h::srcORmR,	&TLCS900h::srcORmR,	&TLCS900h::srcORmR,	&TLCS900h::srcORmR,
+/*F*/	&TLCS900h::srcCPRm,	&TLCS900h::srcCPRm,	&TLCS900h::srcCPRm,	&TLCS900h::srcCPRm,	&TLCS900h::srcCPRm,	&TLCS900h::srcCPRm,	&TLCS900h::srcCPRm,	&TLCS900h::srcCPRm,
+		&TLCS900h::srcCPmR,	&TLCS900h::srcCPmR,	&TLCS900h::srcCPmR,	&TLCS900h::srcCPmR,	&TLCS900h::srcCPmR,	&TLCS900h::srcCPmR,	&TLCS900h::srcCPmR,	&TLCS900h::srcCPmR
 };
 
 //Secondary (DST) Instruction decode
-static void (*dstDecode[256])() = 
+TLCS900h::RegMemberFn TLCS900h::dstDecode[256] = 
 {
-/*0*/	DST_dstLDBi,	ed,			DST_dstLDWi,	ed,			DST_dstPOPB,	ed,			DST_dstPOPW,	ed,
-		ed,			ed,			ed,			ed,			ed,			ed,			ed,			ed,
-/*1*/	ed,			ed,			ed,			ed,			DST_dstLDBm16,	ed,			DST_dstLDWm16,	ed,
-		ed,			ed,			ed,			ed,			ed,			ed,			ed,			ed,
-/*2*/	DST_dstLDAW,	DST_dstLDAW,	DST_dstLDAW,	DST_dstLDAW,	DST_dstLDAW,	DST_dstLDAW,	DST_dstLDAW,	DST_dstLDAW,
-		DST_dstANDCFA,	DST_dstORCFA,	DST_dstXORCFA,	DST_dstLDCFA,	DST_dstSTCFA,	ed,			ed,			ed,
-/*3*/	DST_dstLDAL,	DST_dstLDAL,	DST_dstLDAL,	DST_dstLDAL,	DST_dstLDAL,	DST_dstLDAL,	DST_dstLDAL,	DST_dstLDAL,
-		ed,			ed,			ed,			ed,			ed,			ed,			ed,			ed,
-/*4*/	DST_dstLDBR,	DST_dstLDBR,	DST_dstLDBR,	DST_dstLDBR,	DST_dstLDBR,	DST_dstLDBR,	DST_dstLDBR,	DST_dstLDBR,
-		ed,			ed,			ed,			ed,			ed,			ed,			ed,			ed,
-/*5*/	DST_dstLDWR,	DST_dstLDWR,	DST_dstLDWR,	DST_dstLDWR,	DST_dstLDWR,	DST_dstLDWR,	DST_dstLDWR,	DST_dstLDWR,
-		ed,			ed,			ed,			ed,			ed,			ed,			ed,			ed,
-/*6*/	DST_dstLDLR,	DST_dstLDLR,	DST_dstLDLR,	DST_dstLDLR,	DST_dstLDLR,	DST_dstLDLR,	DST_dstLDLR,	DST_dstLDLR,
-		ed,			ed,			ed,			ed,			ed,			ed,			ed,			ed,
-/*7*/	ed,			ed,			ed,			ed,			ed,			ed,			ed,			ed,
-		ed,			ed,			ed,			ed,			ed,			ed,			ed,			ed,
-/*8*/	DST_dstANDCF,	DST_dstANDCF,	DST_dstANDCF,	DST_dstANDCF,	DST_dstANDCF,	DST_dstANDCF,	DST_dstANDCF,	DST_dstANDCF,
-		DST_dstORCF,	DST_dstORCF,	DST_dstORCF,	DST_dstORCF,	DST_dstORCF,	DST_dstORCF,	DST_dstORCF,	DST_dstORCF,
-/*9*/	DST_dstXORCF,	DST_dstXORCF,	DST_dstXORCF,	DST_dstXORCF,	DST_dstXORCF,	DST_dstXORCF,	DST_dstXORCF,	DST_dstXORCF,
-		DST_dstLDCF,	DST_dstLDCF,	DST_dstLDCF,	DST_dstLDCF,	DST_dstLDCF,	DST_dstLDCF,	DST_dstLDCF,	DST_dstLDCF,
-/*A*/	DST_dstSTCF,	DST_dstSTCF,	DST_dstSTCF,	DST_dstSTCF,	DST_dstSTCF,	DST_dstSTCF,	DST_dstSTCF,	DST_dstSTCF,	
-		DST_dstTSET,	DST_dstTSET,	DST_dstTSET,	DST_dstTSET,	DST_dstTSET,	DST_dstTSET,	DST_dstTSET,	DST_dstTSET,
-/*B*/	DST_dstRES,		DST_dstRES,		DST_dstRES,		DST_dstRES,		DST_dstRES,		DST_dstRES,		DST_dstRES,		DST_dstRES,
-		DST_dstSET,		DST_dstSET,		DST_dstSET,		DST_dstSET,		DST_dstSET,		DST_dstSET,		DST_dstSET,		DST_dstSET,
-/*C*/	DST_dstCHG,		DST_dstCHG,		DST_dstCHG,		DST_dstCHG,		DST_dstCHG,		DST_dstCHG,		DST_dstCHG,		DST_dstCHG,
-		DST_dstBIT,		DST_dstBIT,		DST_dstBIT,		DST_dstBIT,		DST_dstBIT,		DST_dstBIT,		DST_dstBIT,		DST_dstBIT,
-/*D*/	DST_dstJP,		DST_dstJP,		DST_dstJP,		DST_dstJP,		DST_dstJP,		DST_dstJP,		DST_dstJP,		DST_dstJP,
-		DST_dstJP,		DST_dstJP,		DST_dstJP,		DST_dstJP,		DST_dstJP,		DST_dstJP,		DST_dstJP,		DST_dstJP,
-/*E*/	DST_dstCALL,	DST_dstCALL,	DST_dstCALL,	DST_dstCALL,	DST_dstCALL,	DST_dstCALL,	DST_dstCALL,	DST_dstCALL,
-		DST_dstCALL,	DST_dstCALL,	DST_dstCALL,	DST_dstCALL,	DST_dstCALL,	DST_dstCALL,	DST_dstCALL,	DST_dstCALL,
-/*F*/	DST_dstRET,		DST_dstRET,		DST_dstRET,		DST_dstRET,		DST_dstRET,		DST_dstRET,		DST_dstRET,		DST_dstRET,
-		DST_dstRET,		DST_dstRET,		DST_dstRET,		DST_dstRET,		DST_dstRET,		DST_dstRET,		DST_dstRET,		DST_dstRET
+/*0*/	&TLCS900h::DST_dstLDBi,	&TLCS900h::ed,			&TLCS900h::DST_dstLDWi,	&TLCS900h::ed,			&TLCS900h::DST_dstPOPB,	&TLCS900h::ed,			&TLCS900h::DST_dstPOPW,	&TLCS900h::ed,
+		&TLCS900h::ed,			&TLCS900h::ed,			&TLCS900h::ed,			&TLCS900h::ed,			&TLCS900h::ed,			&TLCS900h::ed,			&TLCS900h::ed,			&TLCS900h::ed,
+/*1*/	&TLCS900h::ed,			&TLCS900h::ed,			&TLCS900h::ed,			&TLCS900h::ed,			&TLCS900h::DST_dstLDBm16,	&TLCS900h::ed,			&TLCS900h::DST_dstLDWm16,	&TLCS900h::ed,
+		&TLCS900h::ed,			&TLCS900h::ed,			&TLCS900h::ed,			&TLCS900h::ed,			&TLCS900h::ed,			&TLCS900h::ed,			&TLCS900h::ed,			&TLCS900h::ed,
+/*2*/	&TLCS900h::DST_dstLDAW,	&TLCS900h::DST_dstLDAW,	&TLCS900h::DST_dstLDAW,	&TLCS900h::DST_dstLDAW,	&TLCS900h::DST_dstLDAW,	&TLCS900h::DST_dstLDAW,	&TLCS900h::DST_dstLDAW,	&TLCS900h::DST_dstLDAW,
+		&TLCS900h::DST_dstANDCFA,	&TLCS900h::DST_dstORCFA,	&TLCS900h::DST_dstXORCFA,	&TLCS900h::DST_dstLDCFA,	&TLCS900h::DST_dstSTCFA,	&TLCS900h::ed,			&TLCS900h::ed,			&TLCS900h::ed,
+/*3*/	&TLCS900h::DST_dstLDAL,	&TLCS900h::DST_dstLDAL,	&TLCS900h::DST_dstLDAL,	&TLCS900h::DST_dstLDAL,	&TLCS900h::DST_dstLDAL,	&TLCS900h::DST_dstLDAL,	&TLCS900h::DST_dstLDAL,	&TLCS900h::DST_dstLDAL,
+		&TLCS900h::ed,			&TLCS900h::ed,			&TLCS900h::ed,			&TLCS900h::ed,			&TLCS900h::ed,			&TLCS900h::ed,			&TLCS900h::ed,			&TLCS900h::ed,
+/*4*/	&TLCS900h::DST_dstLDBR,	&TLCS900h::DST_dstLDBR,	&TLCS900h::DST_dstLDBR,	&TLCS900h::DST_dstLDBR,	&TLCS900h::DST_dstLDBR,	&TLCS900h::DST_dstLDBR,	&TLCS900h::DST_dstLDBR,	&TLCS900h::DST_dstLDBR,
+		&TLCS900h::ed,			&TLCS900h::ed,			&TLCS900h::ed,			&TLCS900h::ed,			&TLCS900h::ed,			&TLCS900h::ed,			&TLCS900h::ed,			&TLCS900h::ed,
+/*5*/	&TLCS900h::DST_dstLDWR,	&TLCS900h::DST_dstLDWR,	&TLCS900h::DST_dstLDWR,	&TLCS900h::DST_dstLDWR,	&TLCS900h::DST_dstLDWR,	&TLCS900h::DST_dstLDWR,	&TLCS900h::DST_dstLDWR,	&TLCS900h::DST_dstLDWR,
+		&TLCS900h::ed,			&TLCS900h::ed,			&TLCS900h::ed,			&TLCS900h::ed,			&TLCS900h::ed,			&TLCS900h::ed,			&TLCS900h::ed,			&TLCS900h::ed,
+/*6*/	&TLCS900h::DST_dstLDLR,	&TLCS900h::DST_dstLDLR,	&TLCS900h::DST_dstLDLR,	&TLCS900h::DST_dstLDLR,	&TLCS900h::DST_dstLDLR,	&TLCS900h::DST_dstLDLR,	&TLCS900h::DST_dstLDLR,	&TLCS900h::DST_dstLDLR,
+		&TLCS900h::ed,			&TLCS900h::ed,			&TLCS900h::ed,			&TLCS900h::ed,			&TLCS900h::ed,			&TLCS900h::ed,			&TLCS900h::ed,			&TLCS900h::ed,
+/*7*/	&TLCS900h::ed,			&TLCS900h::ed,			&TLCS900h::ed,			&TLCS900h::ed,			&TLCS900h::ed,			&TLCS900h::ed,			&TLCS900h::ed,			&TLCS900h::ed,
+		&TLCS900h::ed,			&TLCS900h::ed,			&TLCS900h::ed,			&TLCS900h::ed,			&TLCS900h::ed,			&TLCS900h::ed,			&TLCS900h::ed,			&TLCS900h::ed,
+/*8*/	&TLCS900h::DST_dstANDCF,	&TLCS900h::DST_dstANDCF,	&TLCS900h::DST_dstANDCF,	&TLCS900h::DST_dstANDCF,	&TLCS900h::DST_dstANDCF,	&TLCS900h::DST_dstANDCF,	&TLCS900h::DST_dstANDCF,	&TLCS900h::DST_dstANDCF,
+		&TLCS900h::DST_dstORCF,	&TLCS900h::DST_dstORCF,	&TLCS900h::DST_dstORCF,	&TLCS900h::DST_dstORCF,	&TLCS900h::DST_dstORCF,	&TLCS900h::DST_dstORCF,	&TLCS900h::DST_dstORCF,	&TLCS900h::DST_dstORCF,
+/*9*/	&TLCS900h::DST_dstXORCF,	&TLCS900h::DST_dstXORCF,	&TLCS900h::DST_dstXORCF,	&TLCS900h::DST_dstXORCF,	&TLCS900h::DST_dstXORCF,	&TLCS900h::DST_dstXORCF,	&TLCS900h::DST_dstXORCF,	&TLCS900h::DST_dstXORCF,
+		&TLCS900h::DST_dstLDCF,	&TLCS900h::DST_dstLDCF,	&TLCS900h::DST_dstLDCF,	&TLCS900h::DST_dstLDCF,	&TLCS900h::DST_dstLDCF,	&TLCS900h::DST_dstLDCF,	&TLCS900h::DST_dstLDCF,	&TLCS900h::DST_dstLDCF,
+/*A*/	&TLCS900h::DST_dstSTCF,	&TLCS900h::DST_dstSTCF,	&TLCS900h::DST_dstSTCF,	&TLCS900h::DST_dstSTCF,	&TLCS900h::DST_dstSTCF,	&TLCS900h::DST_dstSTCF,	&TLCS900h::DST_dstSTCF,	&TLCS900h::DST_dstSTCF,	
+		&TLCS900h::DST_dstTSET,	&TLCS900h::DST_dstTSET,	&TLCS900h::DST_dstTSET,	&TLCS900h::DST_dstTSET,	&TLCS900h::DST_dstTSET,	&TLCS900h::DST_dstTSET,	&TLCS900h::DST_dstTSET,	&TLCS900h::DST_dstTSET,
+/*B*/	&TLCS900h::DST_dstRES,		&TLCS900h::DST_dstRES,		&TLCS900h::DST_dstRES,		&TLCS900h::DST_dstRES,		&TLCS900h::DST_dstRES,		&TLCS900h::DST_dstRES,		&TLCS900h::DST_dstRES,		&TLCS900h::DST_dstRES,
+		&TLCS900h::DST_dstSET,		&TLCS900h::DST_dstSET,		&TLCS900h::DST_dstSET,		&TLCS900h::DST_dstSET,		&TLCS900h::DST_dstSET,		&TLCS900h::DST_dstSET,		&TLCS900h::DST_dstSET,		&TLCS900h::DST_dstSET,
+/*C*/	&TLCS900h::DST_dstCHG,		&TLCS900h::DST_dstCHG,		&TLCS900h::DST_dstCHG,		&TLCS900h::DST_dstCHG,		&TLCS900h::DST_dstCHG,		&TLCS900h::DST_dstCHG,		&TLCS900h::DST_dstCHG,		&TLCS900h::DST_dstCHG,
+		&TLCS900h::DST_dstBIT,		&TLCS900h::DST_dstBIT,		&TLCS900h::DST_dstBIT,		&TLCS900h::DST_dstBIT,		&TLCS900h::DST_dstBIT,		&TLCS900h::DST_dstBIT,		&TLCS900h::DST_dstBIT,		&TLCS900h::DST_dstBIT,
+/*D*/	&TLCS900h::DST_dstJP,		&TLCS900h::DST_dstJP,		&TLCS900h::DST_dstJP,		&TLCS900h::DST_dstJP,		&TLCS900h::DST_dstJP,		&TLCS900h::DST_dstJP,		&TLCS900h::DST_dstJP,		&TLCS900h::DST_dstJP,
+		&TLCS900h::DST_dstJP,		&TLCS900h::DST_dstJP,		&TLCS900h::DST_dstJP,		&TLCS900h::DST_dstJP,		&TLCS900h::DST_dstJP,		&TLCS900h::DST_dstJP,		&TLCS900h::DST_dstJP,		&TLCS900h::DST_dstJP,
+/*E*/	&TLCS900h::DST_dstCALL,	&TLCS900h::DST_dstCALL,	&TLCS900h::DST_dstCALL,	&TLCS900h::DST_dstCALL,	&TLCS900h::DST_dstCALL,	&TLCS900h::DST_dstCALL,	&TLCS900h::DST_dstCALL,	&TLCS900h::DST_dstCALL,
+		&TLCS900h::DST_dstCALL,	&TLCS900h::DST_dstCALL,	&TLCS900h::DST_dstCALL,	&TLCS900h::DST_dstCALL,	&TLCS900h::DST_dstCALL,	&TLCS900h::DST_dstCALL,	&TLCS900h::DST_dstCALL,	&TLCS900h::DST_dstCALL,
+/*F*/	&TLCS900h::DST_dstRET,		&TLCS900h::DST_dstRET,		&TLCS900h::DST_dstRET,		&TLCS900h::DST_dstRET,		&TLCS900h::DST_dstRET,		&TLCS900h::DST_dstRET,		&TLCS900h::DST_dstRET,		&TLCS900h::DST_dstRET,
+		&TLCS900h::DST_dstRET,		&TLCS900h::DST_dstRET,		&TLCS900h::DST_dstRET,		&TLCS900h::DST_dstRET,		&TLCS900h::DST_dstRET,		&TLCS900h::DST_dstRET,		&TLCS900h::DST_dstRET,		&TLCS900h::DST_dstRET
 };
 
 //Secondary (REG) Instruction decode
-static void (*regDecode[256])() = 
+TLCS900h::RegMemberFn TLCS900h::regDecode[256] =
 {
-/*0*/	er,			er,			er,			regLDi,		regPUSH,	regPOP,		regCPL,		regNEG,
-		regMULi,	regMULSi,	regDIVi,	regDIVSi,	regLINK,	regUNLK,	regBS1F,	regBS1B,
-/*1*/	regDAA,		er,			regEXTZ,	regEXTS,	regPAA,		er,			regMIRR,	er,
-		er,			regMULA,	er,			er,			regDJNZ,	er,			er,			er,
-/*2*/	regANDCFi,	regORCFi,	regXORCFi,	regLDCFi,	regSTCFi,	er,			er,			er,
-		regANDCFA,	regORCFA,	regXORCFA,	regLDCFA,	regSTCFA,	er,			regLDCcrr,	regLDCrcr,
-/*3*/	regRES,		regSET,		regCHG,		regBIT,		regTSET,	er,			er,			er,
-		regMINC1,	regMINC2,	regMINC4,	er,			regMDEC1,	regMDEC2,	regMDEC4,	er,
-/*4*/	regMUL,		regMUL,		regMUL,		regMUL,		regMUL,		regMUL,		regMUL,		regMUL,
-		regMULS,	regMULS,	regMULS,	regMULS,	regMULS,	regMULS,	regMULS,	regMULS,
-/*5*/	regDIV,		regDIV,		regDIV,		regDIV,		regDIV,		regDIV,		regDIV,		regDIV,
-		regDIVS,	regDIVS,	regDIVS,	regDIVS,	regDIVS,	regDIVS,	regDIVS,	regDIVS,
-/*6*/	regINC,		regINC,		regINC,		regINC,		regINC,		regINC,		regINC,		regINC,
-		regDEC,		regDEC,		regDEC,		regDEC,		regDEC,		regDEC,		regDEC,		regDEC,
-/*7*/	regSCC,		regSCC,		regSCC,		regSCC,		regSCC,		regSCC,		regSCC,		regSCC,
-		regSCC,		regSCC,		regSCC,		regSCC,		regSCC,		regSCC,		regSCC,		regSCC,
-/*8*/	regADD,		regADD,		regADD,		regADD,		regADD,		regADD,		regADD,		regADD,
-		regLDRr,	regLDRr,	regLDRr,	regLDRr,	regLDRr,	regLDRr,	regLDRr,	regLDRr,
-/*9*/	regADC,		regADC,		regADC,		regADC,		regADC,		regADC,		regADC,		regADC,
-		regLDrR,	regLDrR,	regLDrR,	regLDrR,	regLDrR,	regLDrR,	regLDrR,	regLDrR,
-/*A*/	regSUB,		regSUB,		regSUB,		regSUB,		regSUB,		regSUB,		regSUB,		regSUB,
-		regLDr3,	regLDr3,	regLDr3,	regLDr3,	regLDr3,	regLDr3,	regLDr3,	regLDr3,
-/*B*/	regSBC,		regSBC,		regSBC,		regSBC,		regSBC,		regSBC,		regSBC,		regSBC,
-		regEX,		regEX,		regEX,		regEX,		regEX,		regEX,		regEX,		regEX,
-/*C*/	regAND,		regAND,		regAND,		regAND,		regAND,		regAND,		regAND,		regAND,
-		regADDi,	regADCi,	regSUBi,	regSBCi,	regANDi,	regXORi,	regORi,		regCPi,
-/*D*/	regXOR,		regXOR,		regXOR,		regXOR,		regXOR,		regXOR,		regXOR,		regXOR,
-		regCPr3,	regCPr3,	regCPr3,	regCPr3,	regCPr3,	regCPr3,	regCPr3,	regCPr3,
-/*E*/	regOR,		regOR,		regOR,		regOR,		regOR,		regOR,		regOR,		regOR,
-		regRLCi,	regRRCi,	regRLi,		regRRi,		regSLAi,	regSRAi,	regSLLi,	regSRLi,
-/*F*/	regCP,		regCP,		regCP,		regCP,		regCP,		regCP,		regCP,		regCP,
-		regRLCA,	regRRCA,	regRLA,		regRRA,		regSLAA,	regSRAA,	regSLLA,	regSRLA
+/*0*/	&TLCS900h::er,			&TLCS900h::er,			&TLCS900h::er,			&TLCS900h::regLDi,		&TLCS900h::regPUSH,	&TLCS900h::regPOP,		&TLCS900h::regCPL,		&TLCS900h::regNEG,
+		&TLCS900h::regMULi,	&TLCS900h::regMULSi,	&TLCS900h::regDIVi,	&TLCS900h::regDIVSi,	&TLCS900h::regLINK,	&TLCS900h::regUNLK,	&TLCS900h::regBS1F,	&TLCS900h::regBS1B,
+/*1*/	&TLCS900h::regDAA,		&TLCS900h::er,			&TLCS900h::regEXTZ,	&TLCS900h::regEXTS,	&TLCS900h::regPAA,		&TLCS900h::er,			&TLCS900h::regMIRR,	&TLCS900h::er,
+		&TLCS900h::er,			&TLCS900h::regMULA,	&TLCS900h::er,			&TLCS900h::er,			&TLCS900h::regDJNZ,	&TLCS900h::er,			&TLCS900h::er,			&TLCS900h::er,
+/*2*/	&TLCS900h::regANDCFi,	&TLCS900h::regORCFi,	&TLCS900h::regXORCFi,	&TLCS900h::regLDCFi,	&TLCS900h::regSTCFi,	&TLCS900h::er,			&TLCS900h::er,			&TLCS900h::er,
+		&TLCS900h::regANDCFA,	&TLCS900h::regORCFA,	&TLCS900h::regXORCFA,	&TLCS900h::regLDCFA,	&TLCS900h::regSTCFA,	&TLCS900h::er,			&TLCS900h::regLDCcrr,	&TLCS900h::regLDCrcr,
+/*3*/	&TLCS900h::regRES,		&TLCS900h::regSET,		&TLCS900h::regCHG,		&TLCS900h::regBIT,		&TLCS900h::regTSET,	&TLCS900h::er,			&TLCS900h::er,			&TLCS900h::er,
+		&TLCS900h::regMINC1,	&TLCS900h::regMINC2,	&TLCS900h::regMINC4,	&TLCS900h::er,			&TLCS900h::regMDEC1,	&TLCS900h::regMDEC2,	&TLCS900h::regMDEC4,	&TLCS900h::er,
+/*4*/	&TLCS900h::regMUL,		&TLCS900h::regMUL,		&TLCS900h::regMUL,		&TLCS900h::regMUL,		&TLCS900h::regMUL,		&TLCS900h::regMUL,		&TLCS900h::regMUL,		&TLCS900h::regMUL,
+		&TLCS900h::regMULS,	&TLCS900h::regMULS,	&TLCS900h::regMULS,	&TLCS900h::regMULS,	&TLCS900h::regMULS,	&TLCS900h::regMULS,	&TLCS900h::regMULS,	&TLCS900h::regMULS,
+/*5*/	&TLCS900h::regDIV,		&TLCS900h::regDIV,		&TLCS900h::regDIV,		&TLCS900h::regDIV,		&TLCS900h::regDIV,		&TLCS900h::regDIV,		&TLCS900h::regDIV,		&TLCS900h::regDIV,
+		&TLCS900h::regDIVS,	&TLCS900h::regDIVS,	&TLCS900h::regDIVS,	&TLCS900h::regDIVS,	&TLCS900h::regDIVS,	&TLCS900h::regDIVS,	&TLCS900h::regDIVS,	&TLCS900h::regDIVS,
+/*6*/	&TLCS900h::regINC,		&TLCS900h::regINC,		&TLCS900h::regINC,		&TLCS900h::regINC,		&TLCS900h::regINC,		&TLCS900h::regINC,		&TLCS900h::regINC,		&TLCS900h::regINC,
+		&TLCS900h::regDEC,		&TLCS900h::regDEC,		&TLCS900h::regDEC,		&TLCS900h::regDEC,		&TLCS900h::regDEC,		&TLCS900h::regDEC,		&TLCS900h::regDEC,		&TLCS900h::regDEC,
+/*7*/	&TLCS900h::regSCC,		&TLCS900h::regSCC,		&TLCS900h::regSCC,		&TLCS900h::regSCC,		&TLCS900h::regSCC,		&TLCS900h::regSCC,		&TLCS900h::regSCC,		&TLCS900h::regSCC,
+		&TLCS900h::regSCC,		&TLCS900h::regSCC,		&TLCS900h::regSCC,		&TLCS900h::regSCC,		&TLCS900h::regSCC,		&TLCS900h::regSCC,		&TLCS900h::regSCC,		&TLCS900h::regSCC,
+/*8*/	&TLCS900h::regADD,		&TLCS900h::regADD,		&TLCS900h::regADD,		&TLCS900h::regADD,		&TLCS900h::regADD,		&TLCS900h::regADD,		&TLCS900h::regADD,		&TLCS900h::regADD,
+		&TLCS900h::regLDRr,	&TLCS900h::regLDRr,	&TLCS900h::regLDRr,	&TLCS900h::regLDRr,	&TLCS900h::regLDRr,	&TLCS900h::regLDRr,	&TLCS900h::regLDRr,	&TLCS900h::regLDRr,
+/*9*/	&TLCS900h::regADC,		&TLCS900h::regADC,		&TLCS900h::regADC,		&TLCS900h::regADC,		&TLCS900h::regADC,		&TLCS900h::regADC,		&TLCS900h::regADC,		&TLCS900h::regADC,
+		&TLCS900h::regLDrR,	&TLCS900h::regLDrR,	&TLCS900h::regLDrR,	&TLCS900h::regLDrR,	&TLCS900h::regLDrR,	&TLCS900h::regLDrR,	&TLCS900h::regLDrR,	&TLCS900h::regLDrR,
+/*A*/	&TLCS900h::regSUB,		&TLCS900h::regSUB,		&TLCS900h::regSUB,		&TLCS900h::regSUB,		&TLCS900h::regSUB,		&TLCS900h::regSUB,		&TLCS900h::regSUB,		&TLCS900h::regSUB,
+		&TLCS900h::regLDr3,	&TLCS900h::regLDr3,	&TLCS900h::regLDr3,	&TLCS900h::regLDr3,	&TLCS900h::regLDr3,	&TLCS900h::regLDr3,	&TLCS900h::regLDr3,	&TLCS900h::regLDr3,
+/*B*/	&TLCS900h::regSBC,		&TLCS900h::regSBC,		&TLCS900h::regSBC,		&TLCS900h::regSBC,		&TLCS900h::regSBC,		&TLCS900h::regSBC,		&TLCS900h::regSBC,		&TLCS900h::regSBC,
+		&TLCS900h::regEX,		&TLCS900h::regEX,		&TLCS900h::regEX,		&TLCS900h::regEX,		&TLCS900h::regEX,		&TLCS900h::regEX,		&TLCS900h::regEX,		&TLCS900h::regEX,
+/*C*/	&TLCS900h::regAND,		&TLCS900h::regAND,		&TLCS900h::regAND,		&TLCS900h::regAND,		&TLCS900h::regAND,		&TLCS900h::regAND,		&TLCS900h::regAND,		&TLCS900h::regAND,
+		&TLCS900h::regADDi,	&TLCS900h::regADCi,	&TLCS900h::regSUBi,	&TLCS900h::regSBCi,	&TLCS900h::regANDi,	&TLCS900h::regXORi,	&TLCS900h::regORi,		&TLCS900h::regCPi,
+/*D*/	&TLCS900h::regXOR,		&TLCS900h::regXOR,		&TLCS900h::regXOR,		&TLCS900h::regXOR,		&TLCS900h::regXOR,		&TLCS900h::regXOR,		&TLCS900h::regXOR,		&TLCS900h::regXOR,
+		&TLCS900h::regCPr3,	&TLCS900h::regCPr3,	&TLCS900h::regCPr3,	&TLCS900h::regCPr3,	&TLCS900h::regCPr3,	&TLCS900h::regCPr3,	&TLCS900h::regCPr3,	&TLCS900h::regCPr3,
+/*E*/	&TLCS900h::regOR,		&TLCS900h::regOR,		&TLCS900h::regOR,		&TLCS900h::regOR,		&TLCS900h::regOR,		&TLCS900h::regOR,		&TLCS900h::regOR,		&TLCS900h::regOR,
+		&TLCS900h::regRLCi,	&TLCS900h::regRRCi,	&TLCS900h::regRLi,		&TLCS900h::regRRi,		&TLCS900h::regSLAi,	&TLCS900h::regSRAi,	&TLCS900h::regSLLi,	&TLCS900h::regSRLi,
+/*F*/	&TLCS900h::regCP,		&TLCS900h::regCP,		&TLCS900h::regCP,		&TLCS900h::regCP,		&TLCS900h::regCP,		&TLCS900h::regCP,		&TLCS900h::regCP,		&TLCS900h::regCP,
+		&TLCS900h::regRLCA,	&TLCS900h::regRRCA,	&TLCS900h::regRLA,		&TLCS900h::regRRA,		&TLCS900h::regSLAA,	&TLCS900h::regSRAA,	&TLCS900h::regSLLA,	&TLCS900h::regSRLA
 };
 
 //=========================================================================
 
-static void src_B()
+void TLCS900h::src_B()
 {
 	second = FETCH8;			//Get the second opcode
 	R = second & 7;
 	size = 0;					//Byte Size
 
-	(*srcDecode[second])();		//Call
+	CALL_MEMBER_FN(this, srcDecode[second])();
 }
 
-static void src_W()
+void TLCS900h::src_W()
 {
 	second = FETCH8;			//Get the second opcode
 	R = second & 7;
 	size = 1;					//Word Size
 
-	(*srcDecode[second])();		//Call
+	CALL_MEMBER_FN(this, srcDecode[second])();
 }
 
-static void src_L()
+void TLCS900h::src_L()
 {
 	second = FETCH8;			//Get the second opcode
 	R = second & 7;
 	size = 2;					//Long Size
 
-	(*srcDecode[second])();		//Call
+	CALL_MEMBER_FN(this, srcDecode[second])();
 }
 
-static void dst()
+void TLCS900h::dst()
 {
 	second = FETCH8;			//Get the second opcode
 	R = second & 7;
 
-	(*dstDecode[second])();		//Call
+	CALL_MEMBER_FN(this, dstDecode[second])();
 }
 
 static uint8 rCodeConversionB[8] = { 0xE1, 0xE0, 0xE5, 0xE4, 0xE9, 0xE8, 0xED, 0xEC };
 static uint8 rCodeConversionW[8] = { 0xE0, 0xE4, 0xE8, 0xEC, 0xF0, 0xF4, 0xF8, 0xFC };
 static uint8 rCodeConversionL[8] = { 0xE0, 0xE4, 0xE8, 0xEC, 0xF0, 0xF4, 0xF8, 0xFC };
 
-static void reg_B(void)
+void TLCS900h::reg_B(void)
 {
 	second = FETCH8;			//Get the second opcode
 	R = second & 7;
@@ -995,10 +975,10 @@ static void reg_B(void)
 		rCode = rCodeConversionB[first & 7];
 	}
 
-	(*regDecode[second])();		//Call
+	CALL_MEMBER_FN(this, regDecode[second])();
 }
 
-static void reg_W(void)
+void TLCS900h::reg_W(void)
 {
 	second = FETCH8;			//Get the second opcode
 	R = second & 7;
@@ -1010,10 +990,10 @@ static void reg_W(void)
 		rCode = rCodeConversionW[first & 7];
 	}
 
-	(*regDecode[second])();		//Call
+	CALL_MEMBER_FN(this, regDecode[second])();
 }
 
-static void reg_L(void)
+void TLCS900h::reg_L(void)
 {
 	second = FETCH8;			//Get the second opcode
 	R = second & 7;
@@ -1025,51 +1005,51 @@ static void reg_L(void)
 		rCode = rCodeConversionL[first & 7];
 	}
 
-	(*regDecode[second])();		//Call
+	CALL_MEMBER_FN(this, regDecode[second])();
 }
 
 //=============================================================================
 
 //Primary Instruction decode
-static void (*decode[256])() = 
+TLCS900h::RegMemberFn TLCS900h::decode[256] = 
 {
-/*0*/	sngNOP,		sngNORMAL,	sngPUSHSR,	sngPOPSR,	sngMAX,		sngHALT,	sngEI,		sngRETI,
-		sngLD8_8,	sngPUSH8,	sngLD8_16,	sngPUSH16,	sngINCF,	sngDECF,	sngRET,		sngRETD,
-/*1*/	sngRCF,		sngSCF,		sngCCF,		sngZCF,		sngPUSHA,	sngPOPA,	sngEX,		sngLDF,
-		sngPUSHF,	sngPOPF,	sngJP16,	sngJP24,	sngCALL16,	sngCALL24,	sngCALR,	iBIOSHLE,
-/*2*/	sngLDB,		sngLDB,		sngLDB,		sngLDB,		sngLDB,		sngLDB,		sngLDB,		sngLDB,
-		sngPUSHW,	sngPUSHW,	sngPUSHW,	sngPUSHW,	sngPUSHW,	sngPUSHW,	sngPUSHW,	sngPUSHW,
-/*3*/	sngLDW,		sngLDW,		sngLDW,		sngLDW,		sngLDW,		sngLDW,		sngLDW,		sngLDW,
-		sngPUSHL,	sngPUSHL,	sngPUSHL,	sngPUSHL,	sngPUSHL,	sngPUSHL,	sngPUSHL,	sngPUSHL,
-/*4*/	sngLDL,		sngLDL,		sngLDL,		sngLDL,		sngLDL,		sngLDL,		sngLDL,		sngLDL,
-		sngPOPW,	sngPOPW,	sngPOPW,	sngPOPW,	sngPOPW,	sngPOPW,	sngPOPW,	sngPOPW,
-/*5*/	e,			e,			e,			e,			e,			e,			e,			e,
-		sngPOPL,	sngPOPL,	sngPOPL,	sngPOPL,	sngPOPL,	sngPOPL,	sngPOPL,	sngPOPL,
-/*6*/	sngJR,		sngJR,		sngJR,		sngJR,		sngJR,		sngJR,		sngJR,		sngJR,
-		sngJR,		sngJR,		sngJR,		sngJR,		sngJR,		sngJR,		sngJR,		sngJR,
-/*7*/	sngJRL,		sngJRL,		sngJRL,		sngJRL,		sngJRL,		sngJRL,		sngJRL,		sngJRL,
-		sngJRL,		sngJRL,		sngJRL,		sngJRL,		sngJRL,		sngJRL,		sngJRL,		sngJRL,
-/*8*/	src_B,		src_B,		src_B,		src_B,		src_B,		src_B,		src_B,		src_B,
-		src_B,		src_B,		src_B,		src_B,		src_B,		src_B,		src_B,		src_B,
-/*9*/	src_W,		src_W,		src_W,		src_W,		src_W,		src_W,		src_W,		src_W,
-		src_W,		src_W,		src_W,		src_W,		src_W,		src_W,		src_W,		src_W,
-/*A*/	src_L,		src_L,		src_L,		src_L,		src_L,		src_L,		src_L,		src_L,
-		src_L,		src_L,		src_L,		src_L,		src_L,		src_L,		src_L,		src_L,
-/*B*/	dst,		dst,		dst,		dst,		dst,		dst,		dst,		dst,
-		dst,		dst,		dst,		dst,		dst,		dst,		dst,		dst,
-/*C*/	src_B,		src_B,		src_B,		src_B,		src_B,		src_B,		e,			reg_B,
-		reg_B,		reg_B,		reg_B,		reg_B,		reg_B,		reg_B,		reg_B,		reg_B,
-/*D*/	src_W,		src_W,		src_W,		src_W,		src_W,		src_W,		e,			reg_W,
-		reg_W,		reg_W,		reg_W,		reg_W,		reg_W,		reg_W,		reg_W,		reg_W,
-/*E*/	src_L,		src_L,		src_L,		src_L,		src_L,		src_L,		e,			reg_L,
-		reg_L,		reg_L,		reg_L,		reg_L,		reg_L,		reg_L,		reg_L,		reg_L,
-/*F*/	dst,		dst,		dst,		dst,		dst,		dst,		e,			sngLDX,
-		sngSWI,		sngSWI,		sngSWI,		sngSWI,		sngSWI,		sngSWI,		sngSWI,		sngSWI
+/*0*/	&TLCS900h::sngNOP,		&TLCS900h::sngNORMAL,	&TLCS900h::sngPUSHSR,	&TLCS900h::sngPOPSR,	&TLCS900h::sngMAX,		&TLCS900h::sngHALT,	&TLCS900h::sngEI,		&TLCS900h::sngRETI,
+		&TLCS900h::sngLD8_8,	&TLCS900h::sngPUSH8,	&TLCS900h::sngLD8_16,	&TLCS900h::sngPUSH16,	&TLCS900h::sngINCF,	&TLCS900h::sngDECF,	&TLCS900h::sngRET,		&TLCS900h::sngRETD,
+/*1*/	&TLCS900h::sngRCF,		&TLCS900h::sngSCF,		&TLCS900h::sngCCF,		&TLCS900h::sngZCF,		&TLCS900h::sngPUSHA,	&TLCS900h::sngPOPA,	&TLCS900h::sngEX,		&TLCS900h::sngLDF,
+		&TLCS900h::sngPUSHF,	&TLCS900h::sngPOPF,	&TLCS900h::sngJP16,	&TLCS900h::sngJP24,	&TLCS900h::sngCALL16,	&TLCS900h::sngCALL24,	&TLCS900h::sngCALR,	&TLCS900h::iBIOSHLE,
+/*2*/	&TLCS900h::sngLDB,		&TLCS900h::sngLDB,		&TLCS900h::sngLDB,		&TLCS900h::sngLDB,		&TLCS900h::sngLDB,		&TLCS900h::sngLDB,		&TLCS900h::sngLDB,		&TLCS900h::sngLDB,
+		&TLCS900h::sngPUSHW,	&TLCS900h::sngPUSHW,	&TLCS900h::sngPUSHW,	&TLCS900h::sngPUSHW,	&TLCS900h::sngPUSHW,	&TLCS900h::sngPUSHW,	&TLCS900h::sngPUSHW,	&TLCS900h::sngPUSHW,
+/*3*/	&TLCS900h::sngLDW,		&TLCS900h::sngLDW,		&TLCS900h::sngLDW,		&TLCS900h::sngLDW,		&TLCS900h::sngLDW,		&TLCS900h::sngLDW,		&TLCS900h::sngLDW,		&TLCS900h::sngLDW,
+		&TLCS900h::sngPUSHL,	&TLCS900h::sngPUSHL,	&TLCS900h::sngPUSHL,	&TLCS900h::sngPUSHL,	&TLCS900h::sngPUSHL,	&TLCS900h::sngPUSHL,	&TLCS900h::sngPUSHL,	&TLCS900h::sngPUSHL,
+/*4*/	&TLCS900h::sngLDL,		&TLCS900h::sngLDL,		&TLCS900h::sngLDL,		&TLCS900h::sngLDL,		&TLCS900h::sngLDL,		&TLCS900h::sngLDL,		&TLCS900h::sngLDL,		&TLCS900h::sngLDL,
+		&TLCS900h::sngPOPW,	&TLCS900h::sngPOPW,	&TLCS900h::sngPOPW,	&TLCS900h::sngPOPW,	&TLCS900h::sngPOPW,	&TLCS900h::sngPOPW,	&TLCS900h::sngPOPW,	&TLCS900h::sngPOPW,
+/*5*/	&TLCS900h::e,			&TLCS900h::e,			&TLCS900h::e,			&TLCS900h::e,			&TLCS900h::e,			&TLCS900h::e,			&TLCS900h::e,			&TLCS900h::e,
+		&TLCS900h::sngPOPL,	&TLCS900h::sngPOPL,	&TLCS900h::sngPOPL,	&TLCS900h::sngPOPL,	&TLCS900h::sngPOPL,	&TLCS900h::sngPOPL,	&TLCS900h::sngPOPL,	&TLCS900h::sngPOPL,
+/*6*/	&TLCS900h::sngJR,		&TLCS900h::sngJR,		&TLCS900h::sngJR,		&TLCS900h::sngJR,		&TLCS900h::sngJR,		&TLCS900h::sngJR,		&TLCS900h::sngJR,		&TLCS900h::sngJR,
+		&TLCS900h::sngJR,		&TLCS900h::sngJR,		&TLCS900h::sngJR,		&TLCS900h::sngJR,		&TLCS900h::sngJR,		&TLCS900h::sngJR,		&TLCS900h::sngJR,		&TLCS900h::sngJR,
+/*7*/	&TLCS900h::sngJRL,		&TLCS900h::sngJRL,		&TLCS900h::sngJRL,		&TLCS900h::sngJRL,		&TLCS900h::sngJRL,		&TLCS900h::sngJRL,		&TLCS900h::sngJRL,		&TLCS900h::sngJRL,
+		&TLCS900h::sngJRL,		&TLCS900h::sngJRL,		&TLCS900h::sngJRL,		&TLCS900h::sngJRL,		&TLCS900h::sngJRL,		&TLCS900h::sngJRL,		&TLCS900h::sngJRL,		&TLCS900h::sngJRL,
+/*8*/	&TLCS900h::src_B,		&TLCS900h::src_B,		&TLCS900h::src_B,		&TLCS900h::src_B,		&TLCS900h::src_B,		&TLCS900h::src_B,		&TLCS900h::src_B,		&TLCS900h::src_B,
+		&TLCS900h::src_B,		&TLCS900h::src_B,		&TLCS900h::src_B,		&TLCS900h::src_B,		&TLCS900h::src_B,		&TLCS900h::src_B,		&TLCS900h::src_B,		&TLCS900h::src_B,
+/*9*/	&TLCS900h::src_W,		&TLCS900h::src_W,		&TLCS900h::src_W,		&TLCS900h::src_W,		&TLCS900h::src_W,		&TLCS900h::src_W,		&TLCS900h::src_W,		&TLCS900h::src_W,
+		&TLCS900h::src_W,		&TLCS900h::src_W,		&TLCS900h::src_W,		&TLCS900h::src_W,		&TLCS900h::src_W,		&TLCS900h::src_W,		&TLCS900h::src_W,		&TLCS900h::src_W,
+/*A*/	&TLCS900h::src_L,		&TLCS900h::src_L,		&TLCS900h::src_L,		&TLCS900h::src_L,		&TLCS900h::src_L,		&TLCS900h::src_L,		&TLCS900h::src_L,		&TLCS900h::src_L,
+		&TLCS900h::src_L,		&TLCS900h::src_L,		&TLCS900h::src_L,		&TLCS900h::src_L,		&TLCS900h::src_L,		&TLCS900h::src_L,		&TLCS900h::src_L,		&TLCS900h::src_L,
+/*B*/	&TLCS900h::dst,		&TLCS900h::dst,		&TLCS900h::dst,		&TLCS900h::dst,		&TLCS900h::dst,		&TLCS900h::dst,		&TLCS900h::dst,		&TLCS900h::dst,
+		&TLCS900h::dst,		&TLCS900h::dst,		&TLCS900h::dst,		&TLCS900h::dst,		&TLCS900h::dst,		&TLCS900h::dst,		&TLCS900h::dst,		&TLCS900h::dst,
+/*C*/	&TLCS900h::src_B,		&TLCS900h::src_B,		&TLCS900h::src_B,		&TLCS900h::src_B,		&TLCS900h::src_B,		&TLCS900h::src_B,		&TLCS900h::e,			&TLCS900h::reg_B,
+		&TLCS900h::reg_B,		&TLCS900h::reg_B,		&TLCS900h::reg_B,		&TLCS900h::reg_B,		&TLCS900h::reg_B,		&TLCS900h::reg_B,		&TLCS900h::reg_B,		&TLCS900h::reg_B,
+/*D*/	&TLCS900h::src_W,		&TLCS900h::src_W,		&TLCS900h::src_W,		&TLCS900h::src_W,		&TLCS900h::src_W,		&TLCS900h::src_W,		&TLCS900h::e,			&TLCS900h::reg_W,
+		&TLCS900h::reg_W,		&TLCS900h::reg_W,		&TLCS900h::reg_W,		&TLCS900h::reg_W,		&TLCS900h::reg_W,		&TLCS900h::reg_W,		&TLCS900h::reg_W,		&TLCS900h::reg_W,
+/*E*/	&TLCS900h::src_L,		&TLCS900h::src_L,		&TLCS900h::src_L,		&TLCS900h::src_L,		&TLCS900h::src_L,		&TLCS900h::src_L,		&TLCS900h::e,			&TLCS900h::reg_L,
+		&TLCS900h::reg_L,		&TLCS900h::reg_L,		&TLCS900h::reg_L,		&TLCS900h::reg_L,		&TLCS900h::reg_L,		&TLCS900h::reg_L,		&TLCS900h::reg_L,		&TLCS900h::reg_L,
+/*F*/	&TLCS900h::dst,		&TLCS900h::dst,		&TLCS900h::dst,		&TLCS900h::dst,		&TLCS900h::dst,		&TLCS900h::dst,		&TLCS900h::e,			&TLCS900h::sngLDX,
+		&TLCS900h::sngSWI,		&TLCS900h::sngSWI,		&TLCS900h::sngSWI,		&TLCS900h::sngSWI,		&TLCS900h::sngSWI,		&TLCS900h::sngSWI,		&TLCS900h::sngSWI,		&TLCS900h::sngSWI
 };
 
 //=============================================================================
 
-int32 TLCS900h_interpret(void)
+int32 TLCS900h::TLCS900h_interpret(void)
 {
 	brCode = false;
 
@@ -1078,9 +1058,9 @@ int32 TLCS900h_interpret(void)
 	//Is any extra data used by this instruction?
 	cycles_extra = 0;
 	if (decodeExtra[first])
-		(*decodeExtra[first])();
+		CALL_MEMBER_FN(this, decodeExtra[first])();
 
-	(*decode[first])();	//Decode
+	CALL_MEMBER_FN(this, decode[first])();
 
 	return cycles + cycles_extra;
 }

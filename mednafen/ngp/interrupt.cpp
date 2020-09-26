@@ -16,8 +16,7 @@
 
 #include "../mednafen.h"
 
-#include "TLCS-900h/TLCS900h_registers.h"
-#include "TLCS-900h/TLCS900h_interpret.h"
+#include "TLCS-900h/TLCS900h.h"
 #include "mem.h"
 #include "gfx.h"
 #include "interrupt.h"
@@ -54,15 +53,17 @@ extern "C" void set_interrupt(uint8_t index, bool set)
 
 void neopop_interrupt_t::interrupt(uint8_t index, uint8_t level)
 {
-   push32(pc);
-   push16(sr);
+   DuoInstance *duo = GetDuoFromModule(this, interrupt);
+
+   duo->tlcs900h_state.push32(duo->tlcs900h_state.pc);
+   duo->tlcs900h_state.push16(duo->tlcs900h_state.sr);
 
    //Up the IFF
    if(level >= 0)
-      setStatusIFF((level < 7) ? (level + 1) : 7);
+	  duo->tlcs900h_state.setStatusIFF((level < 7) ? (level + 1) : 7);
 
    //Access the interrupt vector table to find the jump destination
-   pc = loadL(0x6FB8 + index * 4);
+   duo->tlcs900h_state.pc = loadL(0x6FB8 + index * 4);
 }
 
 void neopop_interrupt_t::set_interrupt(uint8_t index, bool set)
@@ -77,8 +78,10 @@ void neopop_interrupt_t::set_interrupt(uint8_t index, bool set)
 
 void neopop_interrupt_t::int_check_pending()
 {
+   DuoInstance *duo = GetDuoFromModule(this, interrupt);
+
    uint8 prio;
-   uint8_t curIFF = statusIFF();
+   uint8_t curIFF = duo->tlcs900h_state.statusIFF();
 
    /* Technically, the BIOS should clear the interrupt 
     * pending flag by writing with IxxC set to "0", but

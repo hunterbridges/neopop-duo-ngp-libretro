@@ -49,70 +49,69 @@
 //---------------------------------------------------------------------------
 */
 
-#include "TLCS900h_interpret.h"
-#include "TLCS900h_registers.h"
+#include "TLCS900h.h"
 #include "../mem.h"
 
 //=========================================================================
 
 //===== LD (mem),#
-void DST_dstLDBi(void)
+void TLCS900h::DST_dstLDBi(void)
 {
 	storeB(mem, FETCH8);
 	cycles = 5;
 }
 
 //===== LD (mem),#
-void DST_dstLDWi(void)
+void TLCS900h::DST_dstLDWi(void)
 {
 	storeW(mem, fetch16());
 	cycles = 6;
 }
 
 //===== POP (mem)
-void DST_dstPOPB(void)
+void TLCS900h::DST_dstPOPB(void)
 {
 	storeB(mem, pop8());
 	cycles = 6;
 }
 
 //===== POP (mem)
-void DST_dstPOPW(void)
+void TLCS900h::DST_dstPOPW(void)
 {
 	storeW(mem, pop16());
 	cycles = 6;
 }
 
 //===== LD (mem),(nn)
-void DST_dstLDBm16(void)
+void TLCS900h::DST_dstLDBm16(void)
 {
 	storeB(mem, loadB(fetch16()));
 	cycles = 8;
 }
 
 //===== LD (mem),(nn)
-void DST_dstLDWm16(void)
+void TLCS900h::DST_dstLDWm16(void)
 {
 	storeW(mem, loadW(fetch16()));
 	cycles = 8;
 }
 
 //===== LDA R,mem
-void DST_dstLDAW(void)
+void TLCS900h::DST_dstLDAW(void)
 {
 	regW(R) = (uint16)mem;
 	cycles = 4;
 }
 
 //===== LDA R,mem
-void DST_dstLDAL(void)
+void TLCS900h::DST_dstLDAL(void)
 {
 	regL(R) = (uint32)mem;
 	cycles = 4;
 }
 
 //===== ANDCF A,(mem)
-void DST_dstANDCFA(void)
+void TLCS900h::DST_dstANDCFA(void)
 {
 	uint8 bit = REGA & 0xF;
 	uint8 mbit = (loadB(mem) >> bit) & 1;
@@ -121,7 +120,7 @@ void DST_dstANDCFA(void)
 }
 
 //===== ORCF A,(mem)
-void DST_dstORCFA(void)
+void TLCS900h::DST_dstORCFA(void)
 {
 	uint8 bit = REGA & 0xF;
 	uint8 mbit = (loadB(mem) >> bit) & 1;
@@ -130,7 +129,7 @@ void DST_dstORCFA(void)
 }
 
 //===== XORCF A,(mem)
-void DST_dstXORCFA(void)
+void TLCS900h::DST_dstXORCFA(void)
 {
 	uint8 bit = REGA & 0xF;
 	uint8 mbit = (loadB(mem) >> bit) & 1;
@@ -139,7 +138,7 @@ void DST_dstXORCFA(void)
 }
 
 //===== LDCF A,(mem)
-void DST_dstLDCFA(void)
+void TLCS900h::DST_dstLDCFA(void)
 {
 	uint8 bit = REGA & 0xF;
 	uint8 mask = (1 << bit);
@@ -148,7 +147,7 @@ void DST_dstLDCFA(void)
 }
 
 //===== STCF A,(mem)
-void DST_dstSTCFA(void)
+void TLCS900h::DST_dstSTCFA(void)
 {
 	uint8 bit = REGA & 0xF;
 	uint8 cmask = ~(1 << bit);
@@ -158,28 +157,28 @@ void DST_dstSTCFA(void)
 }
 
 //===== LD (mem),R
-void DST_dstLDBR(void)
+void TLCS900h::DST_dstLDBR(void)
 {
 	storeB(mem, regB(R));
 	cycles = 4;
 }
 
 //===== LD (mem),R
-void DST_dstLDWR(void)
+void TLCS900h::DST_dstLDWR(void)
 {
 	storeW(mem, regW(R));
 	cycles = 4;
 }
 
 //===== LD (mem),R
-void DST_dstLDLR(void)
+void TLCS900h::DST_dstLDLR(void)
 {
 	storeL(mem, regL(R));
 	cycles = 6;
 }
 
 //===== ANDCF #3,(mem)
-void DST_dstANDCF(void)
+void TLCS900h::DST_dstANDCF(void)
 {
 	uint8 bit = R;
 	uint8 mbit = (loadB(mem) >> bit) & 1;
@@ -188,7 +187,7 @@ void DST_dstANDCF(void)
 }
 
 //===== ORCF #3,(mem)
-void DST_dstORCF(void)
+void TLCS900h::DST_dstORCF(void)
 {
 	uint8 bit = R;
 	uint8 mbit = (loadB(mem) >> bit) & 1;
@@ -197,7 +196,7 @@ void DST_dstORCF(void)
 }
 
 //===== XORCF #3,(mem)
-void DST_dstXORCF(void)
+void TLCS900h::DST_dstXORCF(void)
 {
 	uint8 bit = R;
 	uint8 mbit = (loadB(mem) >> bit) & 1;
@@ -206,7 +205,7 @@ void DST_dstXORCF(void)
 }
 
 //===== LDCF #3,(mem)
-void DST_dstLDCF(void)
+void TLCS900h::DST_dstLDCF(void)
 {
 	uint8 bit = R;
 	uint32 mask = (1 << bit);
@@ -215,7 +214,7 @@ void DST_dstLDCF(void)
 }
 
 //===== STCF #3,(mem)
-void DST_dstSTCF(void)
+void TLCS900h::DST_dstSTCF(void)
 {
 	uint8 bit = R;
 	uint8 cmask = ~(1 << bit);
@@ -225,7 +224,7 @@ void DST_dstSTCF(void)
 }
 
 //===== TSET #3,(mem)
-void DST_dstTSET(void)
+void TLCS900h::DST_dstTSET(void)
 {
 	SETFLAG_Z(! (loadB(mem) & (1 << R)) );
 	storeB(mem, loadB(mem) | (1 << R));
@@ -236,28 +235,28 @@ void DST_dstTSET(void)
 }
 
 //===== RES #3,(mem)
-void DST_dstRES(void)
+void TLCS900h::DST_dstRES(void)
 {
 	storeB(mem, loadB(mem) & (~(1 << R)));
 	cycles = 8;
 }
 
 //===== SET #3,(mem)
-void DST_dstSET(void)
+void TLCS900h::DST_dstSET(void)
 {
 	storeB(mem, loadB(mem) | (1 << R));
 	cycles = 8;
 }
 
 //===== CHG #3,(mem)
-void DST_dstCHG(void)
+void TLCS900h::DST_dstCHG(void)
 {
 	storeB(mem, loadB(mem) ^ (1 << R));
 	cycles = 8;
 }
 
 //===== BIT #3,(mem)
-void DST_dstBIT(void)
+void TLCS900h::DST_dstBIT(void)
 {
    SETFLAG_Z(! (loadB(mem) & (1 << R)) );
    SETFLAG_H1;
@@ -266,7 +265,7 @@ void DST_dstBIT(void)
 }
 
 //===== JP cc,mem
-void DST_dstJP(void)
+void TLCS900h::DST_dstJP(void)
 {
    cycles = 6;
    if (conditionCode(second & 0xF))
@@ -277,7 +276,7 @@ void DST_dstJP(void)
 }
 
 //===== CALL cc,mem
-void DST_dstCALL(void)
+void TLCS900h::DST_dstCALL(void)
 {
    cycles = 6;
    if (conditionCode(second & 0xF))
@@ -289,7 +288,7 @@ void DST_dstCALL(void)
 }
 
 //===== RET cc
-void DST_dstRET(void)
+void TLCS900h::DST_dstRET(void)
 {
    cycles = 6;
    if (conditionCode(second & 0xF))

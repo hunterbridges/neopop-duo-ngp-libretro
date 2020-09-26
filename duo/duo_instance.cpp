@@ -17,8 +17,7 @@
 #include "../mednafen/ngp/sound.h"
 #include "../mednafen/ngp/system.h"
 #include "../mednafen/ngp/Z80_interface.h"
-#include "../mednafen/ngp/TLCS-900h/TLCS900h_interpret.h"
-#include "../mednafen/ngp/TLCS-900h/TLCS900h_registers.h"
+#include "../mednafen/ngp/TLCS-900h/TLCS900h.h"
 
 DuoInstance *DuoInstance::currentInstance = nullptr;
 DuoInstance DuoInstance::instances[MAX_INSTANCES];
@@ -103,8 +102,8 @@ bool DuoInstance::Initialize()
 	memset(&z80_state, 0, sizeof(z80_state));
 
 	// Initialize the TLCS900h tables
-	//initGPRTables(&tlcs900h_state);
-	//initRegCodeTables(&tlcs900h_state);
+	tlcs900h_state.initGPRTables();
+	tlcs900h_state.initRegCodeTables();
 
 	return true;
 error:
@@ -215,7 +214,7 @@ void DuoInstance::Reset()
 
 	mem->reset_memory();
 	BIOSHLE_Reset(bios);
-	reset_registers();	/* TLCS900H registers */
+	tlcs900h_state.reset_registers(); /* TLCS900H registers */
 	dma->reset_dma();
 }
 
@@ -385,7 +384,7 @@ void DuoInstance::ProcessFrame()
 
 	do
 	{
-		int32 timetime = TLCS900h_interpret();
+		int32 timetime = tlcs900h_state.TLCS900h_interpret();
 		drewFrame |= interrupt->updateTimers(spec.surface, timetime);
 		z80_runtime += timetime;
 
@@ -428,7 +427,7 @@ void DuoInstance::ProcessFrame_Interleaved(DuoInstance *other)
 
 			DuoInstance::StageInstance(instances[i]);
 
-			int32 tlcsCycles = TLCS900h_interpret();
+			int32 tlcsCycles = tlcs900h_state.TLCS900h_interpret();
 			drewFrame[i] |= instances[i]->interrupt->updateTimers(instances[i]->spec.surface, tlcsCycles);
 			instances[i]->z80_runtime += tlcsCycles;
 
@@ -471,7 +470,6 @@ void DuoInstance::StageInstance(DuoInstance *instance)
 		return;
 
 	currentInstance = instance;
-	//cur_tlcs900h = &instance->tlcs900h_state;
 	cur_z80 = &instance->z80_state;
 }
 
@@ -480,7 +478,6 @@ void DuoInstance::UnstageCurrentInstance()
 	if (currentInstance == NULL)
 		return;
 
-	//cur_tlcs900h = NULL;
 	cur_z80 = NULL;
 	currentInstance = NULL;
 }

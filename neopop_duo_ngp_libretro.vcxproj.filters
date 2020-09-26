@@ -258,24 +258,6 @@
     <ClInclude Include="mednafen\hw_cpu\z80-fuse\z80_types.h">
       <Filter>mednafen\hw_cpu\z80-fuse</Filter>
     </ClInclude>
-    <ClInclude Include="mednafen\ngp\TLCS-900h\TLCS900h_interpret.h">
-      <Filter>mednafen\ngp\TLCS-900h</Filter>
-    </ClInclude>
-    <ClInclude Include="mednafen\ngp\TLCS-900h\TLCS900h_interpret_dst.h">
-      <Filter>mednafen\ngp\TLCS-900h</Filter>
-    </ClInclude>
-    <ClInclude Include="mednafen\ngp\TLCS-900h\TLCS900h_interpret_reg.h">
-      <Filter>mednafen\ngp\TLCS-900h</Filter>
-    </ClInclude>
-    <ClInclude Include="mednafen\ngp\TLCS-900h\TLCS900h_interpret_single.h">
-      <Filter>mednafen\ngp\TLCS-900h</Filter>
-    </ClInclude>
-    <ClInclude Include="mednafen\ngp\TLCS-900h\TLCS900h_interpret_src.h">
-      <Filter>mednafen\ngp\TLCS-900h</Filter>
-    </ClInclude>
-    <ClInclude Include="mednafen\ngp\TLCS-900h\TLCS900h_registers.h">
-      <Filter>mednafen\ngp\TLCS-900h</Filter>
-    </ClInclude>
     <ClInclude Include="mednafen\ngp\bios.h">
       <Filter>mednafen\ngp</Filter>
     </ClInclude>
@@ -336,7 +318,7 @@
     <ClInclude Include="third_party\ringbuf.h">
       <Filter>third_party</Filter>
     </ClInclude>
-    <ClInclude Include="mednafen\ngp\TLCS-900h\TLCS900h_state.h">
+    <ClInclude Include="mednafen\ngp\TLCS-900h\TLCS900h.h">
       <Filter>mednafen\ngp\TLCS-900h</Filter>
     </ClInclude>
   </ItemGroup>

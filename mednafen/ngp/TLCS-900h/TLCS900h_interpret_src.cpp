@@ -65,14 +65,13 @@
 //---------------------------------------------------------------------------
 */
 
-#include "TLCS900h_interpret.h"
-#include "TLCS900h_registers.h"
+#include "TLCS900h.h"
 #include "../mem.h"
 
 //=========================================================================
 
 //===== PUSH (mem)
-void srcPUSH(void)
+void TLCS900h::srcPUSH(void)
 {
    switch(size)
    {
@@ -87,7 +86,7 @@ void srcPUSH(void)
 }
 
 //===== RLD A,(mem)
-void srcRLD(void)
+void TLCS900h::srcRLD(void)
 {
 	uint8 al = REGA & 0xF, m, mh, ml;
 
@@ -108,7 +107,7 @@ void srcRLD(void)
 }
 
 //===== RRD A,(mem)
-void srcRRD()
+void TLCS900h::srcRRD()
 {
 	uint8 al = (REGA & 0xF) << 4, m, mh, ml;
 
@@ -129,7 +128,7 @@ void srcRRD()
 }
 
 //===== LDI
-void srcLDI()
+void TLCS900h::srcLDI()
 {
    uint8 dst = 2/*XDE*/, src = 3/*XHL*/;
    if ((first & 0xF) == 5)
@@ -162,7 +161,7 @@ void srcLDI()
 }
 
 //===== LDIR
-void srcLDIR()
+void TLCS900h::srcLDIR()
 {
    uint8 dst = 2/*XDE*/, src = 3/*XHL*/;
    if ((first & 0xF) == 5)
@@ -203,7 +202,7 @@ void srcLDIR()
 }
 
 //===== LDD
-void srcLDD()
+void TLCS900h::srcLDD()
 {
 	uint8 dst = 2/*XDE*/, src = 3/*XHL*/;
 	if ((first & 0xF) == 5) { dst = 4/*XIX*/; src = 5/*XIY*/; }
@@ -232,7 +231,7 @@ void srcLDD()
 }
 
 //===== LDDR
-void srcLDDR()
+void TLCS900h::srcLDDR()
 {
 	uint8 dst = 2/*XDE*/, src = 3/*XHL*/;
 	if ((first & 0xF) == 5)	{ dst = 4/*XIX*/; src = 5/*XIY*/; }
@@ -270,7 +269,7 @@ void srcLDDR()
 }
 
 //===== CPI
-void srcCPI()
+void TLCS900h::srcCPI()
 {
 	uint8 R = first & 7;
 
@@ -290,7 +289,7 @@ void srcCPI()
 }
 
 //===== CPIR
-void srcCPIR()
+void TLCS900h::srcCPIR()
 {
 	uint8 R = first & 7;
 
@@ -318,7 +317,7 @@ void srcCPIR()
 }
 
 //===== CPD
-void srcCPD()
+void TLCS900h::srcCPD()
 {
 	uint8 R = first & 7;
 
@@ -338,7 +337,7 @@ void srcCPD()
 }
 
 //===== CPDR
-void srcCPDR()
+void TLCS900h::srcCPDR()
 {
 	uint8 R = first & 7;
 
@@ -366,7 +365,7 @@ void srcCPDR()
 }
 
 //===== LD (nn),(mem)
-void srcLD16m()
+void TLCS900h::srcLD16m()
 {
 	switch(size)
 	{
@@ -378,7 +377,7 @@ void srcLD16m()
 }
 
 //===== LD R,(mem)
-void srcLD()
+void TLCS900h::srcLD()
 {
 	switch(size)
 	{
@@ -389,7 +388,7 @@ void srcLD()
 }
 
 //===== EX (mem),R
-void srcEX()
+void TLCS900h::srcEX()
 {
 	switch(size)
 	{
@@ -406,7 +405,7 @@ void srcEX()
 }
 
 //===== ADD (mem),#
-void srcADDi()
+void TLCS900h::srcADDi()
 {
 	switch(size)
 	{
@@ -416,7 +415,7 @@ void srcADDi()
 }
 
 //===== ADC (mem),#
-void srcADCi()
+void TLCS900h::srcADCi()
 {
 	switch(size)
 	{
@@ -426,7 +425,7 @@ void srcADCi()
 }
 
 //===== SUB (mem),#
-void srcSUBi()
+void TLCS900h::srcSUBi()
 {
 	switch(size)
 	{
@@ -436,7 +435,7 @@ void srcSUBi()
 }
 
 //===== SBC (mem),#
-void srcSBCi()
+void TLCS900h::srcSBCi()
 {
 	switch(size)
 	{
@@ -446,7 +445,7 @@ void srcSBCi()
 }
 
 //===== AND (mem),#
-void srcANDi()
+void TLCS900h::srcANDi()
 {
 	switch(size)
 	{
@@ -473,7 +472,7 @@ void srcANDi()
 }
 
 //===== OR (mem),#
-void srcORi()
+void TLCS900h::srcORi()
 {
 	switch(size)
 	{
@@ -500,7 +499,7 @@ void srcORi()
 }
 
 //===== XOR (mem),#
-void srcXORi()
+void TLCS900h::srcXORi()
 {
 	switch(size)
 	{
@@ -527,7 +526,7 @@ void srcXORi()
 }
 
 //===== CP (mem),#
-void srcCPi()
+void TLCS900h::srcCPi()
 {
 	switch(size)
 	{
@@ -539,7 +538,7 @@ void srcCPi()
 }
 
 //===== MUL RR,(mem)
-void srcMUL()
+void TLCS900h::srcMUL()
 {
 	uint8 target = get_RR_Target();
 	if (target == 0x80)
@@ -558,7 +557,7 @@ void srcMUL()
 }
 
 //===== MULS RR,(mem)
-void srcMULS()
+void TLCS900h::srcMULS()
 {
 	uint8 target = get_RR_Target();
 	if (target == 0x80)
@@ -577,7 +576,7 @@ void srcMULS()
 }
 
 //===== DIV RR,(mem)
-void srcDIV()
+void TLCS900h::srcDIV()
 {
 	uint8 target = get_RR_Target();
 	if (target == 0x80)
@@ -599,7 +598,7 @@ void srcDIV()
 }
 
 //===== DIVS RR,(mem)
-void srcDIVS()
+void TLCS900h::srcDIVS()
 {
 	uint8 target = get_RR_Target();
 	if (target == 0x80)
@@ -621,7 +620,7 @@ void srcDIVS()
 }
 
 //===== INC #3,(mem)
-void srcINC()
+void TLCS900h::srcINC()
 {
 	uint8 val = R;
 	if (val == 0)
@@ -664,7 +663,7 @@ void srcINC()
 }
 
 //===== DEC #3,(mem)
-void srcDEC()
+void TLCS900h::srcDEC()
 {
 	uint8 val = R;
 	if (val == 0)
@@ -707,7 +706,7 @@ void srcDEC()
 }
 
 //===== RLC (mem)
-void srcRLC()
+void TLCS900h::srcRLC()
 {
 	switch(size)
 	{
@@ -739,7 +738,7 @@ void srcRLC()
 }
 
 //===== RRC (mem)
-void srcRRC()
+void TLCS900h::srcRRC()
 {
 	switch(size)
 	{
@@ -771,7 +770,7 @@ void srcRRC()
 }
 
 //===== RL (mem)
-void srcRL()
+void TLCS900h::srcRL()
 {
 	bool tempC;
 
@@ -804,7 +803,7 @@ void srcRL()
 }
 
 //===== RR (mem)
-void srcRR()
+void TLCS900h::srcRR()
 {
 	bool tempC;
 
@@ -837,7 +836,7 @@ void srcRR()
 }
 
 //===== SLA (mem)
-void srcSLA()
+void TLCS900h::srcSLA()
 {
 	switch(size)
 	{
@@ -867,7 +866,7 @@ void srcSLA()
 }
 
 //===== SRA (mem)
-void srcSRA()
+void TLCS900h::srcSRA()
 {
 	switch(size)
 	{
@@ -897,7 +896,7 @@ void srcSRA()
 }
 
 //===== SLL (mem)
-void srcSLL()
+void TLCS900h::srcSLL()
 {
 	switch(size)
 	{
@@ -927,7 +926,7 @@ void srcSLL()
 }
 
 //===== SRL (mem)
-void srcSRL()
+void TLCS900h::srcSRL()
 {
 	switch(size)
 	{
@@ -957,7 +956,7 @@ void srcSRL()
 }
 
 //===== ADD R,(mem)
-void srcADDRm()
+void TLCS900h::srcADDRm()
 {
 	switch(size)
 	{
@@ -968,7 +967,7 @@ void srcADDRm()
 }
 
 //===== ADD (mem),R
-void srcADDmR()
+void TLCS900h::srcADDmR()
 {
 	switch(size)
 	{
@@ -979,7 +978,7 @@ void srcADDmR()
 }
 
 //===== ADC R,(mem)
-void srcADCRm()
+void TLCS900h::srcADCRm()
 {
 	switch(size)
 	{
@@ -990,7 +989,7 @@ void srcADCRm()
 }
 
 //===== ADC (mem),R
-void srcADCmR()
+void TLCS900h::srcADCmR()
 {
 	switch(size)
 	{
@@ -1001,7 +1000,7 @@ void srcADCmR()
 }
 
 //===== SUB R,(mem)
-void srcSUBRm()
+void TLCS900h::srcSUBRm()
 {
 	switch(size)
 	{
@@ -1012,7 +1011,7 @@ void srcSUBRm()
 }
 
 //===== SUB (mem),R
-void srcSUBmR()
+void TLCS900h::srcSUBmR()
 {
 	switch(size)
 	{
@@ -1023,7 +1022,7 @@ void srcSUBmR()
 }
 
 //===== SBC R,(mem)
-void srcSBCRm()
+void TLCS900h::srcSBCRm()
 {
 	switch(size)
 	{
@@ -1034,7 +1033,7 @@ void srcSBCRm()
 }
 
 //===== SBC (mem),R
-void srcSBCmR()
+void TLCS900h::srcSBCmR()
 {
 	switch(size)
 	{
@@ -1045,7 +1044,7 @@ void srcSBCmR()
 }
 
 //===== AND R,(mem)
-void srcANDRm()
+void TLCS900h::srcANDRm()
 {
 	switch(size)
 	{
@@ -1079,7 +1078,7 @@ void srcANDRm()
 }
 
 //===== AND (mem),R
-void srcANDmR()
+void TLCS900h::srcANDmR()
 {
 	switch(size)
 	{
@@ -1113,7 +1112,7 @@ void srcANDmR()
 }
 
 //===== XOR R,(mem)
-void srcXORRm()
+void TLCS900h::srcXORRm()
 {
 	switch(size)
 	{
@@ -1147,7 +1146,7 @@ void srcXORRm()
 }
 
 //===== XOR (mem),R
-void srcXORmR()
+void TLCS900h::srcXORmR()
 {
 	switch(size)
 	{
@@ -1181,7 +1180,7 @@ void srcXORmR()
 }
 
 //===== OR R,(mem)
-void srcORRm()
+void TLCS900h::srcORRm()
 {
 	switch(size)
 	{
@@ -1215,7 +1214,7 @@ void srcORRm()
 }
 
 //===== OR (mem),R
-void srcORmR()
+void TLCS900h::srcORmR()
 {
 	switch(size)
 	{
@@ -1249,7 +1248,7 @@ void srcORmR()
 }
 
 //===== CP R,(mem)
-void srcCPRm(void)
+void TLCS900h::srcCPRm(void)
 {
    switch(size)
    {
@@ -1269,7 +1268,7 @@ void srcCPRm(void)
 }
 
 //===== CP (mem),R
-void srcCPmR(void)
+void TLCS900h::srcCPmR(void)
 {
    switch(size)
    {

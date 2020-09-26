@@ -17,7 +17,7 @@
 #include "gfx.h"
 #include "interrupt.h"
 #include "dma.h"
-#include "TLCS-900h/TLCS900h_registers.h"
+#include "TLCS-900h/TLCS900h.h"
 #include "../state.h"
 #include "../video.h"
 #ifdef MSB_FIRST

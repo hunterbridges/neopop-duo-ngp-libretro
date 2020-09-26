@@ -17,7 +17,7 @@
 #include "mem.h"
 #include "sound.h"
 #include "Z80_interface.h"
-#include "TLCS-900h/TLCS900h_registers.h"
+#include "TLCS-900h/TLCS900h.h"
 #include "interrupt.h"
 #include "dma.h"
 #include "../hw_cpu/z80-fuse/z80.h"

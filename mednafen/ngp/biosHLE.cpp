@@ -14,8 +14,7 @@
 
 #include "neopop.h"
 #include "bios.h"
-#include "TLCS-900h/TLCS900h_registers.h"
-#include "TLCS-900h/TLCS900h_interpret.h"
+#include "TLCS-900h/TLCS900h.h"
 #include "mem.h"
 #include "flash.h"
 #include "interrupt.h"
@@ -40,6 +39,27 @@ void BIOSHLE_Reset(neopop_bios_t *bios_ptr)
       storeB(0x70 + x, bios_ptr->CacheIntPrio[x]);
 }
 
+int BIOSHLE_StateAction(void *data, int load, int data_only)
+{
+   // TODO Where does CacheIntPrio come from in this scope?
+   uint8_t *CacheIntPrio = NULL;
+
+   SFORMAT StateRegs[] =
+   {
+      { CacheIntPrio, (uint32_t)((0xB)), 0, "CacheIntPrio" },
+      { 0, 0, 0, 0 }
+   };
+
+   if(!MDFNSS_StateAction(data, load, data_only, StateRegs, "BHLE", false))
+      return 0;
+
+   return 1;
+}
+
+#ifdef __cplusplus
+}
+#endif
+
 #define VECT_SHUTDOWN         0xFF27A2
 #define VECT_CLOCKGEARSET     0xFF1030
 #define VECT_COMGETBUFDATA    0xFF2D85
@@ -49,7 +69,7 @@ void BIOSHLE_Reset(neopop_bios_t *bios_ptr)
 most streamlined way of intercepting a bios call. The operation performed
 is dependant on the current program counter. */
 
-void iBIOSHLE()
+void TLCS900h::iBIOSHLE()
 {
    // WARNING! Using global state!
    DuoInstance *duo = DuoInstance::currentInstance;
@@ -430,25 +450,4 @@ void iBIOSHLE()
 
    //RET
    pc = pop32();
-}
-
-#ifdef __cplusplus
-}
-#endif
-
-int BIOSHLE_StateAction(void *data, int load, int data_only)
-{
-   // TODO Where does CacheIntPrio come from in this scope?
-   uint8_t *CacheIntPrio = NULL;
-
-   SFORMAT StateRegs[] =
-   {
-      { CacheIntPrio, (uint32_t)((0xB)), 0, "CacheIntPrio" },
-      { 0, 0, 0, 0 }
-   };
-
-   if(!MDFNSS_StateAction(data, load, data_only, StateRegs, "BHLE", false))
-      return 0;
-
-   return 1;
 }

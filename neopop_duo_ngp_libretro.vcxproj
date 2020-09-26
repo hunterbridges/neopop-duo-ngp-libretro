@@ -292,13 +292,7 @@
     <ClInclude Include="mednafen\ngp\system.h" />
     <ClInclude Include="mednafen\ngp\T6W28_Apu.h" />
     <ClInclude Include="mednafen\ngp\T6W28_Oscs.h" />
-    <ClInclude Include="mednafen\ngp\TLCS-900h\TLCS900h_interpret.h" />
-    <ClInclude Include="mednafen\ngp\TLCS-900h\TLCS900h_interpret_dst.h" />
-    <ClInclude Include="mednafen\ngp\TLCS-900h\TLCS900h_interpret_reg.h" />
-    <ClInclude Include="mednafen\ngp\TLCS-900h\TLCS900h_interpret_single.h" />
-    <ClInclude Include="mednafen\ngp\TLCS-900h\TLCS900h_interpret_src.h" />
-    <ClInclude Include="mednafen\ngp\TLCS-900h\TLCS900h_registers.h" />
-    <ClInclude Include="mednafen\ngp\TLCS-900h\TLCS900h_state.h" />
+    <ClInclude Include="mednafen\ngp\TLCS-900h\TLCS900h.h" />
     <ClInclude Include="mednafen\ngp\Z80_interface.h" />
     <ClInclude Include="mednafen\settings-common.h" />
     <ClInclude Include="mednafen\settings-driver.h" />

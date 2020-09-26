@@ -62,15 +62,14 @@
 //---------------------------------------------------------------------------
 */
 
-#include "TLCS900h_interpret.h"
-#include "TLCS900h_registers.h"
+#include "TLCS900h.h"
 #include "../mem.h"
 #include "../dma.h"
 
 //=========================================================================
 
 //===== LD r,#
-void regLDi()
+void TLCS900h::regLDi()
 {
 	switch(size)
 	{
@@ -81,7 +80,7 @@ void regLDi()
 }
 
 //===== PUSH r
-void regPUSH()
+void TLCS900h::regPUSH()
 {
 	switch(size)
 	{
@@ -92,7 +91,7 @@ void regPUSH()
 }
 
 //===== POP r
-void regPOP()
+void TLCS900h::regPOP()
 {
 	switch(size)
 	{
@@ -103,7 +102,7 @@ void regPOP()
 }
 
 //===== CPL r
-void regCPL()
+void TLCS900h::regCPL()
 {
 	switch(size)
 	{
@@ -117,7 +116,7 @@ void regCPL()
 }
 
 //===== NEG r
-void regNEG()
+void TLCS900h::regNEG()
 {
 	switch(size)
 	{
@@ -128,7 +127,7 @@ void regNEG()
 }
 
 //===== MUL rr,#
-void regMULi()
+void TLCS900h::regMULi()
 {
 	uint8 target = get_rr_Target();
 	if (target == 0x80)
@@ -149,7 +148,7 @@ void regMULi()
 }
 
 //===== MULS rr,#
-void regMULSi()
+void TLCS900h::regMULSi()
 {
 	uint8 target = get_rr_Target();
 	if (target == 0x80)
@@ -168,7 +167,7 @@ void regMULSi()
 }
 
 //===== DIV rr,#
-void regDIVi()
+void TLCS900h::regDIVi()
 {
 	uint8 target = get_rr_Target();
 	if (target == 0x80)
@@ -190,7 +189,7 @@ void regDIVi()
 }
 
 //===== DIVS rr,#
-void regDIVSi()
+void TLCS900h::regDIVSi()
 {
 	uint8 target = get_rr_Target();
 	if (target == 0x80)
@@ -212,7 +211,7 @@ void regDIVSi()
 }
 
 //===== LINK r,dd
-void regLINK()
+void TLCS900h::regLINK()
 {
 	int16 d = (int16)fetch16();
 	push32(rCodeL(rCode));
@@ -222,7 +221,7 @@ void regLINK()
 }
 
 //===== UNLK r
-void regUNLK()
+void TLCS900h::regUNLK()
 {
 	REGXSP = rCodeL(rCode);
 	rCodeL(rCode) = pop32();
@@ -230,7 +229,7 @@ void regUNLK()
 }
 
 //===== BS1F A,r
-void regBS1F()
+void TLCS900h::regBS1F()
 {
 	uint16 data = rCodeW(rCode), mask = 0x0001;
 	uint8 i;
@@ -252,7 +251,7 @@ void regBS1F()
 }
 
 //===== BS1B A,r
-void regBS1B()
+void TLCS900h::regBS1B()
 {
 	uint16 data = rCodeW(rCode), mask = 0x8000;
 	uint8 i;
@@ -274,7 +273,7 @@ void regBS1B()
 }
 
 //===== DAA r
-void regDAA()
+void TLCS900h::regDAA()
 {
 	uint16 resultC;
 	uint8 src = rCodeB(rCode), result, added = 0, half;
@@ -338,7 +337,7 @@ void regDAA()
 }
 
 //===== EXTZ r
-void regEXTZ()
+void TLCS900h::regEXTZ()
 {
 	switch(size)
 	{
@@ -350,7 +349,7 @@ void regEXTZ()
 }
 
 //===== EXTS r
-void regEXTS()
+void TLCS900h::regEXTS()
 {
 	switch(size)
 	{
@@ -369,7 +368,7 @@ void regEXTS()
 }
 
 //===== PAA r
-void regPAA()
+void TLCS900h::regPAA()
 {
 	switch(size)
 	{
@@ -380,7 +379,7 @@ void regPAA()
 }
 
 //===== MIRR r
-void regMIRR()
+void TLCS900h::regMIRR()
 {
 	uint16 src = rCodeW(rCode), dst = 0, bit;
 
@@ -396,7 +395,7 @@ void regMIRR()
 }
 
 //===== MULA rr
-void regMULA()
+void TLCS900h::regMULA()
 {
 	uint32 src = (int16)loadW(regL(2/*XDE*/)) * (int16)loadW(regL(3/*XHL*/));
 	uint32 dst = rCodeL(rCode);
@@ -413,7 +412,7 @@ void regMULA()
 }
 
 //===== DJNZ r,d
-void regDJNZ()
+void TLCS900h::regDJNZ()
 {
 	int8 offset = FETCH8;
 
@@ -442,7 +441,7 @@ void regDJNZ()
 }
 
 //===== ANDCF #,r
-void regANDCFi()
+void TLCS900h::regANDCFi()
 {
 	uint8 data, bit = FETCH8 & 0xF;
 	switch(size)
@@ -459,7 +458,7 @@ void regANDCFi()
 }
 
 //===== ORCF #,r
-void regORCFi()
+void TLCS900h::regORCFi()
 {
 	uint8 data, bit = FETCH8 & 0xF;
 	switch(size)
@@ -476,7 +475,7 @@ void regORCFi()
 }
 
 //===== XORCF #,r
-void regXORCFi()
+void TLCS900h::regXORCFi()
 {
 	uint8 data, bit = FETCH8 & 0xF;
 	switch(size)
@@ -493,7 +492,7 @@ void regXORCFi()
 }
 
 //===== LDCF #,r
-void regLDCFi()
+void TLCS900h::regLDCFi()
 {
 	uint8 bit = FETCH8 & 0xF;
 	switch(size)
@@ -513,7 +512,7 @@ void regLDCFi()
 }
 
 //===== STCF #,r
-void regSTCFi()
+void TLCS900h::regSTCFi()
 {
 	uint8 bit = FETCH8 & 0xF;
 	switch(size)
@@ -533,7 +532,7 @@ void regSTCFi()
 }
 
 //===== ANDCF A,r
-void regANDCFA()
+void TLCS900h::regANDCFA()
 {
 	uint8 data, bit = REGA & 0xF;
 	switch(size)
@@ -550,7 +549,7 @@ void regANDCFA()
 }
 
 //===== ORCF A,r
-void regORCFA()
+void TLCS900h::regORCFA()
 {
 	uint8 data, bit = REGA & 0xF;
 	switch(size)
@@ -567,7 +566,7 @@ void regORCFA()
 }
 
 //===== XORCF A,r
-void regXORCFA()
+void TLCS900h::regXORCFA()
 {
 	uint8 data, bit = REGA & 0xF;
 	switch(size)
@@ -584,7 +583,7 @@ void regXORCFA()
 }
 
 //===== LDCF A,r
-void regLDCFA()
+void TLCS900h::regLDCFA()
 {
 	uint8 bit = REGA & 0xF;
 	uint32 mask = (1 << bit);
@@ -599,7 +598,7 @@ void regLDCFA()
 }
 
 //===== STCF A,r
-void regSTCFA()
+void TLCS900h::regSTCFA()
 {
 	switch(size)
 	{
@@ -620,7 +619,7 @@ void regSTCFA()
 }
 
 //===== LDC cr,r
-void regLDCcrr()
+void TLCS900h::regLDCcrr()
 {
 	uint8 cr = FETCH8;
 
@@ -635,7 +634,7 @@ void regLDCcrr()
 }
 
 //===== LDC r,cr
-void regLDCrcr()
+void TLCS900h::regLDCrcr()
 {
 	uint8 cr = FETCH8;
 
@@ -650,7 +649,7 @@ void regLDCrcr()
 }
 
 //===== RES #,r
-void regRES()
+void TLCS900h::regRES()
 {
 	uint8 b = FETCH8 & 0xF;
 
@@ -664,7 +663,7 @@ void regRES()
 }
 
 //===== SET #,r
-void regSET()
+void TLCS900h::regSET()
 {
 	uint8 b = FETCH8 & 0xF;
 
@@ -678,7 +677,7 @@ void regSET()
 }
 
 //===== CHG #,r
-void regCHG()
+void TLCS900h::regCHG()
 {
 	uint8 b = FETCH8 & 0xF;
 
@@ -692,7 +691,7 @@ void regCHG()
 }
 
 //===== BIT #,r
-void regBIT()
+void TLCS900h::regBIT()
 {
 	uint8 b = FETCH8 & 0xF;
 	
@@ -708,7 +707,7 @@ void regBIT()
 }
 
 //===== TSET #,r
-void regTSET()
+void TLCS900h::regTSET()
 {
 	uint8 b = FETCH8 & 0xF;
 	
@@ -729,7 +728,7 @@ void regTSET()
 }
 
 //===== MINC1 #,r
-void regMINC1()
+void TLCS900h::regMINC1()
 {
 	uint16 num = fetch16() + 1;
 
@@ -745,7 +744,7 @@ void regMINC1()
 }
 
 //===== MINC2 #,r
-void regMINC2()
+void TLCS900h::regMINC2()
 {
 	uint16 num = fetch16() + 2;
 
@@ -761,7 +760,7 @@ void regMINC2()
 }
 
 //===== MINC4 #,r
-void regMINC4()
+void TLCS900h::regMINC4()
 {
 	uint16 num = fetch16() + 4;
 
@@ -777,7 +776,7 @@ void regMINC4()
 }
 
 //===== MDEC1 #,r
-void regMDEC1()
+void TLCS900h::regMDEC1()
 {
 	uint16 num = fetch16() + 1;
 
@@ -793,7 +792,7 @@ void regMDEC1()
 }
 
 //===== MDEC2 #,r
-void regMDEC2()
+void TLCS900h::regMDEC2()
 {
 	uint16 num = fetch16() + 2;
 
@@ -809,7 +808,7 @@ void regMDEC2()
 }
 
 //===== MDEC4 #,r
-void regMDEC4()
+void TLCS900h::regMDEC4()
 {
 	uint16 num = fetch16() + 4;
 
@@ -825,7 +824,7 @@ void regMDEC4()
 }
 
 //===== MUL RR,r
-void regMUL()
+void TLCS900h::regMUL()
 {
 	uint8 target = get_RR_Target();
 	if (target == 0x80)
@@ -844,7 +843,7 @@ void regMUL()
 }
 
 //===== MULS RR,r
-void regMULS()
+void TLCS900h::regMULS()
 {
 	uint8 target = get_RR_Target();
 	if (target == 0x80)
@@ -863,7 +862,7 @@ void regMULS()
 }
 
 //===== DIV RR,r
-void regDIV()
+void TLCS900h::regDIV()
 {
 	uint8 target = get_RR_Target();
 	if (target == 0x80)
@@ -885,7 +884,7 @@ void regDIV()
 }
 
 //===== DIVS RR,r
-void regDIVS()
+void TLCS900h::regDIVS()
 {
 	uint8 target = get_RR_Target();
 	if (target == 0x80)
@@ -907,7 +906,7 @@ void regDIVS()
 }
 
 //===== INC #3,r
-void regINC()
+void TLCS900h::regINC()
 {
 	uint8 val = R;
 	if (val == 0)
@@ -939,7 +938,7 @@ void regINC()
 }
 
 //===== DEC #3,r
-void regDEC()
+void TLCS900h::regDEC()
 {
 	uint8 val = R;
 	if (val == 0)
@@ -970,7 +969,7 @@ void regDEC()
 }
 
 //===== SCC cc,r
-void regSCC()
+void TLCS900h::regSCC()
 {
 	uint32 result;
 
@@ -989,7 +988,7 @@ void regSCC()
 }
 
 //===== LD R,r
-void regLDRr()
+void TLCS900h::regLDRr()
 {
 	switch(size)
 	{
@@ -1002,7 +1001,7 @@ void regLDRr()
 }
 
 //===== LD r,R
-void regLDrR()
+void TLCS900h::regLDrR()
 {
 	switch(size)
 	{
@@ -1015,7 +1014,7 @@ void regLDrR()
 }
 
 //===== ADD R,r
-void regADD()
+void TLCS900h::regADD()
 {
 	switch(size)
 	{
@@ -1026,7 +1025,7 @@ void regADD()
 }
 
 //===== ADC R,r
-void regADC()
+void TLCS900h::regADC()
 {
 	switch(size)
 	{
@@ -1037,7 +1036,7 @@ void regADC()
 }
 
 //===== SUB R,r
-void regSUB()
+void TLCS900h::regSUB()
 {
 	switch(size)
 	{
@@ -1048,7 +1047,7 @@ void regSUB()
 }
 
 //===== SBC R,r
-void regSBC()
+void TLCS900h::regSBC()
 {
 	switch(size)
 	{
@@ -1059,7 +1058,7 @@ void regSBC()
 }
 
 //===== LD r,#3
-void regLDr3()
+void TLCS900h::regLDr3()
 {
 	switch(size)
 	{
@@ -1072,7 +1071,7 @@ void regLDr3()
 }
 
 //===== EX R,r
-void regEX()
+void TLCS900h::regEX()
 {
 	switch(size)
 	{
@@ -1085,7 +1084,7 @@ void regEX()
 }
 
 //===== ADD r,#
-void regADDi()
+void TLCS900h::regADDi()
 {
 	switch(size)
 	{
@@ -1096,7 +1095,7 @@ void regADDi()
 }
 
 //===== ADC r,#
-void regADCi()
+void TLCS900h::regADCi()
 {
 	switch(size)
 	{
@@ -1107,7 +1106,7 @@ void regADCi()
 }
 
 //===== SUB r,#
-void regSUBi()
+void TLCS900h::regSUBi()
 {
 	switch(size)
 	{
@@ -1118,7 +1117,7 @@ void regSUBi()
 }
 
 //===== SBC r,#
-void regSBCi()
+void TLCS900h::regSBCi()
 {
 	switch(size)
 	{
@@ -1129,7 +1128,7 @@ void regSBCi()
 }
 
 //===== CP r,#
-void regCPi()
+void TLCS900h::regCPi()
 {
 	switch(size)
 	{
@@ -1140,7 +1139,7 @@ void regCPi()
 }
 
 //===== AND r,#
-void regANDi()
+void TLCS900h::regANDi()
 {
 	switch(size)
 	{
@@ -1174,7 +1173,7 @@ void regANDi()
 }
 
 //===== OR r,#
-void regORi()
+void TLCS900h::regORi()
 {
 	switch(size)
 	{
@@ -1208,7 +1207,7 @@ void regORi()
 }
 
 //===== XOR r,#
-void regXORi()
+void TLCS900h::regXORi()
 {
 	switch(size)
 	{
@@ -1242,7 +1241,7 @@ void regXORi()
 }
 
 //===== AND R,r
-void regAND()
+void TLCS900h::regAND()
 {
 	switch(size)
 	{
@@ -1276,7 +1275,7 @@ void regAND()
 }
 
 //===== OR R,r
-void regOR()
+void TLCS900h::regOR()
 {
 	switch(size)
 	{
@@ -1310,7 +1309,7 @@ void regOR()
 }
 
 //===== XOR R,r
-void regXOR()
+void TLCS900h::regXOR()
 {
 	switch(size)
 	{
@@ -1344,7 +1343,7 @@ void regXOR()
 }
 
 //===== CP r,#3
-void regCPr3()
+void TLCS900h::regCPr3()
 {	
 	switch(size)
 	{
@@ -1356,7 +1355,7 @@ void regCPr3()
 }
 
 //===== CP R,r
-void regCP()
+void TLCS900h::regCP()
 {
 	switch(size)
 	{
@@ -1367,7 +1366,7 @@ void regCP()
 }
 
 //===== RLC #,r
-void regRLCi()
+void TLCS900h::regRLCi()
 {
 	int i;
 	uint8 sa = FETCH8 & 0xF;
@@ -1416,7 +1415,7 @@ void regRLCi()
 }
 
 //===== RRC #,r
-void regRRCi()
+void TLCS900h::regRRCi()
 {
 	int i;
 	uint8 sa = FETCH8 & 0xF;
@@ -1465,7 +1464,7 @@ void regRRCi()
 }
 
 //===== RL #,r
-void regRLi(void)
+void TLCS900h::regRLi(void)
 {
 	int i;
 	bool tempC;
@@ -1537,7 +1536,7 @@ void regRLi(void)
 }
 
 //===== RR #,r
-void regRRi(void)
+void TLCS900h::regRRi(void)
 {
 	int i;
 	bool tempC;
@@ -1608,7 +1607,7 @@ void regRRi(void)
 }
 
 //===== SLA #,r
-void regSLAi()
+void TLCS900h::regSLAi()
 {
 	int8 sa = FETCH8 & 0xF;
 	if (sa == 0) sa = 16;
@@ -1654,7 +1653,7 @@ void regSLAi()
 }
 
 //===== SRA #,r
-void regSRAi()
+void TLCS900h::regSRAi()
 {
 	int8 sa = FETCH8 & 0xF;
 	if (sa == 0) sa = 16;
@@ -1700,7 +1699,7 @@ void regSRAi()
 }
 
 //===== SLL #,r
-void regSLLi()
+void TLCS900h::regSLLi()
 {
 	uint8 sa = FETCH8 & 0xF;
 	if (sa == 0) sa = 16;
@@ -1746,7 +1745,7 @@ void regSLLi()
 }
 
 //===== SRL #,r
-void regSRLi()
+void TLCS900h::regSRLi()
 {
 	uint8 sa = FETCH8 & 0xF;
 	if (sa == 0) sa = 16;
@@ -1792,7 +1791,7 @@ void regSRLi()
 }
 
 //===== RLC A,r
-void regRLCA()
+void TLCS900h::regRLCA()
 {
 	int i;
 	uint8 sa = REGA & 0xF;
@@ -1841,7 +1840,7 @@ void regRLCA()
 }
 
 //===== RRC A,r
-void regRRCA()
+void TLCS900h::regRRCA()
 {
 	int i;
 	uint8 sa = REGA & 0xF;
@@ -1890,7 +1889,7 @@ void regRRCA()
 }
 
 //===== RL A,r
-void regRLA(void)
+void TLCS900h::regRLA(void)
 {
    int i;
    bool tempC;
@@ -1962,7 +1961,7 @@ void regRLA(void)
 }
 
 //===== RR A,r
-void regRRA(void)
+void TLCS900h::regRRA(void)
 {
    int i;
    bool tempC;
@@ -2030,7 +2029,7 @@ void regRRA(void)
 }
 
 //===== SLA A,r
-void regSLAA()
+void TLCS900h::regSLAA()
 {
 	int8 sa = REGA & 0xF;
 	if (sa == 0) sa = 16;
@@ -2076,7 +2075,7 @@ void regSLAA()
 }
 
 //===== SRA A,r
-void regSRAA()
+void TLCS900h::regSRAA()
 {
 	int8 sa = REGA & 0xF;
 	if (sa == 0) sa = 16;
@@ -2122,7 +2121,7 @@ void regSRAA()
 }
 
 //===== SLL A,r
-void regSLLA()
+void TLCS900h::regSLLA()
 {
 	uint8 sa = REGA & 0xF;
 	if (sa == 0) sa = 16;
@@ -2168,7 +2167,7 @@ void regSLLA()
 }
 
 //===== SRL A,r
-void regSRLA()
+void TLCS900h::regSRLA()
 {
 	uint8 sa = REGA & 0xF;
 	if (sa == 0) sa = 16;

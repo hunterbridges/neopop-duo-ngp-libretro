@@ -47,56 +47,55 @@
 */
 
 #include <stdio.h>
-#include "TLCS900h_interpret.h"
-#include "TLCS900h_registers.h"
+#include "TLCS900h.h"
 #include "../mem.h"
 #include "../interrupt.h"
 
 //=========================================================================
 
 //===== NOP
-void sngNOP()
+void TLCS900h::sngNOP()
 {
 	cycles = 2;
 }
 
 //===== NORMAL
-void sngNORMAL()
+void TLCS900h::sngNORMAL()
 {
 	//Not supported
 	cycles = 4;
 }
 
 //===== PUSH SR
-void sngPUSHSR()
+void TLCS900h::sngPUSHSR()
 {
 	push16(sr);
 	cycles = 4;
 }
 
 //===== POP SR
-void sngPOPSR()
+void TLCS900h::sngPOPSR()
 {
 	sr = pop16();	changedSP();
 	cycles = 6;
 }
 
 //===== MAX
-void sngMAX()
+void TLCS900h::sngMAX()
 {
 	//Not supported
 	cycles = 4;
 }
 
 //===== HALT
-void sngHALT()
+void TLCS900h::sngHALT()
 {
 	//MDFN_printf("CPU halt requested and ignored.\nPlease send me a saved state.");
 	cycles = 8;
 }
 
 //===== EI #3
-void sngEI()
+void TLCS900h::sngEI()
 {
 	setStatusIFF(FETCH8);
 	int_check_pending();
@@ -104,7 +103,7 @@ void sngEI()
 }
 
 //===== RETI
-void sngRETI()
+void TLCS900h::sngRETI()
 {
 	uint16 temp = pop16();
 	pc = pop32();
@@ -113,7 +112,7 @@ void sngRETI()
 }
 
 //===== LD (n), n
-void sngLD8_8()
+void TLCS900h::sngLD8_8()
 {
 	uint8 dst = FETCH8;
 	uint8 src = FETCH8;
@@ -122,7 +121,7 @@ void sngLD8_8()
 }
 
 //===== PUSH n
-void sngPUSH8()
+void TLCS900h::sngPUSH8()
 {
 	uint8 data = FETCH8;
 	push8(data);
@@ -130,7 +129,7 @@ void sngPUSH8()
 }
 
 //===== LD (n), nn
-void sngLD8_16()
+void TLCS900h::sngLD8_16()
 {
 	uint8 dst = FETCH8;
 	uint16 src = fetch16();
@@ -139,35 +138,35 @@ void sngLD8_16()
 }
 
 //===== PUSH nn
-void sngPUSH16()
+void TLCS900h::sngPUSH16()
 {
 	push16(fetch16());
 	cycles = 5;
 }
 
 //===== INCF
-void sngINCF()
+void TLCS900h::sngINCF()
 {
 	setStatusRFP(((sr & 0x300) >> 8) + 1);
 	cycles = 2;
 }
 
 //===== DECF
-void sngDECF()
+void TLCS900h::sngDECF()
 {
 	setStatusRFP(((sr & 0x300) >> 8) - 1);
 	cycles = 2;
 }
 
 //===== RET condition
-void sngRET()
+void TLCS900h::sngRET()
 {
 	pc = pop32();
 	cycles = 9;
 }
 
 //===== RETD dd
-void sngRETD()
+void TLCS900h::sngRETD()
 {
 	int16 d = (int16)fetch16();
 	pc = pop32();
@@ -176,7 +175,7 @@ void sngRETD()
 }
 
 //===== RCF
-void sngRCF()
+void TLCS900h::sngRCF()
 {
 	SETFLAG_N0;
 	SETFLAG_V0;
@@ -185,7 +184,7 @@ void sngRCF()
 }
 
 //===== SCF
-void sngSCF()
+void TLCS900h::sngSCF()
 {
 	SETFLAG_H0;
 	SETFLAG_N0;
@@ -194,7 +193,7 @@ void sngSCF()
 }
 
 //===== CCF
-void sngCCF()
+void TLCS900h::sngCCF()
 {
 	SETFLAG_N0;
 	SETFLAG_C(!FLAG_C);
@@ -202,7 +201,7 @@ void sngCCF()
 }
 
 //===== ZCF
-void sngZCF()
+void TLCS900h::sngZCF()
 {
 	SETFLAG_N0;
 	SETFLAG_C(!FLAG_Z);
@@ -210,21 +209,21 @@ void sngZCF()
 }
 
 //===== PUSH A
-void sngPUSHA()
+void TLCS900h::sngPUSHA()
 {
 	push8(REGA);
 	cycles = 3;
 }
 
 //===== POP A
-void sngPOPA()
+void TLCS900h::sngPOPA()
 {
 	REGA = pop8();
 	cycles = 4;
 }
 
 //===== EX F,F'
-void sngEX()
+void TLCS900h::sngEX()
 {
 	uint8 f = sr & 0xFF;
 	sr = (sr & 0xFF00) | f_dash;
@@ -233,42 +232,42 @@ void sngEX()
 }
 
 //===== LDF #3
-void sngLDF()
+void TLCS900h::sngLDF()
 {
 	setStatusRFP(FETCH8);
 	cycles = 2;
 }
 
 //===== PUSH F
-void sngPUSHF()
+void TLCS900h::sngPUSHF()
 {
 	push8(sr & 0xFF);
 	cycles = 3;
 }
 
 //===== POP F
-void sngPOPF()
+void TLCS900h::sngPOPF()
 {
 	sr = (sr & 0xFF00) | pop8();
 	cycles = 4;
 }
 
 //===== JP nn
-void sngJP16()
+void TLCS900h::sngJP16()
 {
 	pc = fetch16();
 	cycles = 7;
 }
 
 //===== JP nnn
-void sngJP24()
+void TLCS900h::sngJP24()
 {
 	pc = fetch24();
 	cycles = 7;
 }
 
 //===== CALL #16
-void sngCALL16()
+void TLCS900h::sngCALL16()
 {
 	uint32 target = fetch16();
 	push32(pc);
@@ -277,7 +276,7 @@ void sngCALL16()
 }
 
 //===== CALL #24
-void sngCALL24()
+void TLCS900h::sngCALL24()
 {
 	uint32 target = fetch24();
 	push32(pc);
@@ -286,7 +285,7 @@ void sngCALL24()
 }
 
 //===== CALR $+3+d16
-void sngCALR()
+void TLCS900h::sngCALR()
 {
 	int16 displacement = (int16)fetch16();
 	uint32 target = pc + displacement;
@@ -296,56 +295,56 @@ void sngCALR()
 }
 
 //===== LD R, n
-void sngLDB()
+void TLCS900h::sngLDB()
 {
 	regB(first & 7) = FETCH8;
 	cycles = 2;
 }
 
 //===== PUSH RR
-void sngPUSHW()
+void TLCS900h::sngPUSHW()
 {
 	push16(regW(first & 7));
 	cycles = 3;
 }
 
 //===== LD RR, nn
-void sngLDW()
+void TLCS900h::sngLDW()
 {
 	regW(first & 7) = fetch16();
 	cycles = 3;
 }
 
 //===== PUSH XRR
-void sngPUSHL()
+void TLCS900h::sngPUSHL()
 {
 	push32(regL(first & 7));
 	cycles = 5;
 }
 
 //===== LD XRR, nnnn
-void sngLDL()
+void TLCS900h::sngLDL()
 {
 	regL(first & 7) = fetch32();
 	cycles = 5;
 }
 
 //===== POP RR
-void sngPOPW()
+void TLCS900h::sngPOPW()
 {
 	regW(first & 7) = pop16();
 	cycles = 4;
 }
 
 //===== POP XRR
-void sngPOPL()
+void TLCS900h::sngPOPL()
 {
 	regL(first & 7) = pop32();
 	cycles = 6;
 }
 
 //===== JR cc,PC + d
-void sngJR()
+void TLCS900h::sngJR()
 {
 	if (conditionCode(first & 0xF))
 	{
@@ -362,7 +361,7 @@ void sngJR()
 }
 
 //===== JR cc,PC + dd
-void sngJRL()
+void TLCS900h::sngJRL()
 {
 	if (conditionCode(first & 0xF))
 	{
@@ -378,7 +377,7 @@ void sngJRL()
 }
 
 //===== LDX dst,src
-void sngLDX()
+void TLCS900h::sngLDX()
 {
 	uint8 dst, src;
 
@@ -393,7 +392,7 @@ void sngLDX()
 }
 
 //===== SWI num
-void sngSWI()
+void TLCS900h::sngSWI()
 {
 	cycles = 16;
 

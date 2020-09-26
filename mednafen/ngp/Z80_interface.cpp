@@ -83,8 +83,10 @@ static void NGP_z80_writebyte(uint16_t address, uint8_t value)
 
 static void NGP_z80_writeport(uint16_t port, uint8_t value)
 {
+   DuoInstance *duo = DuoInstance::currentInstance;
+
 	//printf("Portout: %04x %02x\n", port, value);
-	z80_set_interrupt(0);
+   duo->z80_state.z80_set_interrupt(0);
 }
 
 static uint8_t NGP_z80_readport(uint16_t port)
@@ -95,16 +97,22 @@ static uint8_t NGP_z80_readport(uint16_t port)
 
 void neopop_z80i_t::Z80_nmi(void)
 {
-	z80_nmi();
+    DuoInstance *duo = GetDuoFromModule(this, z80i);
+
+	duo->z80_state.z80_nmi();
 }
 
 void neopop_z80i_t::Z80_irq(void)
 {
-	z80_set_interrupt(1);
+    DuoInstance *duo = GetDuoFromModule(this, z80i);
+
+    duo->z80_state.z80_set_interrupt(1);
 }
 
 void neopop_z80i_t::Z80_reset(void)
 {
+    DuoInstance *duo = GetDuoFromModule(this, z80i);
+
 	Z80Enabled = 0;
 
 	z80_writebyte = NGP_z80_writebyte;
@@ -112,15 +120,17 @@ void neopop_z80i_t::Z80_reset(void)
 	z80_writeport = NGP_z80_writeport;
 	z80_readport = NGP_z80_readport;
 
-	z80_init();
-	z80_reset();
+    duo->z80_state.z80_init();
+    duo->z80_state.z80_reset();
 }
 
 void neopop_z80i_t::Z80_SetEnable(bool set)
 {
+   DuoInstance *duo = GetDuoFromModule(this, z80i);
+
    Z80Enabled = set;
    if(!set)
-      z80_reset();
+       duo->z80_state.z80_reset();
 }
 
 bool neopop_z80i_t::Z80_IsEnabled(void)
@@ -130,10 +140,12 @@ bool neopop_z80i_t::Z80_IsEnabled(void)
 
 int neopop_z80i_t::Z80_RunOP(void)
 {
+   DuoInstance *duo = GetDuoFromModule(this, z80i);
+
    if(!Z80Enabled)
       return -1;
 
-   return(z80_do_opcode());
+   return(duo->z80_state.z80_do_opcode());
 }
 
 // ------------
@@ -144,6 +156,8 @@ int z80_state_action(void *data, int load, int data_only, const char *section_na
 {
    uint8_t r_register;
 
+   // TODO
+   /*
    SFORMAT StateRegs[] =
    {
       { &(cur_z80->z80.af.w), sizeof(cur_z80->z80.af.w), 0x80000000, "AF" },
@@ -184,6 +198,7 @@ int z80_state_action(void *data, int load, int data_only, const char *section_na
        cur_z80->z80.r7 = r_register & 0x80;
        cur_z80->z80.r = r_register & 0x7F;
    }
+   */
 
    return(1);
 }

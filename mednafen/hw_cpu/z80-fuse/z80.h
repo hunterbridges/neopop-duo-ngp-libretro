@@ -27,74 +27,102 @@
 #define FUSE_Z80_H
 
 #include <stdint.h>
-#include "z80_types.h"
 
-#ifdef __cplusplus
-extern "C" {
+/* Union allowing a register pair to be accessed as bytes or as a word */
+typedef union {
+#ifdef MSB_FIRST
+  struct { uint8_t h,l; } b;
+#else
+  struct { uint8_t l,h; } b;
 #endif
+  uint16_t w;
+} regpair;
 
-void z80_init( void );
-void z80_reset( void );
+/* What's stored in the main processor */
+typedef struct processor {
+  regpair af,bc,de,hl;
+  regpair af_,bc_,de_,hl_;
+  regpair ix,iy;
+  uint8_t i;
+  uint16_t r;	/* The low seven bits of the R register. 16 bits long
+			   so it can also act as an RZX instruction counter */
+  uint8_t r7;	/* The high bit of the R register */
+  regpair sp,pc;
+  uint8_t iff1, iff2, im;
+  int halted;
 
-void z80_nmi( void );
+  /* Interrupts were enabled at this time; do not accept any interrupts
+     until z80_tstates > this value */
+  uint64_t interrupts_enabled_at;
 
-void z80_set_interrupt(int set);
+} processor;
 
-int z80_interrupt( void );
-
-int z80_do_opcode(void);
-
-extern struct processor z80;
 extern const uint8_t overflow_add_table[];
 extern const uint8_t overflow_sub_table[];
 extern const uint8_t halfcarry_add_table[];
 extern const uint8_t halfcarry_sub_table[];
-extern uint64_t last_z80_tstates;
 extern uint8_t sz53_table[0x100]; /* The S, Z, 5 and 3 bits of the index */
 extern uint8_t parity_table[0x100]; /* The parity of the lookup value */
 extern uint8_t sz53p_table[0x100]; /* OR the above two tables together */
-extern uint64_t z80_tstates;
 extern void (*z80_writebyte)(uint16_t a, uint8_t b);
 extern uint8_t (*z80_readbyte)(uint16_t a);
 extern void (*z80_writeport)(uint16_t a, uint8_t b);
 extern uint8_t (*z80_readport)(uint16_t a);
 
-void z80_enable_interrupts( void );
+struct Z80
+{
+	/* This is what everything acts on! */
+	struct processor z80;
 
-static inline uint16_t z80_getpc(void) { return z80.pc.w; }
+	uint64_t last_z80_tstates;
+	uint64_t z80_tstates;
+	int iline;
 
-// Ok, I lied, not a macro!
+	void z80_init( void );
+	void z80_reset( void );
 
-//Write mem
-static inline void Z80_WB_MACRO(uint16_t A, uint8_t V)
-{ 
- z80_tstates += 3; 
- z80_writebyte(A, V); 
-}
+	void z80_nmi( void );
 
-// Write port
-static inline void Z80_WP_MACRO(uint16_t A, uint8_t V)
-{ 
- z80_tstates += 4; 
- z80_writeport(A, V); 
-}
+	void z80_set_interrupt(int set);
 
-// Read mem
-static inline uint8_t Z80_RB_MACRO(uint16_t A)
-{ 
- z80_tstates += 3; 
- return(z80_readbyte(A));
-}
+	int z80_interrupt( void );
 
-// Read port
-static inline uint8_t Z80_RP_MACRO(uint16_t A)
-{ 
- z80_tstates += 4; 
- return(z80_readport(A));
-}
+	int z80_do_opcode(void);
 
-#ifdef __cplusplus
-}
-#endif
+	void z80_enable_interrupts( void );
+
+	inline uint16_t z80_getpc(void) { return z80.pc.w; }
+
+	// Ok, I lied, not a macro!
+
+	//Write mem
+	inline void Z80_WB_MACRO(uint16_t A, uint8_t V)
+	{ 
+	 z80_tstates += 3; 
+	 z80_writebyte(A, V); 
+	}
+
+	// Write port
+	inline void Z80_WP_MACRO(uint16_t A, uint8_t V)
+	{ 
+	 z80_tstates += 4; 
+	 z80_writeport(A, V); 
+	}
+
+	// Read mem
+	inline uint8_t Z80_RB_MACRO(uint16_t A)
+	{ 
+	 z80_tstates += 3; 
+	 return(z80_readbyte(A));
+	}
+
+	// Read port
+	inline uint8_t Z80_RP_MACRO(uint16_t A)
+	{ 
+	 z80_tstates += 4; 
+	 return(z80_readport(A));
+	}
+
+};
 
 #endif			/* #ifndef FUSE_Z80_H */

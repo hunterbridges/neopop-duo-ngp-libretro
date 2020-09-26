@@ -496,7 +496,7 @@
 	contend_read_no_mreq( PC, 1 ); contend_read_no_mreq( PC, 1 ); PC++;
 	switch(opcode3)
    {
-#include "z80_ddfdcb.c"
+#include "z80_ddfdcb.cpp"
    }
       }
       break;

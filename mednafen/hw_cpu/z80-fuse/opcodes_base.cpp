@@ -805,7 +805,7 @@
             R++;
             switch(opcode2)
             {
-#include "z80_cb.c"
+#include "z80_cb.cpp"
             }
          }
          break;
@@ -915,7 +915,7 @@
 #define REGISTER  IX
 #define REGISTERL IXL
 #define REGISTERH IXH
-#include "z80_ddfd.c"
+#include "z80_ddfd.cpp"
 #undef REGISTERH
 #undef REGISTERL
 #undef REGISTER
@@ -1013,7 +1013,7 @@
             R++;
             switch(opcode2)
             {
-#include "z80_ed.c"
+#include "z80_ed.cpp"
             }
          }
          break;
@@ -1106,7 +1106,7 @@
 #define REGISTER  IY
 #define REGISTERL IYL
 #define REGISTERH IYH
-#include "z80_ddfd.c"
+#include "z80_ddfd.cpp"
 #undef REGISTERH
 #undef REGISTERL
 #undef REGISTER

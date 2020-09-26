@@ -29,14 +29,12 @@
 #include "z80_macros.h"
 #include "z80_fns.h"
 
-int iline = 0;
-
-void z80_set_interrupt(int set)
+void Z80::z80_set_interrupt(int set)
 {
    iline = set;
 }
 
-int z80_do_opcode( void )
+int Z80::z80_do_opcode( void )
 {
    int ret;
    uint8_t opcode;
@@ -59,7 +57,7 @@ int z80_do_opcode( void )
 
    switch(opcode) 
    {
-     #include "opcodes_base.c"
+     #include "opcodes_base.cpp"
    }
 
    ret              = z80_tstates - last_z80_tstates;

@@ -25,7 +25,7 @@
 #include "z80_macros.h"
 
 /* Set up the z80 emulation */
-void z80_init( void )
+void Z80::z80_init( void )
 {
   int i;
 
@@ -53,7 +53,7 @@ void z80_init( void )
 }
 
 /* Reset the z80 */
-void z80_reset( void )
+void Z80::z80_reset( void )
 {
   AF =BC =DE =HL =0;
   AF_=BC_=DE_=HL_=0;
@@ -68,7 +68,7 @@ void z80_reset( void )
 }
 
 /* Process a z80 maskable interrupt */
-int z80_interrupt( void )
+int Z80::z80_interrupt( void )
 {
    if (!IFF1)
       return 0;			/* Did not accept an interrupt */
@@ -114,7 +114,7 @@ int z80_interrupt( void )
 }
 
 /* Process a z80 non-maskable interrupt */
-void z80_nmi(void)
+void Z80::z80_nmi(void)
 {
   if(z80.halted)
   {

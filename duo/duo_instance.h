@@ -12,7 +12,7 @@
 #include "../mednafen/git.h"
 #include "../mednafen/video.h"
 
-#include "../mednafen/hw_cpu/z80-fuse/z80_types.h"
+#include "../mednafen/hw_cpu/z80-fuse/z80.h"
 #include "../mednafen/ngp/TLCS-900h/TLCS900h.h"
 
 #include "duo_settings.h"
@@ -56,8 +56,8 @@ public:
 
 	// Processor state
 	uint32_t absTime;
-	struct TLCS900h tlcs900h_state;
-	struct z80state z80_state;
+	TLCS900h tlcs900h_state;
+	Z80 z80_state;
 
 	// NeoPop core
 	neopop_bios_t *bios;

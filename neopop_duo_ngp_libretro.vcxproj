@@ -182,38 +182,38 @@
     <ClCompile Include="libretro-common\vfs\vfs_implementation.c" />
     <ClCompile Include="libretro.cpp" />
     <ClCompile Include="mednafen\file.c" />
-    <ClCompile Include="mednafen\hw_cpu\z80-fuse\opcodes_base.c">
+    <ClCompile Include="mednafen\hw_cpu\z80-fuse\opcodes_base.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
     </ClCompile>
-    <ClCompile Include="mednafen\hw_cpu\z80-fuse\z80.c" />
-    <ClCompile Include="mednafen\hw_cpu\z80-fuse\z80_cb.c">
+    <ClCompile Include="mednafen\hw_cpu\z80-fuse\z80.cpp" />
+    <ClCompile Include="mednafen\hw_cpu\z80-fuse\z80_cb.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
     </ClCompile>
-    <ClCompile Include="mednafen\hw_cpu\z80-fuse\z80_ddfd.c">
+    <ClCompile Include="mednafen\hw_cpu\z80-fuse\z80_ddfd.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
     </ClCompile>
-    <ClCompile Include="mednafen\hw_cpu\z80-fuse\z80_ddfdcb.c">
+    <ClCompile Include="mednafen\hw_cpu\z80-fuse\z80_ddfdcb.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
     </ClCompile>
-    <ClCompile Include="mednafen\hw_cpu\z80-fuse\z80_ed.c">
+    <ClCompile Include="mednafen\hw_cpu\z80-fuse\z80_ed.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
     </ClCompile>
-    <ClCompile Include="mednafen\hw_cpu\z80-fuse\z80_ops.c" />
+    <ClCompile Include="mednafen\hw_cpu\z80-fuse\z80_ops.cpp" />
     <ClCompile Include="mednafen\mempatcher.cpp" />
     <ClCompile Include="mednafen\ngp\bios.c" />
     <ClCompile Include="mednafen\ngp\biosHLE.cpp" />
@@ -265,7 +265,6 @@
     <ClInclude Include="mednafen\hw_cpu\z80-fuse\z80.h" />
     <ClInclude Include="mednafen\hw_cpu\z80-fuse\z80_fns.h" />
     <ClInclude Include="mednafen\hw_cpu\z80-fuse\z80_macros.h" />
-    <ClInclude Include="mednafen\hw_cpu\z80-fuse\z80_types.h" />
     <ClInclude Include="mednafen\include\blargg_common.h" />
     <ClInclude Include="mednafen\include\blargg_config.h" />
     <ClInclude Include="mednafen\include\blargg_endian.h" />

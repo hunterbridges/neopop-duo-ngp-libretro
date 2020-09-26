@@ -64,27 +64,6 @@
     <ClCompile Include="mednafen\state.cpp">
       <Filter>mednafen</Filter>
     </ClCompile>
-    <ClCompile Include="mednafen\hw_cpu\z80-fuse\opcodes_base.c">
-      <Filter>mednafen\hw_cpu\z80-fuse</Filter>
-    </ClCompile>
-    <ClCompile Include="mednafen\hw_cpu\z80-fuse\z80.c">
-      <Filter>mednafen\hw_cpu\z80-fuse</Filter>
-    </ClCompile>
-    <ClCompile Include="mednafen\hw_cpu\z80-fuse\z80_cb.c">
-      <Filter>mednafen\hw_cpu\z80-fuse</Filter>
-    </ClCompile>
-    <ClCompile Include="mednafen\hw_cpu\z80-fuse\z80_ddfd.c">
-      <Filter>mednafen\hw_cpu\z80-fuse</Filter>
-    </ClCompile>
-    <ClCompile Include="mednafen\hw_cpu\z80-fuse\z80_ddfdcb.c">
-      <Filter>mednafen\hw_cpu\z80-fuse</Filter>
-    </ClCompile>
-    <ClCompile Include="mednafen\hw_cpu\z80-fuse\z80_ed.c">
-      <Filter>mednafen\hw_cpu\z80-fuse</Filter>
-    </ClCompile>
-    <ClCompile Include="mednafen\hw_cpu\z80-fuse\z80_ops.c">
-      <Filter>mednafen\hw_cpu\z80-fuse</Filter>
-    </ClCompile>
     <ClCompile Include="mednafen\ngp\bios.c">
       <Filter>mednafen\ngp</Filter>
     </ClCompile>
@@ -178,6 +157,27 @@
     <ClCompile Include="mednafen\ngp\TLCS-900h\TLCS900h_registers.cpp">
       <Filter>mednafen\ngp\TLCS-900h</Filter>
     </ClCompile>
+    <ClCompile Include="mednafen\hw_cpu\z80-fuse\z80.cpp">
+      <Filter>mednafen\hw_cpu\z80-fuse</Filter>
+    </ClCompile>
+    <ClCompile Include="mednafen\hw_cpu\z80-fuse\z80_cb.cpp">
+      <Filter>mednafen\hw_cpu\z80-fuse</Filter>
+    </ClCompile>
+    <ClCompile Include="mednafen\hw_cpu\z80-fuse\z80_ddfd.cpp">
+      <Filter>mednafen\hw_cpu\z80-fuse</Filter>
+    </ClCompile>
+    <ClCompile Include="mednafen\hw_cpu\z80-fuse\z80_ddfdcb.cpp">
+      <Filter>mednafen\hw_cpu\z80-fuse</Filter>
+    </ClCompile>
+    <ClCompile Include="mednafen\hw_cpu\z80-fuse\z80_ed.cpp">
+      <Filter>mednafen\hw_cpu\z80-fuse</Filter>
+    </ClCompile>
+    <ClCompile Include="mednafen\hw_cpu\z80-fuse\opcodes_base.cpp">
+      <Filter>mednafen\hw_cpu\z80-fuse</Filter>
+    </ClCompile>
+    <ClCompile Include="mednafen\hw_cpu\z80-fuse\z80_ops.cpp">
+      <Filter>mednafen\hw_cpu\z80-fuse</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="libretro-common\include\libretro.h">
@@ -253,9 +253,6 @@
       <Filter>mednafen\hw_cpu\z80-fuse</Filter>
     </ClInclude>
     <ClInclude Include="mednafen\hw_cpu\z80-fuse\z80_macros.h">
-      <Filter>mednafen\hw_cpu\z80-fuse</Filter>
-    </ClInclude>
-    <ClInclude Include="mednafen\hw_cpu\z80-fuse\z80_types.h">
       <Filter>mednafen\hw_cpu\z80-fuse</Filter>
     </ClInclude>
     <ClInclude Include="mednafen\ngp\bios.h">

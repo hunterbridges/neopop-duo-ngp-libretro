@@ -5,11 +5,6 @@ uint8 (*z80_readbyte)(uint16 a);
 void (*z80_writeport)(uint16 a, uint8 b);
 uint8 (*z80_readport)(uint16 a);
 
-/* This is what everything acts on! */
-struct processor z80;
-
-uint64 z80_tstates;
-uint64 last_z80_tstates;
 uint8 sz53_table[0x100]; /* The S, Z, 5 and 3 bits of the index */
 uint8 parity_table[0x100]; /* The parity of the lookup value */
 uint8 sz53p_table[0x100]; /* OR the above two tables together */

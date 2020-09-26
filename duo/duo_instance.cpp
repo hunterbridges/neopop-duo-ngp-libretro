@@ -469,7 +469,6 @@ void DuoInstance::StageInstance(DuoInstance *instance)
 		return;
 
 	currentInstance = instance;
-	cur_z80 = &instance->z80_state;
 }
 
 void DuoInstance::UnstageCurrentInstance()
@@ -477,7 +476,6 @@ void DuoInstance::UnstageCurrentInstance()
 	if (currentInstance == NULL)
 		return;
 
-	cur_z80 = NULL;
 	currentInstance = NULL;
 }
 

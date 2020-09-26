@@ -405,9 +405,9 @@ void DuoInstance::ProcessFrame()
 	FinishFrame();
 }
 
-void DuoInstance::ProcessFrame_Interleaved(DuoInstance *other)
+void DuoInstance::ProcessFrame_Interleaved(DuoInstance *duoA, DuoInstance *duoB)
 {
-	DuoInstance *instances[2] = { this, other };
+	DuoInstance *instances[2] = { duoA, duoB };
 	bool drewFrame[2] = { false, false };
 
 	for (int i = 0; i < 2; i++)
@@ -426,7 +426,7 @@ void DuoInstance::ProcessFrame_Interleaved(DuoInstance *other)
 
 			DuoInstance::StageInstance(instances[i]);
 
-			int32 tlcsCycles = tlcs900h_state.TLCS900h_interpret();
+			int32 tlcsCycles = instances[i]->tlcs900h_state.TLCS900h_interpret();
 			drewFrame[i] |= instances[i]->interrupt->updateTimers(instances[i]->spec.surface, tlcsCycles);
 			instances[i]->z80_runtime += tlcsCycles;
 

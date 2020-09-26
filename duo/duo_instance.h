@@ -92,7 +92,7 @@ public:
 	/*! WARNING: Make sure the instance is active before running this! */
 	void ProcessFrame();
 
-	void ProcessFrame_Interleaved(DuoInstance *other);
+	static void ProcessFrame_Interleaved(DuoInstance *duoA, DuoInstance *duoB);
 
 private:
 	void StartFrame();

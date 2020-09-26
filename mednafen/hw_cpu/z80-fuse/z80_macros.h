@@ -29,63 +29,63 @@
 #include <stdint.h>
 
 /* Macros used for accessing the registers */
-#define A   cur_z80->z80.af.b.h
-#define F   cur_z80->z80.af.b.l
-#define AF  cur_z80->z80.af.w
+#define A   z80.af.b.h
+#define F   z80.af.b.l
+#define AF  z80.af.w
 
-#define B   cur_z80->z80.bc.b.h
-#define C   cur_z80->z80.bc.b.l
-#define BC  cur_z80->z80.bc.w
+#define B   z80.bc.b.h
+#define C   z80.bc.b.l
+#define BC  z80.bc.w
 
-#define D   cur_z80->z80.de.b.h
-#define E   cur_z80->z80.de.b.l
-#define DE  cur_z80->z80.de.w
+#define D   z80.de.b.h
+#define E   z80.de.b.l
+#define DE  z80.de.w
 
-#define H   cur_z80->z80.hl.b.h
-#define L   cur_z80->z80.hl.b.l
-#define HL  cur_z80->z80.hl.w
+#define H   z80.hl.b.h
+#define L   z80.hl.b.l
+#define HL  z80.hl.w
 
-#define A_  cur_z80->z80.af_.b.h
-#define F_  cur_z80->z80.af_.b.l
-#define AF_ cur_z80->z80.af_.w
+#define A_  z80.af_.b.h
+#define F_  z80.af_.b.l
+#define AF_ z80.af_.w
 
-#define B_  cur_z80->z80.bc_.b.h
-#define C_  cur_z80->z80.bc_.b.l
-#define BC_ cur_z80->z80.bc_.w
+#define B_  z80.bc_.b.h
+#define C_  z80.bc_.b.l
+#define BC_ z80.bc_.w
 
-#define D_  cur_z80->z80.de_.b.h
-#define E_  cur_z80->z80.de_.b.l
-#define DE_ cur_z80->z80.de_.w
+#define D_  z80.de_.b.h
+#define E_  z80.de_.b.l
+#define DE_ z80.de_.w
 
-#define H_  cur_z80->z80.hl_.b.h
-#define L_  cur_z80->z80.hl_.b.l
-#define HL_ cur_z80->z80.hl_.w
+#define H_  z80.hl_.b.h
+#define L_  z80.hl_.b.l
+#define HL_ z80.hl_.w
 
-#define IXH cur_z80->z80.ix.b.h
-#define IXL cur_z80->z80.ix.b.l
-#define IX  cur_z80->z80.ix.w
+#define IXH z80.ix.b.h
+#define IXL z80.ix.b.l
+#define IX  z80.ix.w
 
-#define IYH cur_z80->z80.iy.b.h
-#define IYL cur_z80->z80.iy.b.l
-#define IY  cur_z80->z80.iy.w
+#define IYH z80.iy.b.h
+#define IYL z80.iy.b.l
+#define IY  z80.iy.w
 
-#define SPH cur_z80->z80.sp.b.h
-#define SPL cur_z80->z80.sp.b.l
-#define SP  cur_z80->z80.sp.w
+#define SPH z80.sp.b.h
+#define SPL z80.sp.b.l
+#define SP  z80.sp.w
 
-#define PCH cur_z80->z80.pc.b.h
-#define PCL cur_z80->z80.pc.b.l
-#define PC  cur_z80->z80.pc.w
+#define PCH z80.pc.b.h
+#define PCL z80.pc.b.l
+#define PC  z80.pc.w
 
-#define I  cur_z80->z80.i
-#define R  cur_z80->z80.r
-#define R7 cur_z80->z80.r7
+#define I  z80.i
+#define R  z80.r
+#define R7 z80.r7
 
-#define IFF1 cur_z80->z80.iff1
-#define IFF2 cur_z80->z80.iff2
-#define IM   cur_z80->z80.im
+#define IFF1 z80.iff1
+#define IFF2 z80.iff2
+#define IM   z80.im
 
-#define IR ( ( cur_z80->z80.i ) << 8 | ( cur_z80->z80.r7 & 0x80 ) | ( cur_z80->z80.r & 0x7f ) )
+#define IR ( ( z80.i ) << 8 | ( z80.r7 & 0x80 ) | ( z80.r & 0x7f ) )
 
 /* The flags */
 
@@ -103,11 +103,11 @@
    reasons in the main core, but a function for flexibility when building
    the core tester */
 
-#define contend_read(address,time)          cur_z80->z80_tstates += (time);
+#define contend_read(address,time)          z80_tstates += (time);
 
-#define contend_read_no_mreq(address,time)  cur_z80->z80_tstates += (time);
+#define contend_read_no_mreq(address,time)  z80_tstates += (time);
 
-#define contend_write_no_mreq(address,time) cur_z80->z80_tstates += (time);
+#define contend_write_no_mreq(address,time) z80_tstates += (time);
 
 /* Some commonly used instructions */
 #define AND(value)\

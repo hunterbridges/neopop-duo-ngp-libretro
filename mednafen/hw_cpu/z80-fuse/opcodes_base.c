@@ -499,7 +499,7 @@
          Z80_WB_MACRO(HL,L);
          break;
       case 0x76:		/* HALT */
-         cur_z80->z80.halted=1;
+         z80.halted=1;
          PC--;
          break;
       case 0x77:		/* LD (HL),A */
@@ -800,7 +800,7 @@
          {
             uint8_t opcode2;
             opcode2 = Z80_RB_MACRO( PC );
-            cur_z80->z80_tstates++;
+            z80_tstates++;
             PC++;
             R++;
             switch(opcode2)
@@ -908,7 +908,7 @@
          {
             uint8_t opcode2;
             opcode2 = Z80_RB_MACRO( PC );
-            cur_z80->z80_tstates++;
+            z80_tstates++;
             PC++;
             R++;
             switch(opcode2) {
@@ -1008,7 +1008,7 @@
          {
             uint8_t opcode2;
             opcode2 = Z80_RB_MACRO( PC );
-            cur_z80->z80_tstates++;
+            z80_tstates++;
             PC++;
             R++;
             switch(opcode2)
@@ -1085,7 +1085,7 @@
          /* Interrupts are not accepted immediately after an EI, but are
             accepted after the next instruction */
                IFF1 = IFF2 = 1;
-               cur_z80->z80.interrupts_enabled_at = cur_z80->z80_tstates;
+            z80.interrupts_enabled_at = z80_tstates;
             //event_add( z80_tstates + 1, z80_interrupt_event );
             break;
       case 0xfc:		/* CALL M,nnnn */
@@ -1099,7 +1099,7 @@
             {
                uint8_t opcode2;
                opcode2 = Z80_RB_MACRO( PC );
-               cur_z80->z80_tstates++;
+               z80_tstates++;
                PC++;
                R++;
                switch(opcode2) {

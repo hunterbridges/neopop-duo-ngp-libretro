@@ -29,9 +29,11 @@
 #include "z80_macros.h"
 #include "z80_fns.h"
 
+int iline = 0;
+
 void z80_set_interrupt(int set)
 {
-   cur_z80->iline = set;
+   iline = set;
 }
 
 int z80_do_opcode( void )
@@ -39,18 +41,18 @@ int z80_do_opcode( void )
    int ret;
    uint8_t opcode;
 
-   if(cur_z80->iline)
+   if(iline)
    {
       if(z80_interrupt())
       {
-         int ret = cur_z80->z80_tstates - cur_z80->last_z80_tstates;
-         cur_z80->last_z80_tstates = cur_z80->z80_tstates;
+         int ret = z80_tstates - last_z80_tstates;
+         last_z80_tstates = z80_tstates;
          return ret;
       }
    }
 
    opcode = Z80_RB_MACRO( PC ); 
-   cur_z80->z80_tstates++;
+   z80_tstates++;
 
    PC++; 
    R++;
@@ -60,8 +62,8 @@ int z80_do_opcode( void )
      #include "opcodes_base.c"
    }
 
-   ret              = cur_z80->z80_tstates - cur_z80->last_z80_tstates;
-   cur_z80->last_z80_tstates = cur_z80->z80_tstates;
+   ret              = z80_tstates - last_z80_tstates;
+   last_z80_tstates = z80_tstates;
 
    //printf("PC: %04x, %02x, time=%d\n", lastpc, opcode, ret);
 

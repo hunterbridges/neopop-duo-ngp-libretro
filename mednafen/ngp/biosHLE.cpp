@@ -318,12 +318,15 @@ void TLCS900h::iBIOSHLE()
          if (duo->comms->rx_buf != NULL)
             ringbuf_reset(duo->comms->rx_buf);
 
+         if (duo->comms->tx_buf != NULL)
+            ringbuf_reset(duo->comms->tx_buf);
+
          rCodeB(0x30) = 0;	//RA3 = COM_BUF_OK
          break;
 
          //VECT_COMSENDSTART
       case 0xFF2C0C:
-		 duo->comms->system_comms_write(duo->comms->tx_byte);
+         // Nothing to do 
          break;
 
          //VECT_COMRECIVESTART
@@ -337,13 +340,14 @@ void TLCS900h::iBIOSHLE()
          {
             //Write the byte
             uint8 data = rCodeB(0x35);
-            duo->comms->tx_byte = data;
             duo->comms->write_flag = true;
+			duo->comms->system_comms_write(data);
          }
 
          //Restore $PC after BIOS-HLE instruction
          pc = pop32();
 
+		 // storeB(0x77, 0x33);
          duo->interrupt->TestIntHDMA(11, 0x18);
 
          //Always COM_BUF_OK because the write call always succeeds.
@@ -364,6 +368,9 @@ void TLCS900h::iBIOSHLE()
 
                //Comms. Read interrupt
                storeB(0x50, data);
+
+			   // storeB(0x77, 0x33);
+			   storeB(0x77, 0x30);
                duo->interrupt->TestIntHDMA(12, 0x19);
 
                return;
@@ -391,14 +398,14 @@ void TLCS900h::iBIOSHLE()
          //VECT_COMSENDSTATUS
       case 0xFF2D3A:
          // Nothing to do.
-         rCodeW(0x30) = 0;	//Send Buffer Count, never any pending data!
+         rCodeW(0x30) = ringbuf_bytes_used(duo->comms->tx_buf);	//Send Buffer Count, never any pending data!
          break;
 
          //VECT_COMRECIVESTATUS
       case 0xFF2D4E:
 
          // Receive Buffer Count
-         rCodeW(0x30) = duo->comms->system_comms_read(NULL);
+         rCodeW(0x30) = ringbuf_bytes_used(duo->comms->rx_buf);
 
          break;
 
@@ -411,6 +418,7 @@ void TLCS900h::iBIOSHLE()
             data = loadB(rCodeL(0x3C));
 
             //Write data from (XHL3++)
+            duo->comms->write_flag = true;
             duo->comms->system_comms_write(data);
             rCodeL(0x3C)++; //Next data
 
@@ -419,6 +427,7 @@ void TLCS900h::iBIOSHLE()
 
          duo->interrupt->TestIntHDMA(11, 0x18);
          return;
+
       case VECT_COMGETBUFDATA:
 	  {
          pc = pop32();

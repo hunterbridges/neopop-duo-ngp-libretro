@@ -285,6 +285,7 @@ bool neopop_interrupt_t::updateTimers(void *data, int cputicks)
       if ((duo->mem->COMMStatus & 1) == 0 && duo->comms->system_comms_poll(&_data, cputicks))
       {
          storeB(0x50, _data);
+         storeB(0x77, 0x30);
          TestIntHDMA(12, 0x19);
       }
    }

@@ -5,6 +5,7 @@
 #include "flash.h"
 #include "system.h"
 #include "rom.h"
+#include "mem.h"
 
 #include "../general.h"
 #include "../state.h"
@@ -27,13 +28,14 @@ DuoInstance *GetOtherInstance(DuoInstance *fromInstance)
 
 neopop_comms_t::neopop_comms_t()
 {
+    tx_buf = ringbuf_new(64);
+
+    rx_timer = 0;
     rx_buf = ringbuf_new(64);
     receive = false;
 
-	tx_byte = 0;
 	write_flag = false;
 
-	rx_byte = 0;
 	read_flag = false;
 }
 
@@ -45,18 +47,6 @@ neopop_comms_t::~neopop_comms_t()
 
 bool neopop_comms_t::system_comms_read(uint8_t* buffer)
 {
-    return false;
-    /*
-    if (buffer == NULL)
-        return read_flag;
-
-    if (read_flag == false)
-        return false;
-
-    *buffer = rx_byte;
-    return true;
-   */
-
    if (buffer == NULL)
 	  return ringbuf_bytes_used(rx_buf) > 0;
 
@@ -69,43 +59,50 @@ bool neopop_comms_t::system_comms_read(uint8_t* buffer)
 
 bool neopop_comms_t::system_comms_poll(uint8_t* buffer, int32 tlcsCycles)
 {
-    return false;
-    /*
-    if (read_flag == false)
-        return false;
+    static const int32 clock_rate = 6144000;
+    static const int32 baud_rate = 19200;
+    static const int32 cycles_per_bit = clock_rate / baud_rate;
+    // static const int32 cycles_per_byte = 8 * cycles_per_bit;
+    static const int32 cycles_per_byte = 1;
 
-    *buffer = rx_byte;
-    return true;
-   */
+    DuoInstance *duo = GetDuoFromModule(this, comms);
+    DuoInstance *other = GetOtherInstance(duo);
 
-   if (ringbuf_bytes_used(rx_buf) == 0)
+    uint8 tmp = 0xFF;
+
+    rx_timer += tlcsCycles;
+    if (rx_timer < cycles_per_byte)
       return false;
 
-   *buffer = *(uint8_t*)ringbuf_head(rx_buf);
-   return true;
+    //rx_timer %= cycles_per_byte;
+    rx_timer = 0;
+
+    if (ringbuf_bytes_used(other->comms->tx_buf) == 0)
+        return false;
+
+    ringbuf_memcpy_from(&tmp, other->comms->tx_buf, 1);
+
+    if (receive == false)
+        return false;
+
+    if (ringbuf_bytes_free(rx_buf) == 0)
+        return false;
+
+    ringbuf_memcpy_into(rx_buf, &tmp, 1);
+    if (buffer)
+        *buffer = tmp;
+
+    duo->mem->SC0BUF = tmp;
+
+    return true;
 }
 
 void neopop_comms_t::system_comms_write(uint8_t data)
 {
-    return;
-
-    DuoInstance *duo = DuoInstance::currentInstance;
-    DuoInstance *other = GetOtherInstance(duo);
-    
     if (write_flag == false)
         return;
 
-    /*
-    if (other->comms->receive == false)
-        return;
-        */
-
-    /*
-	other->comms->rx_byte = data;
-	other->comms->read_flag = true;
-    */
-
-    ringbuf_memcpy_into(other->comms->rx_buf, &data, 1);
+    ringbuf_memcpy_into(tx_buf, &data, 1);
     write_flag = false;
 }
 

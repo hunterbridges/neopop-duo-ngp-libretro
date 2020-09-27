@@ -23,12 +23,12 @@ struct neopop_comms_t
 {
 	bool receive;
 
-	uint8_t tx_byte;
 	bool write_flag;
 
-	uint8_t rx_byte;
+	int32_t rx_timer;
 	bool read_flag;
 
+	ringbuf_t tx_buf;
 	ringbuf_t rx_buf;
 
 	neopop_comms_t();

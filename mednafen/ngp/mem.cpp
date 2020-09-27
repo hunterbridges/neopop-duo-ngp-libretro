@@ -209,6 +209,22 @@ uint8_t neopop_mem_t::loadB(uint32 address)
    {
       case 0x50:
          return(SC0BUF);
+      case 0x51:
+         return(SC0CR);
+      case 0x52:
+         return(SC0MOD);
+      case 0x53:
+         return(BR0CR);
+      case 0x54:
+         return(SC1BUF);
+      case 0x55:
+         return(SC1CR);
+      case 0x56:
+         return(SC1MOD);
+      case 0x57:
+         return(BR1CR);
+      case 0x58:
+         return(ODE);
       case 0xBC:
          return duo->z80i->Z80_ReadComm();
    }
@@ -267,7 +283,23 @@ uint16_t neopop_mem_t::loadW(uint32 address)
    }
 
    if(address == 0x50)
-      return(SC0BUF);
+	   return(SC0BUF);
+   else if (address == 0x51)
+	   return(SC0CR);
+   else if (address == 0x52)
+	   return(SC0MOD);
+   else if (address == 0x53)
+	   return(BR0CR);
+   else if (address == 0x54)
+	   return(SC1BUF);
+   else if (address == 0x55)
+	   return(SC1CR);
+   else if (address == 0x56)
+	   return(SC1MOD);
+   else if (address == 0x57)
+	   return(BR1CR);
+   else if (address == 0x58)
+	   return(ODE);
 
    if(address >= 0x70 && address <= 0x7F)
    {
@@ -351,6 +383,30 @@ void neopop_mem_t::storeB(uint32 address, uint8_t data)
    {
       case 0x50:
          SC0BUF = data;
+         return;
+      case 0x51:
+         SC0CR = data;
+         return;
+      case 0x52:
+         SC0MOD = data;
+         return;
+      case 0x53:
+         BR0CR = data;
+         return;
+      case 0x54:
+         SC1BUF = data;
+         return;
+      case 0x55:
+         SC1CR = data;
+         return;
+      case 0x56:
+         SC1MOD = data;
+         return;
+      case 0x57:
+         BR1CR = data;
+         return;
+      case 0x58:
+         ODE = data;
          return;
       case 0x6f: /* Watchdog timer */
          return;
@@ -449,6 +505,30 @@ void neopop_mem_t::storeW(uint32 address, uint16_t data)
    {
       case 0x50:
          SC0BUF = data & 0xFF;
+         return;
+      case 0x51:
+         SC0CR = data & 0xFF;
+         return;
+      case 0x52:
+         SC0MOD = data & 0xFF;
+         return;
+      case 0x53:
+         BR0CR = data & 0xFF;
+         return;
+      case 0x54:
+         SC1BUF = data & 0xFF;
+         return;
+      case 0x55:
+         SC1CR = data & 0xFF;
+         return;
+      case 0x56:
+         SC1MOD = data & 0xFF;
+         return;
+      case 0x57:
+         BR1CR = data & 0xFF;
+         return;
+      case 0x58:
+         ODE = data & 0xFF;
          return;
       case 0x6e: /* Watchdog timer(technically 0x6f) */
          return;

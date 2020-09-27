@@ -92,8 +92,6 @@ bool neopop_comms_t::system_comms_poll(uint8_t* buffer, int32 tlcsCycles)
     if (buffer)
         *buffer = tmp;
 
-    duo->mem->SC0BUF = tmp;
-
     return true;
 }
 

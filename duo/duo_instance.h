@@ -28,6 +28,8 @@ struct neopop_rom_t;
 struct neopop_sound_t;
 struct neopop_z80i_t;
 
+// #define TLCS_PC_BREADCRUMB
+
 class DuoInstance
 {
 public:
@@ -42,6 +44,7 @@ public:
 	MDFN_Surface *surface;
 
 	uint8_t system_colour;
+	uint8_t last_raster_line;
 	int32_t z80_runtime;
 
 	// Frame output
@@ -49,6 +52,7 @@ public:
 	unsigned width, height;
 	int16_t sound_buf[0x10000];
 	MDFN_Rect rects[FB_MAX_HEIGHT];
+	unsigned hintCounter;
 
 	// Input
 	uint8_t input_buf;
@@ -72,6 +76,11 @@ public:
 	neopop_rtc_t *rtc;
 	neopop_sound_t *sound;
 	neopop_z80i_t *z80i;
+
+#ifdef TLCS_PC_BREADCRUMB
+	static const uint32_t PC_HISTORY_LEN = 4096;
+	uint32_t pc_history[PC_HISTORY_LEN];
+#endif
 
 	DuoInstance();
 

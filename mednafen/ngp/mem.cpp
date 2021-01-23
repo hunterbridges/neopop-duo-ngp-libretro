@@ -208,7 +208,7 @@ uint8_t neopop_mem_t::loadB(uint32 address)
    switch (address)
    {
       case 0x50:
-         return(SC0BUF);
+         return(SC0BUF_rx);
       case 0x51:
          return(SC0CR);
       case 0x52:
@@ -216,7 +216,7 @@ uint8_t neopop_mem_t::loadB(uint32 address)
       case 0x53:
          return(BR0CR);
       case 0x54:
-         return(SC1BUF);
+         return(SC1BUF_rx);
       case 0x55:
          return(SC1CR);
       case 0x56:
@@ -283,7 +283,7 @@ uint16_t neopop_mem_t::loadW(uint32 address)
    }
 
    if(address == 0x50)
-	   return(SC0BUF);
+	   return(SC0BUF_rx);
    else if (address == 0x51)
 	   return(SC0CR);
    else if (address == 0x52)
@@ -291,7 +291,7 @@ uint16_t neopop_mem_t::loadW(uint32 address)
    else if (address == 0x53)
 	   return(BR0CR);
    else if (address == 0x54)
-	   return(SC1BUF);
+	   return(SC1BUF_rx);
    else if (address == 0x55)
 	   return(SC1CR);
    else if (address == 0x56)
@@ -382,7 +382,7 @@ void neopop_mem_t::storeB(uint32 address, uint8_t data)
    switch (address)
    {
       case 0x50:
-         SC0BUF = data;
+         SC0BUF_tx = data;
          return;
       case 0x51:
          SC0CR = data;
@@ -394,7 +394,7 @@ void neopop_mem_t::storeB(uint32 address, uint8_t data)
          BR0CR = data;
          return;
       case 0x54:
-         SC1BUF = data;
+         SC1BUF_tx = data;
          return;
       case 0x55:
          SC1CR = data;
@@ -504,7 +504,7 @@ void neopop_mem_t::storeW(uint32 address, uint16_t data)
    switch (address)
    {
       case 0x50:
-         SC0BUF = data & 0xFF;
+         SC0BUF_tx = data & 0xFF;
          return;
       case 0x51:
          SC0CR = data & 0xFF;
@@ -516,7 +516,7 @@ void neopop_mem_t::storeW(uint32 address, uint16_t data)
          BR0CR = data & 0xFF;
          return;
       case 0x54:
-         SC1BUF = data & 0xFF;
+         SC1BUF_tx = data & 0xFF;
          return;
       case 0x55:
          SC1CR = data & 0xFF;

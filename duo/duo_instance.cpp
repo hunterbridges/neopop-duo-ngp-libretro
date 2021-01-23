@@ -421,27 +421,43 @@ void DuoInstance::ProcessFrame_Interleaved(DuoInstance *duoA, DuoInstance *duoB)
 	{
 		for (int i = 0; i < 2; i++)
 		{
-			DuoInstance::StageInstance(instances[i]);
+			DuoInstance *instance = instances[i];
+			DuoInstance::StageInstance(instance);
 
-			int32 tlcsCycles = instances[i]->tlcs900h_state.TLCS900h_interpret();
-			drewFrame[i] |= instances[i]->interrupt->updateTimers(instances[i]->spec.surface, tlcsCycles);
-			instances[i]->z80_runtime += tlcsCycles;
+#ifdef TLCS_PC_BREADCRUMB
+			const int32_t offset = 0x40;
+			memmove(&instance->pc_history[1], &instance->pc_history[0], sizeof(uint32_t) * (PC_HISTORY_LEN - 1));
+			instance->pc_history[0] = instance->tlcs900h_state.pc + offset;
 
-			while (instances[i]->z80_runtime > 0)
+			if (instance->pc_history[1] == 0x20201D + offset &&
+				instance->pc_history[0] == 0x202018 + offset)
 			{
-				int z80rantime = instances[i]->z80i->Z80_RunOP();
+				int a = 0;
+				a++;
+			}
+#endif
+
+			int32 tlcsCycles = instance->tlcs900h_state.TLCS900h_interpret();
+			drewFrame[i] |= instance->interrupt->updateTimers(instance->spec.surface, tlcsCycles);
+
+			instance->last_raster_line = instance->gfx->NGPGfx.raster_line;
+
+			instance->z80_runtime += tlcsCycles;
+			while (instance->z80_runtime > 0)
+			{
+				int z80rantime = instance->z80i->Z80_RunOP();
 
 				if (z80rantime < 0) // Z80 inactive, so take up all run time!
 				{
-					instances[i]->z80_runtime = 0;
+					instance->z80_runtime = 0;
 					break;
 				}
 
-				instances[i]->z80_runtime -= z80rantime << 1;
+				instance->z80_runtime -= z80rantime * 2;
 
 			}
 
-			instances[i]->absTime += tlcsCycles;
+			instance->absTime += tlcsCycles;
 			DuoInstance::UnstageCurrentInstance();
 		}
 	} while (!drewFrame[0] || !drewFrame[1]);

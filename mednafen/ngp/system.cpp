@@ -59,23 +59,10 @@ bool neopop_comms_t::system_comms_read(uint8_t* buffer)
 
 bool neopop_comms_t::system_comms_poll(uint8_t* buffer, int32 tlcsCycles)
 {
-    static const int32 clock_rate = 6144000;
-    static const int32 baud_rate = 19200;
-    static const int32 cycles_per_bit = clock_rate / baud_rate;
-    // static const int32 cycles_per_byte = 8 * cycles_per_bit;
-    static const int32 cycles_per_byte = 1;
-
     DuoInstance *duo = GetDuoFromModule(this, comms);
     DuoInstance *other = GetOtherInstance(duo);
 
     uint8 tmp = 0xFF;
-
-    rx_timer += tlcsCycles;
-    if (rx_timer < cycles_per_byte)
-      return false;
-
-    //rx_timer %= cycles_per_byte;
-    rx_timer = 0;
 
     if (ringbuf_bytes_used(other->comms->tx_buf) == 0)
         return false;

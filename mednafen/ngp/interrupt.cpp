@@ -259,35 +259,60 @@ void neopop_interrupt_t::TestIntHDMA(int bios_num, int vec_num)
       set_interrupt(bios_num, true);
 }
 
-
 bool neopop_interrupt_t::updateTimers(void *data, int cputicks)
 {
    bool ret = false;
    DuoInstance *duo = GetDuoFromModule(this, interrupt);
+   DuoInstance *other = (duo == &DuoInstance::instances[0] ? &DuoInstance::instances[1] : &DuoInstance::instances[0]);
+   int index = (duo == &DuoInstance::instances[0] ? 0 : 1);
    ngpgfx_t *NGPGfx = &duo->gfx->NGPGfx;
 
    duo->sound->ngpc_soundTS += cputicks;
 
    /* increment H-INT timer */
    timer_hint += cputicks;
+   timer_serial += cputicks;
+
+   static const int BAUD_STEP = 8;
+
+   const int32 clock_rate = 6144000;
+   const int32 baud_rate = 19200;
+   const int32 cycles_per_bit = clock_rate / baud_rate;
+   const int32 cycles_per_byte = cycles_per_bit / 8;
+
+    // static const int32 cycles_per_byte = 8 * cycles_per_bit;
+   // Feed the low level serial bytes across
+   if (timer_serial >= cycles_per_byte)
+   {
+	   if ((duo->mem->SC0MOD & 0x20) && // Confirm receiver Rx bit on
+		   (other->mem->SC0MOD & 0x40)) // Confirm sender CTS bit on
+	   {
+		   // Transfer byte to receiver
+		   duo->mem->SC0BUF_rx = other->mem->SC0BUF_tx;
+	   }
+
+       timer_serial = 0;
+   }
 
    /*End of scanline / Start of Next one */
    if (timer_hint >= TIMER_HINT_RATE)
    {
-      uint8_t _data;
-
       h_int = ngpgfx_hint(NGPGfx);	
       ret   = ngpgfx_draw(NGPGfx, data, NGPFrameSkip);
 
-      timer_hint -= TIMER_HINT_RATE;	/* Start of next scanline */
-
       /* Comms. Read interrupt */
+      uint8_t _data;
       if ((duo->mem->COMMStatus & 1) == 0 && duo->comms->system_comms_poll(&_data, cputicks))
       {
-         storeB(0x50, _data);
+         duo->mem->SC0BUF_rx = _data;
+
+         // storeB(0x50, _data);
          storeB(0x77, 0x30);
-         TestIntHDMA(12, 0x19);
+         // TestIntHDMA(12, 0x19);
+         TestIntHDMA(11, 0x18);
       }
+
+      timer_hint -= TIMER_HINT_RATE;	/* Start of next scanline */
    }
 
    /* Tick the Clock Generator */

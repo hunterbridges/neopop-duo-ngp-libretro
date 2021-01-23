@@ -60,7 +60,7 @@ int Z80::z80_do_opcode( void )
      #include "opcodes_base.cpp"
    }
 
-   ret              = z80_tstates - last_z80_tstates;
+   ret              = (int64_t)z80_tstates - (int64_t)last_z80_tstates;
    last_z80_tstates = z80_tstates;
 
    //printf("PC: %04x, %02x, time=%d\n", lastpc, opcode, ret);

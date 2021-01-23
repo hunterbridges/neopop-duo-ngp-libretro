@@ -45,6 +45,7 @@ struct neopop_interrupt_t
 {
 	uint32_t timer_hint;
 	uint32_t timer_clock[4];
+	uint32_t timer_serial;
 	uint8_t timer[4];	//Up-counters
 	uint8_t timer_threshold[4];
 

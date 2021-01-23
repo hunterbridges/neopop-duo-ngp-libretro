@@ -342,13 +342,15 @@ void TLCS900h::iBIOSHLE()
             uint8 data = rCodeB(0x35);
             duo->comms->write_flag = true;
 			duo->comms->system_comms_write(data);
+            duo->mem->SC0BUF_tx = data;
          }
 
          //Restore $PC after BIOS-HLE instruction
          pc = pop32();
 
 		 // storeB(0x77, 0x33);
-         duo->interrupt->TestIntHDMA(11, 0x18);
+         //duo->interrupt->TestIntHDMA(11, 0x18);
+         duo->interrupt->TestIntHDMA(12, 0x19);
 
          //Always COM_BUF_OK because the write call always succeeds.
          rCodeB(0x30) = 0x0;			//RA3 = COM_BUF_OK
@@ -367,11 +369,13 @@ void TLCS900h::iBIOSHLE()
                pc = pop32();
 
                //Comms. Read interrupt
-               storeB(0x50, data);
+               //storeB(0x50, data);
+			   duo->mem->SC0BUF_rx = data;
 
 			   // storeB(0x77, 0x33);
 			   storeB(0x77, 0x30);
-               duo->interrupt->TestIntHDMA(12, 0x19);
+               //duo->interrupt->TestIntHDMA(12, 0x19);
+               duo->interrupt->TestIntHDMA(11, 0x18);
 
                return;
             }
@@ -425,7 +429,8 @@ void TLCS900h::iBIOSHLE()
             rCodeB(0x35)--;	//RB3 = Count Left
          }
 
-         duo->interrupt->TestIntHDMA(11, 0x18);
+         // duo->interrupt->TestIntHDMA(11, 0x18);
+         duo->interrupt->TestIntHDMA(12, 0x19);
          return;
 
       case VECT_COMGETBUFDATA:
@@ -444,8 +449,10 @@ void TLCS900h::iBIOSHLE()
                rCodeB(0x35)--;	//RB3 = Count Left
 
                //Comms. Read interrupt
-               storeB(0x50, data);
-               duo->interrupt->TestIntHDMA(12, 0x19);
+               //storeB(0x50, data);
+			   duo->mem->SC0BUF_rx = data;
+               //duo->interrupt->TestIntHDMA(12, 0x19);
+               duo->interrupt->TestIntHDMA(11, 0x18);
                return;
             }
             else

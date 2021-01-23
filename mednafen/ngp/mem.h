@@ -55,14 +55,18 @@ struct neopop_mem_t
    bool FlashStatusEnable;
    uint32_t FlashStatus;	
 
-   uint8_t SC0BUF; /* Serial channel 0 buffer. */
-   uint8_t SC0CR; /* Serial channel 0 control. */
-   uint8_t SC0MOD; /* Serial channel 0 mode. */
-   uint8_t BR0CR; /* Serial channel 0 baud rate. */
-   uint8_t SC1BUF; /* Serial channel 0 buffer. */
-   uint8_t SC1CR; /* Serial channel 0 control. */
-   uint8_t SC1MOD; /* Serial channel 0 mode. */
-   uint8_t BR1CR; /* Serial channel 0 baud rate. */
+   uint8_t SC0BUF_tx;
+   uint8_t SC0BUF_rx;
+   uint8_t SC0CR;
+   uint8_t SC0MOD;
+   uint8_t BR0CR;
+
+   uint8_t SC1BUF_tx;
+   uint8_t SC1BUF_rx;
+   uint8_t SC1CR;
+   uint8_t SC1MOD;
+   uint8_t BR1CR;
+
    uint8_t ODE; /* Serial open drain enable. */
 
    uint8_t COMMStatus;

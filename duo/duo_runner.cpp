@@ -102,6 +102,9 @@ void DuoRunner::Initialize(void)
 	if (environ_cb(RETRO_ENVIRONMENT_GET_INPUT_BITMASKS, NULL))
 		libretro_supports_bitmasks = true;
 
+	static uint32_t quirks = RETRO_SERIALIZATION_QUIRK_INCOMPLETE;
+	environ_cb(RETRO_ENVIRONMENT_SET_SERIALIZATION_QUIRKS, &quirks);
+
 	CheckSystemSpecs();
 
 	for (int i = 0; i < instance_count; i++)

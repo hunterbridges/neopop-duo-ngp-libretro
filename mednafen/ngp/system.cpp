@@ -91,8 +91,11 @@ void neopop_comms_t::system_comms_write(uint8_t data)
 
 int neopop_comms_t::StateAction(void *data, int load, int data_only)
 {
-   uint8 txLen = 0;
-   uint8 rxLen = 0;
+   DuoInstance *duo = GetDuoFromModule(this, comms);
+   int idx = (duo == &DuoInstance::instances[1] ? 1 : 0);
+
+   size_t txLen = 0;
+   size_t rxLen = 0;
    uint8 bufTX[64] = { 0 };
    uint8 bufRX[64] = { 0 };
 
@@ -101,8 +104,8 @@ int neopop_comms_t::StateAction(void *data, int load, int data_only)
 
    SFORMAT StateRegs[] =
    {
-      SFVAR(rx_timer, "RX_TIMER"),
-      SFVAR(receive, "RCV"),
+      SFVARN(rx_timer, "RX_TIMER"),
+      SFVARN(receive, "RCV"),
 
       SFVARN(txLen, "TX_USED"),
       SFARRAYN(bufTX, 64, "TX_BUF"),
@@ -118,19 +121,17 @@ int neopop_comms_t::StateAction(void *data, int load, int data_only)
        // If saving, grab the linear contents of the tx/rx ringbuffers
        // and then restore the buffers to their previous state
 
-       tmpHead = tx_buf->head;
-       tmpTail = tx_buf->tail;
+       ringbuf tmp;
+
+       memcpy(&tmp, tx_buf, sizeof(ringbuf));
        txLen = ringbuf_bytes_used(tx_buf);
        ringbuf_memcpy_from(bufTX, tx_buf, txLen);
-       tx_buf->head = tmpHead;
-       tx_buf->tail = tmpHead;
+       memcpy(tx_buf, &tmp, sizeof(ringbuf));
 
-       tmpHead = rx_buf->head;
-       tmpTail = rx_buf->tail;
+       memcpy(&tmp, rx_buf, sizeof(ringbuf));
        rxLen = ringbuf_bytes_used(rx_buf);
        ringbuf_memcpy_from(bufRX, rx_buf, rxLen);
-       rx_buf->head = tmpHead;
-       rx_buf->tail = tmpHead;
+       memcpy(rx_buf, &tmp, sizeof(ringbuf));
    }
 
    if(!MDFNSS_StateAction(data, load, data_only, StateRegs, "COMM", false))
@@ -141,11 +142,17 @@ int neopop_comms_t::StateAction(void *data, int load, int data_only)
        // If loading, completely replace the ringbuffers with the new
        // contents.
 
-       ringbuf_reset(tx_buf);
-       ringbuf_memcpy_into(tx_buf, bufTX, txLen);
+       if (idx == 1)
+       {
+           ringbuf_reset(tx_buf);
+           ringbuf_memcpy_into(tx_buf, bufTX, txLen);
+       }
 
-       ringbuf_reset(rx_buf);
-       ringbuf_memcpy_into(rx_buf, bufRX, rxLen);
+       if (idx == 0)
+       {
+           ringbuf_reset(rx_buf);
+           ringbuf_memcpy_into(rx_buf, bufRX, rxLen);
+       }
    }
 
    return 1;

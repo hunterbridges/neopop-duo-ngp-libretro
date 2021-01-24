@@ -15,9 +15,60 @@ const MDFNSetting_EnumList LanguageList[] =
  { NULL, 0 },
 };
 
+const MDFNSetting_EnumList VideoMixList[] =
+{
+ { "p1", 0, "Show P1 Only" },
+ { "0", 0 },
+
+ { "p2", 1, "Show P2 Only" },
+ { "1", 1 },
+
+ { "both", 2, "Show Both Players" },
+ { "2", 2 },
+
+ { NULL, 0 },
+};
+
+const MDFNSetting_EnumList AudioMixList[] =
+{
+ { "p1", 0, "Play P1 Audio Only" },
+ { "0", 0 },
+
+ { "p2", 1, "Play P2 Audio Only" },
+ { "1", 1 },
+
+ { "both", 2, "Play Audio from Both Players" },
+ { "2", 2 },
+
+ { "match", 3, "Match Video Mix" },
+ { "3", 3 },
+
+ { NULL, 0 },
+};
+
+const MDFNSetting_EnumList VideoLayoutList[] =
+{
+ { "h", 0, "Horizontal" },
+ { "0", 0 },
+
+ { "v", 1, "Vertical" },
+ { "1", 1 },
+
+ { "sh", 2, "Horizontal (Switched)" },
+ { "2", 2 },
+
+ { "sv", 2, "Vertical (Switched)" },
+ { "3", 3 },
+
+ { NULL, 0 },
+};
+
 MDFNSetting NGPSettings[] =
 {
  { "ngp.language", MDFNSF_EMU_STATE | MDFNSF_UNTRUSTED_SAFE, "Language games should display text in.", NULL, MDFNST_ENUM, "english", NULL, NULL, NULL, NULL, LanguageList },
+ { "ngp.videomix", MDFNSF_EMU_STATE | MDFNSF_UNTRUSTED_SAFE, "Choose which screens to display.", NULL, MDFNST_ENUM, "both", NULL, NULL, NULL, NULL, VideoMixList },
+ { "ngp.videolayout", MDFNSF_EMU_STATE | MDFNSF_UNTRUSTED_SAFE, "Layout when displaying both screens.", NULL, MDFNST_ENUM, "h", NULL, NULL, NULL, NULL, VideoLayoutList },
+ { "ngp.audiomix", MDFNSF_EMU_STATE | MDFNSF_UNTRUSTED_SAFE, "Choose which screens to play audio for.", NULL, MDFNST_ENUM, "match", NULL, NULL, NULL, NULL, AudioMixList },
  { NULL }
 };
 

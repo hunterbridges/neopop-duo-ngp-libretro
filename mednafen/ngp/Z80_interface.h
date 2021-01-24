@@ -34,8 +34,9 @@ struct neopop_z80i_t
 	void Z80_SetEnable(bool set);
 	bool Z80_IsEnabled(void);
 	int Z80_RunOP(void);
-};
 
-int MDFNNGPCZ80_StateAction(void *data, int load, int data_only);
+	int StateAction(void *data, int load, int data_only);
+	int z80_state_action(void *data, int load, int data_only, const char *section_name);
+};
 
 #endif

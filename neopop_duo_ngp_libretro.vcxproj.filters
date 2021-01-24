@@ -318,5 +318,6 @@
     <ClInclude Include="mednafen\ngp\TLCS-900h\TLCS900h.h">
       <Filter>mednafen\ngp\TLCS-900h</Filter>
     </ClInclude>
+    <ClInclude Include="libretro_core_options.h" />
   </ItemGroup>
 </Project>

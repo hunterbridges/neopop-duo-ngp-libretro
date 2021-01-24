@@ -246,17 +246,15 @@ void neopop_flash_t::flash_commit()
    free(flashdata);
 }
 
-int FLASH_StateAction(void *data, int load, int data_only)
+int neopop_flash_t::StateAction(void *data, int load, int data_only)
 {
-   // TODO Where does flash come from in this scope?
-   DuoInstance *duo = DuoInstance::currentInstance;
-   neopop_flash_t *flash = duo->flash;
+   DuoInstance *duo = GetDuoFromModule(this, flash);
 
    int32_t FlashLength = 0;
    uint8_t *flashdata = NULL;
 
    if(!load)
-      flashdata = flash->make_flash_commit(&FlashLength);
+      flashdata = make_flash_commit(&FlashLength);
 
    SFORMAT FINF_StateRegs[] =
    {
@@ -291,7 +289,7 @@ int FLASH_StateAction(void *data, int load, int data_only)
    if(load)
    {
       memcpy(duo->rom->ngpc_rom.data, duo->rom->ngpc_rom.orig_data, duo->rom->ngpc_rom.length);
-      flash->do_flash_read(flashdata);
+      do_flash_read(flashdata);
    }
 
    free(flashdata);

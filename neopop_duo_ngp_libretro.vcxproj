@@ -258,6 +258,7 @@
       </SubType>
     </ClInclude>
     <ClInclude Include="libretro-common\include\libretro.h" />
+    <ClInclude Include="libretro_core_options.h" />
     <ClInclude Include="mednafen\driver.h" />
     <ClInclude Include="mednafen\file.h" />
     <ClInclude Include="mednafen\general.h" />

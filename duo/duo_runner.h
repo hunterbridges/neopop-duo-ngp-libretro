@@ -13,11 +13,12 @@
 class DuoRunner
 {
 public:
-	enum AVMode
+	enum AVMode : uint8
 	{
 		AV_P1_ONLY,
 		AV_P2_ONLY,
-		AV_BOTH_PLAYERS
+		AV_BOTH_PLAYERS,
+		AV_MATCH_VIDEO
 	};
 
 	enum AVLayout
@@ -52,7 +53,7 @@ public:
 
 	AVMode videoMixMode = AV_BOTH_PLAYERS;
 	AVLayout videoLayout = AV_LAYOUT_H;
-	AVMode audioMixMode = AV_P1_ONLY;
+	AVMode audioMixMode = AV_MATCH_VIDEO;
 
 	struct retro_perf_callback perf_cb;
 	retro_get_cpu_features_t perf_get_cpu_features_cb;
@@ -78,6 +79,8 @@ public:
 
 	void GetSystemInfo(struct retro_system_info *info);
 	void GetAvInfo(struct retro_system_av_info *info);
+
+	int GetCurrentPlayer();
 
 	int SaveStateAction(StateMem *sm, int load, int data_only);
 

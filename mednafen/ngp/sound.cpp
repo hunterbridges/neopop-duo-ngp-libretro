@@ -93,23 +93,21 @@ void MDFNNGPCSOUND_SetEnable(bool set)
    sound->SetEnable(set);
 }
 
-int MDFNNGPCSOUND_StateAction(void *data, int load, int data_only)
+int neopop_sound_t::StateAction(void *data, int load, int data_only)
 {
-   neopop_sound_t *sound = DuoInstance::currentInstance->sound;
-
    T6W28_ApuState *sn_state;
 
    if(!load)
-      sn_state = sound->apu.save_state();
+      sn_state = apu.save_state();
    else
       sn_state = (T6W28_ApuState *)malloc(sizeof(T6W28_ApuState));
 
    SFORMAT StateRegs[] =
    {
-      SFVAR(sound->CurrentDACLeft),
-      SFVAR(sound->CurrentDACRight),
+      SFVAR(CurrentDACLeft),
+      SFVAR(CurrentDACRight),
 
-      SFVAR(sound->schipenable),
+      SFVAR(schipenable),
 
       SFARRAY32N(sn_state->delay, 4, "Delay"),
       SFARRAY32N(sn_state->volume_left, 4, "VolumeLeft"),
@@ -133,11 +131,11 @@ int MDFNNGPCSOUND_StateAction(void *data, int load, int data_only)
 
    if(load)
    {
-      sound->buf.clear();
-      sound->apu.load_state(sn_state);
+      buf.clear();
+      apu.load_state(sn_state);
 
-      sound->LastDACLeft = sound->CurrentDACLeft;
-      sound->LastDACRight = sound->CurrentDACRight;
+      LastDACLeft = CurrentDACLeft;
+      LastDACRight = CurrentDACRight;
    }
 
    free(sn_state);

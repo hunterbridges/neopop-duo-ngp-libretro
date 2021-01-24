@@ -39,14 +39,11 @@ void BIOSHLE_Reset(neopop_bios_t *bios_ptr)
       storeB(0x70 + x, bios_ptr->CacheIntPrio[x]);
 }
 
-int BIOSHLE_StateAction(void *data, int load, int data_only)
+int BIOSHLE_StateAction(neopop_bios_t *bios_ptr, void *data, int load, int data_only)
 {
-   // TODO Where does CacheIntPrio come from in this scope?
-   uint8_t *CacheIntPrio = NULL;
-
    SFORMAT StateRegs[] =
    {
-      { CacheIntPrio, (uint32_t)((0xB)), 0, "CacheIntPrio" },
+      { bios_ptr->CacheIntPrio, (uint32_t)((0xB)), 0, "CacheIntPrio" },
       { 0, 0, 0, 0 }
    };
 
@@ -349,7 +346,6 @@ void TLCS900h::iBIOSHLE()
          pc = pop32();
 
 		 // storeB(0x77, 0x33);
-         //duo->interrupt->TestIntHDMA(11, 0x18);
          duo->interrupt->TestIntHDMA(12, 0x19);
 
          //Always COM_BUF_OK because the write call always succeeds.
@@ -374,7 +370,6 @@ void TLCS900h::iBIOSHLE()
 
 			   // storeB(0x77, 0x33);
 			   storeB(0x77, 0x30);
-               //duo->interrupt->TestIntHDMA(12, 0x19);
                duo->interrupt->TestIntHDMA(11, 0x18);
 
                return;
@@ -429,7 +424,6 @@ void TLCS900h::iBIOSHLE()
             rCodeB(0x35)--;	//RB3 = Count Left
          }
 
-         // duo->interrupt->TestIntHDMA(11, 0x18);
          duo->interrupt->TestIntHDMA(12, 0x19);
          return;
 
@@ -451,7 +445,6 @@ void TLCS900h::iBIOSHLE()
                //Comms. Read interrupt
                //storeB(0x50, data);
 			   duo->mem->SC0BUF_rx = data;
-               //duo->interrupt->TestIntHDMA(12, 0x19);
                duo->interrupt->TestIntHDMA(11, 0x18);
                return;
             }
@@ -467,3 +460,4 @@ void TLCS900h::iBIOSHLE()
    //RET
    pc = pop32();
 }
+

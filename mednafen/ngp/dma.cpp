@@ -293,17 +293,14 @@ uint32_t neopop_dma_t::dmaLoadL(uint8_t cr)
    return 0;
 }
 
-int MDFNNGPCDMA_StateAction(void *data, int load, int data_only)
+int neopop_dma_t::StateAction(void *data, int load, int data_only)
 {
-   // TODO where does dma_ptr come from in this scope?
-   neopop_dma_t *dma_ptr = NULL;
-
    SFORMAT StateRegs[] =
    {
-      { dma_ptr->dmaS, (uint32_t)((4) * sizeof(uint32_t)), 0x40000000, "DMAS" },
-      { dma_ptr->dmaD, (uint32_t)((4) * sizeof(uint32_t)), 0x40000000, "DMAD" },
-      { dma_ptr->dmaC, (uint32_t)((4) * sizeof(uint16_t)), 0x20000000, "DMAC" },
-      { dma_ptr->dmaM, (uint32_t)(4), 0, "DMAM" },
+      { dmaS, (uint32_t)((4) * sizeof(uint32_t)), 0x40000000, "DMAS" },
+      { dmaD, (uint32_t)((4) * sizeof(uint32_t)), 0x40000000, "DMAD" },
+      { dmaC, (uint32_t)((4) * sizeof(uint16_t)), 0x20000000, "DMAC" },
+      { dmaM, (uint32_t)(4), 0, "DMAM" },
       { 0, 0, 0, 0 }
    };
 

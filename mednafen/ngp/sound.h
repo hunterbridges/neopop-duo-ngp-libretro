@@ -53,11 +53,12 @@ struct neopop_sound_t
    void dac_write_left(uint8_t);
    void dac_write_right(uint8_t);
 
+   int StateAction(void *data, int load, int data_only);
+
 private:
    void RedoVolume();
 };
 
-int MDFNNGPCSOUND_StateAction(void *data, int load, int data_only);
 void MDFNNGPCSOUND_SetEnable(bool set);
 
 #endif

@@ -152,66 +152,62 @@ int neopop_z80i_t::Z80_RunOP(void)
 // State Action
 // ------------
 
-int z80_state_action(void *data, int load, int data_only, const char *section_name)
+int neopop_z80i_t::z80_state_action(void *data, int load, int data_only, const char *section_name)
 {
+   Z80 *z80_state = &GetDuoFromModule(this, z80i)->z80_state;
+
    uint8_t r_register;
 
-   // TODO
-   /*
    SFORMAT StateRegs[] =
    {
-      { &(cur_z80->z80.af.w), sizeof(cur_z80->z80.af.w), 0x80000000, "AF" },
-      { &(cur_z80->z80.bc.w), sizeof(cur_z80->z80.bc.w), 0x80000000, "BC" },
-      { &(cur_z80->z80.de.w), sizeof(cur_z80->z80.de.w), 0x80000000, "DE" },
-      { &(cur_z80->z80.hl.w), sizeof(cur_z80->z80.hl.w), 0x80000000, "HL" },
-      { &(cur_z80->z80.af_.w), sizeof(cur_z80->z80.af_.w), 0x80000000, "AF_" },
-      { &(cur_z80->z80.bc_.w), sizeof(cur_z80->z80.bc_.w), 0x80000000, "BC_" },
-      { &(cur_z80->z80.de_.w), sizeof(cur_z80->z80.de_.w), 0x80000000, "DE_" },
-      { &(cur_z80->z80.hl_.w), sizeof(cur_z80->z80.hl_.w), 0x80000000, "HL_" },
-      { &(cur_z80->z80.ix.w), sizeof(cur_z80->z80.ix.w), 0x80000000, "IX" },
-      { &(cur_z80->z80.iy.w), sizeof(cur_z80->z80.iy.w), 0x80000000, "IY" },
-      { &(cur_z80->z80.i), sizeof(cur_z80->z80.i), 0x80000000, "I" },
-      { &(cur_z80->z80.sp.w), sizeof(cur_z80->z80.sp.w), 0x80000000, "SP" },
-      { &(cur_z80->z80.pc.w), sizeof(cur_z80->z80.pc.w), 0x80000000, "PC" },
-      { &(cur_z80->z80.iff1), sizeof(cur_z80->z80.iff1), 0x80000000, "IFF1" },
-      { &(cur_z80->z80.iff2), sizeof(cur_z80->z80.iff2), 0x80000000, "IFF2" },
-      { &(cur_z80->z80.im), sizeof(cur_z80->z80.im), 0x80000000, "IM" },
+      { &(z80_state->z80.af.w), sizeof(z80_state->z80.af.w), 0x80000000, "AF" },
+      { &(z80_state->z80.bc.w), sizeof(z80_state->z80.bc.w), 0x80000000, "BC" },
+      { &(z80_state->z80.de.w), sizeof(z80_state->z80.de.w), 0x80000000, "DE" },
+      { &(z80_state->z80.hl.w), sizeof(z80_state->z80.hl.w), 0x80000000, "HL" },
+      { &(z80_state->z80.af_.w), sizeof(z80_state->z80.af_.w), 0x80000000, "AF_" },
+      { &(z80_state->z80.bc_.w), sizeof(z80_state->z80.bc_.w), 0x80000000, "BC_" },
+      { &(z80_state->z80.de_.w), sizeof(z80_state->z80.de_.w), 0x80000000, "DE_" },
+      { &(z80_state->z80.hl_.w), sizeof(z80_state->z80.hl_.w), 0x80000000, "HL_" },
+      { &(z80_state->z80.ix.w), sizeof(z80_state->z80.ix.w), 0x80000000, "IX" },
+      { &(z80_state->z80.iy.w), sizeof(z80_state->z80.iy.w), 0x80000000, "IY" },
+      { &(z80_state->z80.i), sizeof(z80_state->z80.i), 0x80000000, "I" },
+      { &(z80_state->z80.sp.w), sizeof(z80_state->z80.sp.w), 0x80000000, "SP" },
+      { &(z80_state->z80.pc.w), sizeof(z80_state->z80.pc.w), 0x80000000, "PC" },
+      { &(z80_state->z80.iff1), sizeof(z80_state->z80.iff1), 0x80000000, "IFF1" },
+      { &(z80_state->z80.iff2), sizeof(z80_state->z80.iff2), 0x80000000, "IFF2" },
+      { &(z80_state->z80.im), sizeof(z80_state->z80.im), 0x80000000, "IM" },
       { &(r_register), sizeof(r_register), 0x80000000, "R" },
 
-      { &(cur_z80->z80.interrupts_enabled_at), sizeof(cur_z80->z80.interrupts_enabled_at), 0x80000000, "interrupts_enabled_at" },
-      { &(cur_z80->z80.halted), sizeof(cur_z80->z80.halted), 0x80000000, "halted" },
+      { &(z80_state->z80.interrupts_enabled_at), sizeof(z80_state->z80.interrupts_enabled_at), 0x80000000, "interrupts_enabled_at" },
+      { &(z80_state->z80.halted), sizeof(z80_state->z80.halted), 0x80000000, "halted" },
 
-      { &((cur_z80->z80_tstates)), sizeof((cur_z80->z80_tstates)), 0x80000000, "z80_tstates" },
-      { &((cur_z80->last_z80_tstates)), sizeof((cur_z80->last_z80_tstates)), 0x80000000, "last_z80_tstates" },
+      { &((z80_state->z80_tstates)), sizeof((z80_state->z80_tstates)), 0x80000000, "z80_tstates" },
+      { &((z80_state->last_z80_tstates)), sizeof((z80_state->last_z80_tstates)), 0x80000000, "last_z80_tstates" },
 
       { 0, 0, 0, 0 }
    };
 
    if(!load)
-      r_register = (cur_z80->z80.r7 & 0x80) | (cur_z80->z80.r & 0x7f);
+      r_register = (z80_state->z80.r7 & 0x80) | (z80_state->z80.r & 0x7f);
 
    if(!MDFNSS_StateAction(data, load, data_only, StateRegs, section_name, false))
       return(0);
 
    if(load)
    {
-       cur_z80->z80.r7 = r_register & 0x80;
-       cur_z80->z80.r = r_register & 0x7F;
+       z80_state->z80.r7 = r_register & 0x80;
+       z80_state->z80.r = r_register & 0x7F;
    }
-   */
 
    return(1);
 }
 
-int MDFNNGPCZ80_StateAction(void *data, int load, int data_only)
+int neopop_z80i_t::StateAction(void *data, int load, int data_only)
 {
-   // TODO Where does z80i come from in this scope?
-   neopop_z80i_t *z80i = NULL;
-
    SFORMAT StateRegs[] =
    {
-      SFVAR(z80i->CommByte),
-      SFVAR(z80i->Z80Enabled),
+      SFVAR(CommByte),
+      SFVAR(Z80Enabled),
       SFEND
    };
 

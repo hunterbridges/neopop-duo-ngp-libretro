@@ -37,7 +37,8 @@ typedef struct neopop_bios
 int bios_install(neopop_bios_t *bios_ptr);
 
 void BIOSHLE_Reset(neopop_bios_t *bios_ptr);
-int BIOSHLE_StateAction(void *data, int load, int data_only);
+
+int BIOSHLE_StateAction(neopop_bios_t *bios_ptr, void *data, int load, int data_only);
 
 #ifdef __cplusplus
 }

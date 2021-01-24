@@ -64,13 +64,13 @@ struct neopop_gfx_t
 {
 	ngpgfx_t NGPGfx;
 	uint16_t cfb_scanline[256];	// __attribute__ ((aligned (8)));
+
+	int StateAction(void *data, int load, int data_only);
 };
 
 void ngpgfx_set_pixel_format(ngpgfx_t *fx, int depth);
 
 void ngpgfx_SetLayerEnableMask(ngpgfx_t *gfx, uint64_t mask);
-
-int ngpgfx_StateAction(ngpgfx_t *gfx, void *data, int load, int data_only);
 
 void ngpgfx_power(ngpgfx_t *gfx);
 

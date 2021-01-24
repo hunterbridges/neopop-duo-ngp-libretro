@@ -9,6 +9,15 @@
 #include "duo_settings.h"
 #include "../mednafen/mednafen-types.h"
 
+#include "../mednafen/ngp/mem.h"
+#include "../mednafen/ngp/flash.h"
+#include "../mednafen/ngp/dma.h"
+#include "../mednafen/ngp/sound.h"
+#include "../mednafen/ngp/gfx.h"
+#include "../mednafen/ngp/interrupt.h"
+#include "../mednafen/ngp/Z80_interface.h"
+#include "../mednafen/ngp/system.h"
+
 const char *mednafen_core_str = MEDNAFEN_CORE_NAME;
 
 DuoRunner DuoRunner::shared;
@@ -197,6 +206,12 @@ void DuoRunner::Run()
 	MixFrameAV();
 }
 
+int DuoRunner::GetCurrentPlayer()
+{
+	// TODO
+	return 0;
+}
+
 void DuoRunner::MixFrameAV()
 {
 	static uint8_t joined_buf_16[FB_WIDTH * FB_HEIGHT * 2 * 2]; // two screens' worth of 16-bit data
@@ -256,7 +271,9 @@ void DuoRunner::MixFrameAV()
 	else
 	{
 		// Display single screen
-		int instance_i = (videoMixMode == AV_P2_ONLY ? 1 : 0);
+		int instance_i = 0;
+		if (videoMixMode == AV_P2_ONLY)
+			instance_i = 1;
 
 		DuoInstance *duo = &DuoInstance::instances[instance_i];
 		video_cb(duo->surface->pixels, duo->width, duo->height, pitch);
@@ -266,6 +283,10 @@ void DuoRunner::MixFrameAV()
 	// ------------
 	// Audio Mixing
 	// ------------
+
+	AVMode audioMode = audioMixMode;
+	if (audioMode == AV_MATCH_VIDEO)
+		audioMode = videoMixMode;
 
 	if (audioMixMode == AV_BOTH_PLAYERS && instance_count > 1)
 	{
@@ -291,8 +312,9 @@ void DuoRunner::MixFrameAV()
 	}
 	else
 	{
-		// P1 or P2 audio only
-		int instance_i = (audioMixMode == AV_P2_ONLY ? 1 : 0);
+		int instance_i = 0;
+		if (audioMode == AV_P2_ONLY)
+			instance_i = 1;
 
 		DuoInstance *duo = &DuoInstance::instances[instance_i];
 		audio_frames += duo->spec.SoundBufSize;
@@ -484,6 +506,26 @@ void DuoRunner::CheckVariables(void)
 			update_audio = true;
 	}
 
+	var.key = "ngp_audiomix";
+	var.value = NULL;
+
+	if (environ_cb(RETRO_ENVIRONMENT_GET_VARIABLE, &var) && var.value)
+	{
+		int old_value = audioMixMode;
+		int new_value = 0;
+
+		if (!strcmp(var.value, "p1"))
+			new_value = AV_P1_ONLY;
+		else if (!strcmp(var.value, "p2"))
+			new_value = AV_P2_ONLY;
+		else if (!strcmp(var.value, "both"))
+			new_value = AV_BOTH_PLAYERS;
+		else if (!strcmp(var.value, "match"))
+			new_value = AV_MATCH_VIDEO;
+
+		audioMixMode = AVMode(new_value);
+	}
+
 	var.key = "ngp_gfx_colors";
 	var.value = NULL;
 
@@ -505,6 +547,51 @@ void DuoRunner::CheckVariables(void)
 		if (old_value != RETRO_PIX_BYTES)
 			update_video = true;
 	}
+
+	var.key = "ngp_videomix";
+	var.value = NULL;
+
+	if (environ_cb(RETRO_ENVIRONMENT_GET_VARIABLE, &var) && var.value)
+	{
+		int old_value = videoMixMode;
+		int new_value = 0;
+
+		if (!strcmp(var.value, "p1"))
+			new_value = AV_P1_ONLY;
+		else if (!strcmp(var.value, "p2"))
+			new_value = AV_P2_ONLY;
+		else if (!strcmp(var.value, "both"))
+			new_value = AV_BOTH_PLAYERS;
+
+		videoMixMode = AVMode(new_value);
+
+		if (old_value != new_value)
+			update_video = true;
+	}
+
+	var.key = "ngp_videolayout";
+	var.value = NULL;
+
+	if (environ_cb(RETRO_ENVIRONMENT_GET_VARIABLE, &var) && var.value)
+	{
+		int old_value = videoLayout;
+		int new_value = 0;
+
+		if (!strcmp(var.value, "h"))
+			new_value = AV_LAYOUT_H;
+		else if (!strcmp(var.value, "v"))
+			new_value = AV_LAYOUT_V;
+		else if (!strcmp(var.value, "sh"))
+			new_value = AV_LAYOUT_SWITCH_H;
+		else if (!strcmp(var.value, "sv"))
+			new_value = AV_LAYOUT_SWITCH_V;
+
+		videoLayout = AVLayout(new_value);
+
+		if (old_value != new_value)
+			update_video = true;
+	}
+
 }
 
 // -------
@@ -647,63 +734,120 @@ void DuoRunner::UnloadGame()
 
 int DuoRunner::SaveStateAction(StateMem *sm, int load, int data_only)
 {
-	// TODO
-	return 0;
+	int result = 1;
 
-	/*
-SFORMAT StateRegs[] =
-{
-   SFVAR(z80_runtime),
-   SFARRAY(CPUExRAM, 16384),
-   SFVAR(FlashStatusEnable),
-   SFEND
-};
+	DuoInstance *oldInstance = DuoInstance::currentInstance;
 
-SFORMAT TLCS_StateRegs[] =
-{
-   SFVARN(pc, "PC"),
-   SFVARN(sr, "SR"),
-   SFVARN(f_dash, "F_DASH"),
-   SFARRAY32N(gpr, 4, "GPR"),
-   SFARRAY32N(gprBank[0], 4, "GPRB0"),
-   SFARRAY32N(gprBank[1], 4, "GPRB1"),
-   SFARRAY32N(gprBank[2], 4, "GPRB2"),
-   SFARRAY32N(gprBank[3], 4, "GPRB3"),
-   SFEND
-};
+	for (int i = 0; i < 2; i++)
+	{
+		DuoInstance *instance = &DuoInstance::instances[i];
+		DuoInstance::StageInstance(instance);
 
-if(!MDFNSS_StateAction(sm, load, data_only, StateRegs, "MAIN", false))
-   return(0);
+		SFORMAT StateRegs[] =
+		{
+		   SFVAR(instance->z80_runtime),
+		   SFARRAY(instance->mem->CPUExRAM, 16384),
+		   SFVAR(instance->mem->FlashStatusEnable),
 
-if(!MDFNSS_StateAction(sm, load, data_only, TLCS_StateRegs, "TLCS", false))
-   return(0);
+		   SFVARN(instance->mem->SC0BUF_rx, "SC0BUF_rx"),
+		   SFVARN(instance->mem->SC0BUF_tx, "SC0BUF_tx"),
+		   SFVARN(instance->mem->SC0CR, "SC0CR"),
+		   SFVARN(instance->mem->SC0MOD, "SC0MOD"),
+		   SFVARN(instance->mem->BR0CR, "BR0CR"),
 
-if(!MDFNNGPCDMA_StateAction(sm, load, data_only))
-   return(0);
+		   SFVARN(instance->mem->SC1BUF_rx, "SC1BUF_rx"),
+		   SFVARN(instance->mem->SC1BUF_tx, "SC1BUF_tx"),
+		   SFVARN(instance->mem->SC1CR, "SC1CR"),
+		   SFVARN(instance->mem->SC1MOD, "SC1MOD"),
+		   SFVARN(instance->mem->BR1CR, "BR1CR"),
 
-if(!MDFNNGPCSOUND_StateAction(sm, load, data_only))
-   return(0);
+		   SFEND
+		};
 
-if(!ngpgfx_StateAction(NGPGfx, sm, load, data_only))
-   return(0);
+		SFORMAT TLCS_StateRegs[] =
+		{
+		   SFVARN(instance->tlcs900h_state.pc, "PC"),
+		   SFVARN(instance->tlcs900h_state.sr, "SR"),
+		   SFVARN(instance->tlcs900h_state.f_dash, "F_DASH"),
+		   SFARRAY32N(instance->tlcs900h_state.gpr, 4, "GPR"),
+		   SFARRAY32N(instance->tlcs900h_state.gprBank[0], 4, "GPRB0"),
+		   SFARRAY32N(instance->tlcs900h_state.gprBank[1], 4, "GPRB1"),
+		   SFARRAY32N(instance->tlcs900h_state.gprBank[2], 4, "GPRB2"),
+		   SFARRAY32N(instance->tlcs900h_state.gprBank[3], 4, "GPRB3"),
+		   SFEND
+		};
 
-if(!MDFNNGPCZ80_StateAction(sm, load, data_only))
-   return(0);
+		if (!MDFNSS_StateAction(sm, load, data_only, StateRegs, "MAIN", false))
+		{
+			result = 0;
+			break;
+		}
 
-if(!int_timer_StateAction(sm, load, data_only))
-   return(0);
+		if (!MDFNSS_StateAction(sm, load, data_only, TLCS_StateRegs, "TLCS", false))
+		{
+			result = 0;
+			break;
+		}
 
-if(!BIOSHLE_StateAction(sm, load, data_only))
-   return(0);
+		if (!instance->dma->StateAction(sm, load, data_only))
+		{
+			result = 0;
+			break;
+		}
 
-if(!FLASH_StateAction(sm, load, data_only))
-   return(0);
+		if (!instance->sound->StateAction(sm, load, data_only))
+		{
+			result = 0;
+			break;
+		}
 
-if(load)
-{
-   RecacheFRM();
-   changedSP();
-}
-return(1);
-*/
+		if (!instance->gfx->StateAction(sm, load, data_only))
+		{
+			result = 0;
+			break;
+		}
+
+		if (!instance->z80i->StateAction(sm, load, data_only))
+		{
+			result = 0;
+			break;
+		}
+
+		if (!instance->interrupt->Timer_StateAction(sm, load, data_only))
+		{
+			result = 0;
+			break;
+		}
+
+		if (!BIOSHLE_StateAction(instance->bios, sm, load, data_only))
+		{
+			result = 0;
+			break;
+		}
+
+		if (!instance->comms->StateAction(sm, load, data_only))
+		{
+			result = 0;
+			break;
+		}
+
+		if (!instance->flash->StateAction(sm, load, data_only))
+		{
+			result = 0;
+			break;
+		}
+
+		if (load)
+		{
+			instance->mem->RecacheFRM();
+			instance->tlcs900h_state.changedSP();
+		}
+	}
+
+	DuoInstance::UnstageCurrentInstance();
+
+	if (oldInstance)
+		DuoInstance::StageInstance(oldInstance);
+
+	return result;
 }

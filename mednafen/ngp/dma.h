@@ -52,9 +52,9 @@ struct neopop_dma_t
 	void dmaStoreB(uint8_t cr, uint8_t data);
 	void dmaStoreW(uint8_t cr, uint16_t data);
 	void dmaStoreL(uint8_t cr, uint32_t data);
+
+	int StateAction(void *data, int load, int data_only);
 };
 #endif
-
-int MDFNNGPCDMA_StateAction(void *data, int load, int data_only);
 
 #endif

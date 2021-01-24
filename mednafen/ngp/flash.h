@@ -58,8 +58,8 @@ struct neopop_flash_t
 	void flash_commit();
 
 	void do_flash_read(uint8_t *flashdata);
-};
 
-int FLASH_StateAction(void *data, int load, int data_only);
+	int StateAction(void *data, int load, int data_only);
+};
 
 #endif

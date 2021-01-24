@@ -308,7 +308,6 @@ bool neopop_interrupt_t::updateTimers(void *data, int cputicks)
 
          // storeB(0x50, _data);
          storeB(0x77, 0x30);
-         // TestIntHDMA(12, 0x19);
          TestIntHDMA(11, 0x18);
       }
 
@@ -602,29 +601,27 @@ uint8_t neopop_interrupt_t::timer_read8(uint32_t address)
    return 0x4;
 }
 
-int int_timer_StateAction(void *data, int load, int data_only)
+int neopop_interrupt_t::Timer_StateAction(void *data, int load, int data_only)
 {
-   // TODO Where does interrupt_ptr come from in this scope?
-   neopop_interrupt_t *interrupt_ptr = NULL;
-
    SFORMAT StateRegs[] =
    {
-      SFVAR(interrupt_ptr->timer_hint),
-      SFARRAY32(interrupt_ptr->timer_clock, 4),
-      SFARRAY(interrupt_ptr->timer, 4),
-      SFARRAY(interrupt_ptr->timer_threshold, 4),
-      SFVAR(interrupt_ptr->TRUN),
-      SFVAR(interrupt_ptr->T01MOD), SFVAR(interrupt_ptr->T23MOD),
-      SFVAR(interrupt_ptr->TRDC),
-      SFVAR(interrupt_ptr->TFFCR),
-      SFARRAY(interrupt_ptr->HDMAStartVector, 4),
-      SFARRAY32(interrupt_ptr->ipending, 24),
-      SFARRAY32(interrupt_ptr->IntPrio, 0xB),
-      SFVAR(interrupt_ptr->h_int),
-      SFVAR(interrupt_ptr->timer0),
-      SFVAR(interrupt_ptr->timer2),
+      SFVAR(timer_hint),
+      SFARRAY32(timer_clock, 4),
+      SFARRAY(timer, 4),
+      SFARRAY(timer_threshold, 4),
+      SFVAR(TRUN),
+      SFVAR(T01MOD), SFVAR(T23MOD),
+      SFVAR(TRDC),
+      SFVAR(TFFCR),
+      SFARRAY(HDMAStartVector, 4),
+      SFARRAY32(ipending, 24),
+      SFARRAY32(IntPrio, 0xB),
+      SFVAR(h_int),
+      SFVAR(timer0),
+      SFVAR(timer2),
       SFEND
    };
+
    if(!MDFNSS_StateAction(data, load, data_only, StateRegs, "INTT", false))
       return 0;
 

@@ -22,11 +22,9 @@
 struct neopop_comms_t
 {
 	bool receive;
+	int32_t rx_timer;
 
 	bool write_flag;
-
-	int32_t rx_timer;
-	bool read_flag;
 
 	ringbuf_t tx_buf;
 	ringbuf_t rx_buf;
@@ -49,6 +47,8 @@ struct neopop_comms_t
 	/*! Writes a byte from the other system. This function should block until
 		the data is written. USE RELIABLE COMMS! Data cannot be re-requested. */
 	void system_comms_write(uint8_t data);
+
+	int StateAction(void *data, int load, int data_only);
 };
 
 struct neopop_io_t
@@ -62,7 +62,6 @@ struct neopop_io_t
 	/*! Reads the "appropriate" (system specific) flash data into the given
 		preallocated buffer. The emulation core doesn't care where from. */
 	bool system_io_flash_read(uint8_t* buffer, uint32_t bufferLength);
-
 
 	/*! Writes the given flash data into an "appropriate" (system specific)
 		place. The emulation core doesn't care where to. */

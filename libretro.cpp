@@ -152,6 +152,7 @@ void retro_deinit(void)
 // Serialization Interface
 // -----------------------
 
+// NOTE: Entry point in state.cpp
 int StateAction(StateMem *sm, int load, int data_only)
 {
    return DuoRunner::shared.SaveStateAction(sm, load, data_only);

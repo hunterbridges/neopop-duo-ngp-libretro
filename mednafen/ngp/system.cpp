@@ -34,9 +34,7 @@ neopop_comms_t::neopop_comms_t()
     rx_buf = ringbuf_new(64);
     receive = false;
 
-	write_flag = false;
-
-	read_flag = false;
+    write_flag = false;
 }
 
 neopop_comms_t::~neopop_comms_t()
@@ -89,6 +87,68 @@ void neopop_comms_t::system_comms_write(uint8_t data)
 
     ringbuf_memcpy_into(tx_buf, &data, 1);
     write_flag = false;
+}
+
+int neopop_comms_t::StateAction(void *data, int load, int data_only)
+{
+   uint8 txLen = 0;
+   uint8 rxLen = 0;
+   uint8 bufTX[64] = { 0 };
+   uint8 bufRX[64] = { 0 };
+
+   uint8 *tmpHead = NULL;
+   uint8 *tmpTail = NULL;
+
+   SFORMAT StateRegs[] =
+   {
+      SFVAR(rx_timer, "RX_TIMER"),
+      SFVAR(receive, "RCV"),
+
+      SFVARN(txLen, "TX_USED"),
+      SFARRAYN(bufTX, 64, "TX_BUF"),
+
+      SFVARN(txLen, "RX_USED"),
+      SFARRAYN(bufTX, 64, "RX_BUF"),
+
+      { 0, 0, 0, 0 }
+   };
+
+   if (!load)
+   {
+       // If saving, grab the linear contents of the tx/rx ringbuffers
+       // and then restore the buffers to their previous state
+
+       tmpHead = tx_buf->head;
+       tmpTail = tx_buf->tail;
+       txLen = ringbuf_bytes_used(tx_buf);
+       ringbuf_memcpy_from(bufTX, tx_buf, txLen);
+       tx_buf->head = tmpHead;
+       tx_buf->tail = tmpHead;
+
+       tmpHead = rx_buf->head;
+       tmpTail = rx_buf->tail;
+       rxLen = ringbuf_bytes_used(rx_buf);
+       ringbuf_memcpy_from(bufRX, rx_buf, rxLen);
+       rx_buf->head = tmpHead;
+       rx_buf->tail = tmpHead;
+   }
+
+   if(!MDFNSS_StateAction(data, load, data_only, StateRegs, "COMM", false))
+      return 0;
+
+   if (load)
+   {
+       // If loading, completely replace the ringbuffers with the new
+       // contents.
+
+       ringbuf_reset(tx_buf);
+       ringbuf_memcpy_into(tx_buf, bufTX, txLen);
+
+       ringbuf_reset(rx_buf);
+       ringbuf_memcpy_into(rx_buf, bufRX, rxLen);
+   }
+
+   return 1;
 }
 
 // --
